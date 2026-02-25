@@ -1,0 +1,265 @@
+@inject('settings', 'App\Services\SettingService')
+
+<div class="app-sidebar-menu">
+    <div class="h-100" data-simplebar>
+        <div id="sidebar-menu">
+
+            <div class="logo-box">
+                <a href="{{ route('admin.dashboard') }}" class="logo logo-light">
+                    <span class="logo-sm">
+                        <img src="{{ $settings->getImageUrl('logo') }}" alt="" height="22">
+                    </span>
+                    <span class="logo-lg">
+                        <img src="{{ $settings->getImageUrl('logo') }}" alt="" height="60">
+                    </span>
+                </a>
+                <a href="{{ route('admin.dashboard') }}" class="logo logo-dark">
+                    <span class="logo-sm">
+                        <img src="{{ $settings->getImageUrl('logo') }}" alt="" height="22">
+                    </span>
+                    <span class="logo-lg">
+                        <img src="{{ $settings->getImageUrl('logo') }}" alt="" height="60">
+                    </span>
+                </a>
+            </div>
+
+            <ul id="sidebar-menu">
+
+                <li class="menu-title">Menu</li>
+                <li>
+                    <a href="{{ route('admin.dashboard') }}"
+                        class="tp-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                        <span class="nav-icon">
+                            <iconify-icon icon="tabler:assembly"></iconify-icon>
+                        </span>
+                        <span class="sidebar-text"> Dashboard </span>
+                    </a>
+                </li>
+
+                {{-- NEW: Messaging Section for Admin --}}
+                <li class="menu-title mt-2">Communications</li>
+                <li>
+                    <a href="{{ route('admin.requests.index') }}"
+                        class="tp-link {{ request()->routeIs('admin.requests.*') ? 'active' : '' }}">
+                        <span class="nav-icon">
+                            <iconify-icon icon="tabler:arrows-exchange"></iconify-icon>
+                        </span>
+                        <span class="sidebar-text"> Connection Logs </span>
+                    </a>
+                </li>
+
+                @can('users.view')
+                    <li class="menu-title mt-2">User Management</li>
+                    <li>
+                        <a href="#sidebarUsers" data-bs-toggle="collapse"
+                            class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                            <span class="nav-icon">
+                                <iconify-icon icon="tabler:users"></iconify-icon>
+                            </span>
+                            <span class="sidebar-text"> Users </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <div class="collapse {{ request()->routeIs('admin.users.*') ? 'show' : '' }}" id="sidebarUsers">
+                            <ul class="nav-second-level">
+                                <li><a href="{{ route('admin.users.index') }}"
+                                        class="tp-link {{ request()->routeIs('admin.users.index') ? 'active' : '' }}">All
+                                        Users</a></li>
+                                @can('users.create')
+                                    <li><a href="{{ route('admin.users.create') }}"
+                                            class="tp-link {{ request()->routeIs('admin.users.create') ? 'active' : '' }}">Add
+                                            User</a></li>
+                                @endcan
+                            </ul>
+                        </div>
+                    </li>
+                @endcan
+
+                @if (auth()->user()->can('coaches.view') ||
+                        auth()->user()->can('seekers.view') ||
+                        auth()->user()->can('categories.view') ||
+                        auth()->user()->can('blogs.view'))
+                    <li class="menu-title mt-2">Platform Management</li>
+                @endif
+
+                @can('coaches.view')
+                    <li>
+                        <a href="#sidebarCoaches" data-bs-toggle="collapse"
+                            class="{{ request()->routeIs('admin.coaches.*') ? 'active' : '' }}">
+                            <span class="nav-icon">
+                                <iconify-icon icon="tabler:briefcase"></iconify-icon>
+                            </span>
+                            <span class="sidebar-text"> Coaches </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <div class="collapse {{ request()->routeIs('admin.coaches.*') ? 'show' : '' }}"
+                            id="sidebarCoaches">
+                            <ul class="nav-second-level">
+                                <li><a href="{{ route('admin.coaches.index') }}"
+                                        class="tp-link {{ request()->routeIs('admin.coaches.index') ? 'active' : '' }}">All
+                                        Coaches</a></li>
+                                @can('coaches.create')
+                                    <li><a href="{{ route('admin.coaches.create') }}"
+                                            class="tp-link {{ request()->routeIs('admin.coaches.create') ? 'active' : '' }}">Add
+                                            Coach</a></li>
+                                @endcan
+                            </ul>
+                        </div>
+                    </li>
+                @endcan
+
+                @can('seekers.view')
+                    <li>
+                        <a href="#sidebarSeekers" data-bs-toggle="collapse"
+                            class="{{ request()->routeIs('admin.seekers.*') ? 'active' : '' }}">
+                            <span class="nav-icon">
+                                <iconify-icon icon="tabler:users-group"></iconify-icon>
+                            </span>
+                            <span class="sidebar-text"> Seekers </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <div class="collapse {{ request()->routeIs('admin.seekers.*') ? 'show' : '' }}"
+                            id="sidebarSeekers">
+                            <ul class="nav-second-level">
+                                <li><a href="{{ route('admin.seekers.index') }}"
+                                        class="tp-link {{ request()->routeIs('admin.seekers.index') ? 'active' : '' }}">All
+                                        Seekers</a></li>
+                                @can('seekers.create')
+                                    <li><a href="{{ route('admin.seekers.create') }}"
+                                            class="tp-link {{ request()->routeIs('admin.seekers.create') ? 'active' : '' }}">Add
+                                            Seeker</a></li>
+                                @endcan
+                            </ul>
+                        </div>
+                    </li>
+                @endcan
+
+                @can('categories.view')
+                    <li>
+                        <a href="#sidebarCategories" data-bs-toggle="collapse"
+                            class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+                            <span class="nav-icon">
+                                <iconify-icon icon="tabler:category"></iconify-icon>
+                            </span>
+                            <span class="sidebar-text"> Categories </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <div class="collapse {{ request()->routeIs('admin.categories.*') ? 'show' : '' }}"
+                            id="sidebarCategories">
+                            <ul class="nav-second-level">
+                                <li><a href="{{ route('admin.categories.index') }}"
+                                        class="tp-link {{ request()->routeIs('admin.categories.index') ? 'active' : '' }}">All
+                                        Categories</a></li>
+                                @can('categories.create')
+                                    <li><a href="{{ route('admin.categories.create') }}"
+                                            class="tp-link {{ request()->routeIs('admin.categories.create') ? 'active' : '' }}">Add
+                                            Category</a></li>
+                                @endcan
+                            </ul>
+                        </div>
+                    </li>
+                @endcan
+
+                @can('blogs.view')
+                    <li>
+                        <a href="#sidebarBlogs" data-bs-toggle="collapse"
+                            class="{{ request()->routeIs(['admin.blogs.*', 'admin.media.*']) ? 'active' : '' }}">
+                            <span class="nav-icon">
+                                <iconify-icon icon="tabler:news"></iconify-icon>
+                            </span>
+                            <span class="sidebar-text"> Blogs & Media </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <div class="collapse {{ request()->routeIs(['admin.blogs.*', 'admin.media.*']) ? 'show' : '' }}"
+                            id="sidebarBlogs">
+                            <ul class="nav-second-level">
+                                <li><a href="{{ route('admin.blogs.index') }}"
+                                        class="tp-link {{ request()->routeIs('admin.blogs.index') ? 'active' : '' }}">All
+                                        Blogs</a></li>
+                                @can('blogs.create')
+                                    <li><a href="{{ route('admin.blogs.create') }}"
+                                            class="tp-link {{ request()->routeIs('admin.blogs.create') ? 'active' : '' }}">Create
+                                            Post</a></li>
+                                @endcan
+                                @can('media.view')
+                                    <li><a href="{{ route('admin.media.index') }}"
+                                            class="tp-link {{ request()->routeIs('admin.media.index') ? 'active' : '' }}">Media
+                                            Gallery</a></li>
+                                @endcan
+                            </ul>
+                        </div>
+                    </li>
+                @endcan
+
+                @can('settings.manage')
+                    <li class="menu-title mt-2">Pages</li>
+                    <li>
+                        <a href="{{ route('admin.pages.index') }}"
+                            class="tp-link {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}">
+                            <span class="nav-icon">
+                                <iconify-icon icon="tabler:file-description"></iconify-icon>
+                            </span>
+                            <span class="sidebar-text"> Manage Pages </span>
+                        </a>
+                    </li>
+                @endcan
+
+                @if (auth()->user()->can('roles.view') || auth()->user()->can('settings.manage'))
+                    <li class="menu-title mt-2">Configuration</li>
+                @endif
+
+                @can('roles.view')
+                    <li>
+                        <a href="#sidebarRoles" data-bs-toggle="collapse"
+                            class="{{ request()->routeIs(['admin.roles.*', 'admin.permissions.*']) ? 'active' : '' }}">
+                            <span class="nav-icon">
+                                <iconify-icon icon="tabler:shield-lock"></iconify-icon>
+                            </span>
+                            <span class="sidebar-text"> Roles & Permissions </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <div class="collapse {{ request()->routeIs(['admin.roles.*', 'admin.permissions.*']) ? 'show' : '' }}"
+                            id="sidebarRoles">
+                            <ul class="nav-second-level">
+                                <li><a href="{{ route('admin.roles.index') }}"
+                                        class="tp-link {{ request()->routeIs('admin.roles.index') ? 'active' : '' }}">Roles</a>
+                                </li>
+                                <li><a href="{{ route('admin.permissions.index') }}"
+                                        class="tp-link {{ request()->routeIs('admin.permissions.index') ? 'active' : '' }}">Permissions</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                @endcan
+
+                @can('settings.manage')
+                    <li>
+                        <a href="#sidebarSettings" data-bs-toggle="collapse"
+                            class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+                            <span class="nav-icon">
+                                <iconify-icon icon="tabler:settings"></iconify-icon>
+                            </span>
+                            <span class="sidebar-text"> Settings </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <div class="collapse {{ request()->routeIs('admin.settings.*') ? 'show' : '' }}"
+                            id="sidebarSettings">
+                            <ul class="nav-second-level">
+                                <li><a href="{{ route('admin.settings.index') }}" class="tp-link">General Settings</a>
+                                </li>
+                                <li><a href="{{ route('admin.settings.sms-gateway') }}" class="tp-link">SMS Gateway</a>
+                                </li>
+                                <li><a href="{{ route('admin.settings.mail-config') }}" class="tp-link">Mail
+                                        Configuration</a></li>
+                                <li><a href="{{ route('admin.settings.social-links') }}" class="tp-link">Social Links</a>
+                                </li>
+                                <li><a href="{{ route('admin.settings.page-setting') }}" class="tp-link">Page
+                                        Settings</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                @endcan
+
+            </ul>
+        </div>
+    </div>
+</div>
