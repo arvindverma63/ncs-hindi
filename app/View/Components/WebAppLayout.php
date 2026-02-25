@@ -8,19 +8,15 @@ use Illuminate\View\Component;
 
 class WebAppLayout extends Component
 {
-    /**
-     * Create a new component instance.
-     */
     public function __construct()
     {
         //
     }
 
-    /**
-     * Get the view / contents that represent the component.
-     */
     public function render(): View|Closure|string
     {
-        return view('layouts.webapp-layout');
+        // IMPORTANT: Ensure this matches exactly where your file is located
+        // If the file is in resources/views/components/webapp-layout.blade.php, use:
+        return view('components.webapp-layout');
     }
 }
