@@ -67,14 +67,14 @@ Route::middleware('auth','role:0,1')->group(function () {
     Route::controller(MediaGalleryController::class)->group(function () {
         Route::get('/media', 'index')->name('media.index');
         Route::post('/media/upload', 'upload')->name('media.upload');
-        
+
         Route::delete('/media/{id}', 'destroy')->name('media.destroy');
     });
 
         Route::resource('blogs', BlogController::class);
-        
+
         Route::post('blogs/update-status', [BlogController::class, 'updateStatus'])->name('blogs.update-status');
-        
+
         Route::get('blogs/export/excel', [BlogController::class, 'exportExcel'])->name('blogs.export.excel');
         Route::get('blogs/export/pdf', [BlogController::class, 'exportPdf'])->name('blogs.export.pdf');
 
@@ -105,7 +105,7 @@ Route::middleware('auth','role:0,1')->group(function () {
         Route::post('users/update-status', [UserController::class, 'updateStatus'])
             ->name('users.update-status');
 
-            
+
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);
         Route::resource('seekers', SeekerController::class);
@@ -118,7 +118,7 @@ Route::middleware('auth','role:0,1')->group(function () {
         Route::get('coaches/export/excel', [CoachController::class, 'exportExcel'])->name('coaches.export.excel');
         Route::get('coaches/export/pdf', [CoachController::class, 'exportPdf'])->name('coaches.export.pdf');
         Route::resource('categories', CategoryController::class);
-    
+
         Route::patch('/coaches/{id}/status', [CoachController::class, 'updateStatus'])
         ->name('coaches.update-status');
 
@@ -142,3 +142,4 @@ Route::middleware('auth','role:0,1')->group(function () {
 require __DIR__ . '/auth.php';
 require __DIR__ . '/coach.php';
 require __DIR__ . '/seeker.php';
+require __DIR__ . '/webapp.php';
