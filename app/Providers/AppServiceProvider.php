@@ -35,6 +35,7 @@ use App\Repositories\Eloquent\EloquentMediaGalleryRepository;
 use App\Repositories\Eloquent\EloquentMessageRequestRepository;
 use App\Repositories\Eloquent\EloquentSeekerDashboardRepository;
 use App\Repositories\Eloquent\EloquentSeekerProfileRepository;
+use App\View\Components\WebAppLayout;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -72,7 +73,6 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
-        Blade::component('webapp-layout', \App\View\Components\WebappLayout::class);
-
+        Blade::component('webapp-layout', WebAppLayout::class);
     }
 }
