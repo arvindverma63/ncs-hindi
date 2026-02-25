@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Blade;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
 use App\Repositories\Contracts\CoachRepositoryInterface;
 use App\Repositories\Contracts\InteractionRepositoryInterface;
@@ -70,6 +71,8 @@ class AppServiceProvider extends ServiceProvider
                 return true;
             }
         });
-        
+
+        Blade::component('webapp-layout', \App\View\Components\WebappLayout::class);
+
     }
 }
