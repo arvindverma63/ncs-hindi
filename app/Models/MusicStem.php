@@ -9,7 +9,7 @@ class MusicStem extends Model
 {
     protected $fillable = [
         'id',
-        'thread_id',
+        'category_id',
         'title',
         'description',
         'file_name',
