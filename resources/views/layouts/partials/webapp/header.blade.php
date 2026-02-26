@@ -6,6 +6,9 @@
             <input type="text" placeholder="Search the Vault..."
                 class="bg-zinc-900/50 border border-zinc-800 rounded-full py-2 px-12 text-sm focus:border-amber-700 outline-none w-64 transition">
         </div>
-        <button class="btn-vault px-6 py-2.5 text-[10px]">New Topic</button>
+        {{-- Link to Create Page --}}
+        <a href="{{ route('webapp.forum.create') }}" class="btn-vault px-6 py-2.5 text-[10px] uppercase font-black">
+            New Topic
+        </a>
     </div>
 </header>

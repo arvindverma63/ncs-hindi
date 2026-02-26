@@ -158,6 +158,37 @@
                         </div>
                     </li>
                 @endcan
+                {{-- NEW: Stem Management Section --}}
+                @can('stems.view')
+                    <li>
+                        <a href="#sidebarStems" data-bs-toggle="collapse"
+                            class="{{ request()->routeIs('admin.stems.*') ? 'active' : '' }}">
+                            <span class="nav-icon">
+                                <iconify-icon icon="tabler:music"></iconify-icon>
+                            </span>
+                            <span class="sidebar-text"> Music Stems </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <div class="collapse {{ request()->routeIs('admin.stems.*') ? 'show' : '' }}" id="sidebarStems">
+                            <ul class="nav-second-level">
+                                <li>
+                                    <a href="{{ route('admin.stems.index') }}"
+                                        class="tp-link {{ request()->routeIs('admin.stems.index') ? 'active' : '' }}">
+                                        All Stems
+                                    </a>
+                                </li>
+                                @can('stems.create')
+                                    <li>
+                                        <a href="{{ route('admin.stems.create') }}"
+                                            class="tp-link {{ request()->routeIs('admin.stems.create') ? 'active' : '' }}">
+                                            Upload Stem
+                                        </a>
+                                    </li>
+                                @endcan
+                            </ul>
+                        </div>
+                    </li>
+                @endcan
 
                 @can('blogs.view')
                     <li>

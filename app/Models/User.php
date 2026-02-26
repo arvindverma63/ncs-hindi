@@ -3,7 +3,7 @@
 namespace App\Models;
 
 // 1. Remove the custom trait import
-// use App\Traits\HasUuid; 
+// use App\Traits\HasUuid;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids; // Keep this (Standard Laravel UUIDs)
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -81,5 +81,28 @@ class User extends Authenticatable
     public function seekerProfile()
     {
         return $this->hasOne(SeekerProfile::class);
+    }
+
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
+
+    /**
+     * Get all interactions performed by the user.
+     */
+    public function interactions()
+    {
+        return $this->hasMany(StemInteraction::class);
+    }
+
+    /**
+     * Specifically get the user's liked stems.
+     */
+    public function likedStems()
+    {
+        return $this->belongsToMany(MusicStem::class, 'stem_interactions', 'user_id', 'stem_id')
+            ->wherePivot('type', 'like')
+            ->withTimestamps();
     }
 }

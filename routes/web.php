@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InteractionController;
 use App\Http\Controllers\Admin\MediaGalleryController;
 use App\Http\Controllers\Admin\MessageRequestController;
+use App\Http\Controllers\Admin\StemController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
@@ -26,16 +27,16 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
 
 
-Route::get('/SeekerLayout',function(){
+Route::get('/SeekerLayout', function () {
     Artisan::call('make:component SeekerLayout');
 });
 
 
-Route::get('setup-notification',function(){
+Route::get('setup-notification', function () {
     Artisan::call('notifications:table');
 });
 
-Route::get('/export',function(){
+Route::get('/export', function () {
     Artisan::call('make:import SeekersImport --model=SeekerProfile');
 });
 
@@ -49,7 +50,7 @@ Route::get('/migrate', function () {
     return 'Migration executed successfully';
 });
 
-Route::middleware('auth','role:0,1')->group(function () {
+Route::middleware('auth', 'role:0,1')->group(function () {
 
     // 1. Main Dashboard (Redirects here after login)
 
@@ -59,17 +60,17 @@ Route::middleware('auth','role:0,1')->group(function () {
 
     Route::prefix('admin')->as('admin.')->group(function () {
 
-    Route::get('/connection-logs', [MessageRequestController::class, 'index'])->name('requests.index');
-    Route::delete('/connection-logs/{id}', [MessageRequestController::class, 'destroy'])->name('requests.destroy');
-    Route::get('/message-user/{id}', [InteractionController::class, 'createDirectMessage'])->name('messages.create');
-    Route::post('/message-user', [InteractionController::class, 'storeDirectMessage'])->name('messages.store');
+        Route::get('/connection-logs', [MessageRequestController::class, 'index'])->name('requests.index');
+        Route::delete('/connection-logs/{id}', [MessageRequestController::class, 'destroy'])->name('requests.destroy');
+        Route::get('/message-user/{id}', [InteractionController::class, 'createDirectMessage'])->name('messages.create');
+        Route::post('/message-user', [InteractionController::class, 'storeDirectMessage'])->name('messages.store');
 
-    Route::controller(MediaGalleryController::class)->group(function () {
-        Route::get('/media', 'index')->name('media.index');
-        Route::post('/media/upload', 'upload')->name('media.upload');
+        Route::controller(MediaGalleryController::class)->group(function () {
+            Route::get('/media', 'index')->name('media.index');
+            Route::post('/media/upload', 'upload')->name('media.upload');
 
-        Route::delete('/media/{id}', 'destroy')->name('media.destroy');
-    });
+            Route::delete('/media/{id}', 'destroy')->name('media.destroy');
+        });
 
         Route::resource('blogs', BlogController::class);
 
@@ -101,6 +102,15 @@ Route::middleware('auth','role:0,1')->group(function () {
             Route::put('/page-setting', [SettingController::class, 'updatePageSetting'])->name('update-page-setting');
         });
 
+        Route::controller(StemController::class)->prefix('stems')->name('stems.')->group(function () {
+            Route::get('/', 'index')->name('index')->middleware('can:stems.view');
+            Route::get('/create', 'create')->name('create')->middleware('can:stems.create');
+            Route::post('/store', 'store')->name('store')->middleware('can:stems.create');
+            Route::get('/{id}/edit', 'edit')->name('edit')->middleware('can:stems.edit');
+            Route::put('/{id}/update', 'update')->name('update')->middleware('can:stems.edit');
+            Route::delete('/{id}/destroy', 'destroy')->name('destroy')->middleware('can:stems.delete');
+        });
+
         Route::resource('users', UserController::class);
         Route::post('users/update-status', [UserController::class, 'updateStatus'])
             ->name('users.update-status');
@@ -120,9 +130,9 @@ Route::middleware('auth','role:0,1')->group(function () {
         Route::resource('categories', CategoryController::class);
 
         Route::patch('/coaches/{id}/status', [CoachController::class, 'updateStatus'])
-        ->name('coaches.update-status');
+            ->name('coaches.update-status');
 
-            // Page Routes
+        // Page Routes
         Route::controller(PageController::class)->group(function () {
             // List all pages
             Route::get('pages', 'index')->name('pages.index');
@@ -133,9 +143,9 @@ Route::middleware('auth','role:0,1')->group(function () {
         });
 
         Route::get('/notifications/read', function () {
-                auth()->user()->unreadNotifications->markAsRead();
-                return back();
-            })->name('notifications.markAsRead');
+            auth()->user()->unreadNotifications->markAsRead();
+            return back();
+        })->name('notifications.markAsRead');
     });
 });
 

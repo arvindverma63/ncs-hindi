@@ -22,10 +22,13 @@ use App\Repositories\Contracts\BlogRepositoryInterface;
 use App\Repositories\Contracts\CoachBlogRepositoryInterface;
 use App\Repositories\Contracts\CoachDashboardRepositoryInterface;
 use App\Repositories\Contracts\CoachProfileRepositoryInterface;
+use App\Repositories\Contracts\ForumRepositoryInterface;
 use App\Repositories\Contracts\MediaGalleryInterface;
 use App\Repositories\Contracts\MessageRequestInterface;
+use App\Repositories\Contracts\ProfileRepositoryInterface as ContractsProfileRepositoryInterface;
 use App\Repositories\Contracts\SeekerDashboardInterface;
 use App\Repositories\Contracts\SeekerProfileInterface;
+use App\Repositories\Contracts\StemRepositoryInterface as ContractsStemRepositoryInterface;
 use App\Repositories\Eloquent\EloquentBlogCommentRepository;
 use App\Repositories\Eloquent\EloquentBlogRepository;
 use App\Repositories\Eloquent\EloquentCoachBlogRepository;
@@ -35,6 +38,11 @@ use App\Repositories\Eloquent\EloquentMediaGalleryRepository;
 use App\Repositories\Eloquent\EloquentMessageRequestRepository;
 use App\Repositories\Eloquent\EloquentSeekerDashboardRepository;
 use App\Repositories\Eloquent\EloquentSeekerProfileRepository;
+use App\Repositories\Eloquent\ForumRepository;
+use App\Repositories\Eloquent\ProfileRepository;
+use App\Repositories\Eloquent\StemRepository;
+use App\Repositories\Interfaces\ProfileRepositoryInterface;
+use App\Repositories\Interfaces\StemRepositoryInterface;
 use App\View\Components\WebAppLayout;
 
 class AppServiceProvider extends ServiceProvider
@@ -58,6 +66,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MessageRequestInterface::class, EloquentMessageRequestRepository::class);
         $this->app->bind(SeekerDashboardInterface::class, EloquentSeekerDashboardRepository::class);
         $this->app->bind(SeekerProfileInterface::class, EloquentSeekerProfileRepository::class);
+        $this->app->bind(ForumRepositoryInterface::class, ForumRepository::class);
+        $this->app->bind(ContractsStemRepositoryInterface::class, StemRepository::class);
+        $this->app->bind(ContractsProfileRepositoryInterface::class, ProfileRepository::class);
     }
 
     /**

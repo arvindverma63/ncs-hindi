@@ -16,7 +16,7 @@
     </a>
 
     {{-- Center Action Button (Create) --}}
-    <a href="#" class="flex flex-col items-center -mt-10 group">
+    <a href="{{ route('webapp.forum.create') }}" class="flex flex-col items-center -mt-10 group">
         <div
             class="w-14 h-14 btn-vault rounded-2xl flex items-center justify-center shadow-2xl shadow-red-900/40 border-4 border-black text-white group-active:scale-95 transition-transform duration-200">
             <i class="fa-solid fa-plus text-xl"></i>

@@ -28,4 +28,9 @@ class Category extends Model
     {
         return $this->belongsToMany(CoachProfile::class, 'coach_category');
     }
+
+    public function threads()
+    {
+        return $this->hasMany(ForumThread::class);
+    }
 }
