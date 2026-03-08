@@ -53,19 +53,12 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(PageRepositoryInterface::class, PageRepository::class);
-        $this->app->bind(CoachRepositoryInterface::class, EloquentCoachRepository::class);
         $this->app->bind(CategoryRepositoryInterface::class, EloquentCategoryRepository::class);
-        $this->app->bind(SeekerRepositoryInterface::class, EloquentSeekerRepository::class);
         $this->app->bind(InteractionRepositoryInterface::class, EloquentInteractionRepository::class);
         $this->app->bind(BlogRepositoryInterface::class, EloquentBlogRepository::class);
         $this->app->bind(BlogCommentRepositoryInterface::class, EloquentBlogCommentRepository::class);
-        $this->app->bind(CoachDashboardRepositoryInterface::class, EloquentCoachDashboardRepository::class);
-        $this->app->bind(CoachBlogRepositoryInterface::class, EloquentCoachBlogRepository::class);
-        $this->app->bind(CoachProfileRepositoryInterface::class, EloquentCoachProfileRepository::class);
         $this->app->bind(MediaGalleryInterface::class, EloquentMediaGalleryRepository::class);
         $this->app->bind(MessageRequestInterface::class, EloquentMessageRequestRepository::class);
-        $this->app->bind(SeekerDashboardInterface::class, EloquentSeekerDashboardRepository::class);
-        $this->app->bind(SeekerProfileInterface::class, EloquentSeekerProfileRepository::class);
         $this->app->bind(ForumRepositoryInterface::class, ForumRepository::class);
         $this->app->bind(ContractsStemRepositoryInterface::class, StemRepository::class);
         $this->app->bind(ContractsProfileRepositoryInterface::class, ProfileRepository::class);
