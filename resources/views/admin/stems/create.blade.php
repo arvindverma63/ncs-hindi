@@ -1,6 +1,7 @@
 <x-app-layout title="Upload Official Stem | NCS Hindi Admin">
     @push('heads')
         <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     @endpush
 
     <div class="py-4">
@@ -34,7 +35,7 @@
                                     <div class="col-12 mb-2">
                                         <label class="form-label fw-bold small text-uppercase text-secondary">Music
                                             Title <span class="text-danger">*</span></label>
-                                        <input type="text" name="title" id="title"
+                                        <input type="text" name="title"
                                             class="form-control form-control-lg bg-light border-0"
                                             placeholder="e.g., Baarishein - Lo-Fi" required>
                                     </div>
@@ -56,8 +57,7 @@
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold small text-uppercase text-secondary">Category
                                             <span class="text-danger">*</span></label>
-                                        <select name="category_id" id="category_id"
-                                            class="form-select bg-light border-0" required>
+                                        <select name="category_id" class="form-select bg-light border-0" required>
                                             <option value="">Select Category</option>
                                             @foreach ($categories as $category)
                                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -84,14 +84,12 @@
                                     <div class="col-md-4">
                                         <label
                                             class="form-label fw-bold small text-uppercase text-secondary">BPM</label>
-                                        <input type="number" name="bpm" class="form-control bg-light border-0"
-                                            placeholder="128">
+                                        <input type="number" name="bpm" class="form-control bg-light border-0">
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label fw-bold small text-uppercase text-secondary">Music
                                             Key</label>
-                                        <input type="text" name="music_key" class="form-control bg-light border-0"
-                                            placeholder="Am, C#m">
+                                        <input type="text" name="music_key" class="form-control bg-light border-0">
                                     </div>
                                     <div class="col-md-4">
                                         <label
@@ -104,7 +102,7 @@
                                     <div class="col-12">
                                         <label class="form-label fw-bold small text-uppercase text-secondary">Music
                                             Description</label>
-                                        <textarea name="description" class="form-control bg-light border-0" rows="4"></textarea>
+                                        <textarea name="description" class="form-control bg-light border-0" rows="3"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -116,11 +114,9 @@
                                         class="me-2 text-primary"></iconify-icon>SEO & Tags</h5>
                             </div>
                             <div class="card-body p-4">
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold small text-uppercase text-secondary">Tags /
-                                        Keywords</label>
-                                    <input type="text" name="tags_keywords" class="form-control bg-light border-0"
-                                        placeholder="lofi, stems, hindi">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small text-uppercase text-secondary">Tags</label>
+                                    <input type="text" name="tags_keywords" class="form-control bg-light border-0">
                                 </div>
                                 <div class="row g-3">
                                     <div class="col-md-6">
@@ -141,19 +137,17 @@
                     </div>
 
                     <div class="col-lg-4">
-                        <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden text-center">
-                            <div class="card-header bg-white border-bottom py-3">
-                                <h6 class="card-title mb-0 fw-bold text-dark">Cover Image</h6>
+                        <div class="card border-0 shadow-sm rounded-4 mb-4 text-center">
+                            <div class="card-header bg-white border-bottom py-3 text-start">
+                                <h6 class="card-title mb-0 fw-bold text-dark">Cover Art</h6>
                             </div>
-                            <div id="imagePreviewContainer"
-                                class="bg-light d-flex align-items-center justify-content-center border-bottom"
-                                style="height: 300px;">
+                            <div class="bg-light d-flex align-items-center justify-content-center border-bottom"
+                                style="height: 250px;">
                                 <img id="imagePreview" src="" class="w-100 h-100"
                                     style="display: none; object-fit: cover;">
                                 <div id="previewPlaceholder" class="p-4">
-                                    <iconify-icon icon="mdi:image-album" width="64"
-                                        class="mb-2 text-secondary opacity-50"></iconify-icon>
-                                    <p class="small mb-0 text-muted">Preview Area</p>
+                                    <iconify-icon icon="mdi:image-album" width="48"
+                                        class="text-secondary opacity-50"></iconify-icon>
                                 </div>
                             </div>
                             <div class="p-3">
@@ -162,14 +156,9 @@
                             </div>
                         </div>
 
-                        <div class="card border-0 shadow-sm rounded-4 mb-4">
-                            <div class="card-body p-4 text-center">
-                                <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle mb-3"
-                                    style="width: 64px; height: 64px;">
-                                    <iconify-icon icon="mdi:file-music" class="text-primary"
-                                        width="32"></iconify-icon>
-                                </div>
-                                <h6 class="fw-bold text-uppercase small mb-2">MP3 Audio File <span
+                        <div class="card border-0 shadow-sm rounded-4 mb-4 text-center">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold text-uppercase small mb-3">Audio (.mp3) <span
                                         class="text-danger">*</span></h6>
                                 <input type="file" name="stem_file" id="stem_file"
                                     class="form-control border-0 bg-light" accept=".mp3" required>
@@ -177,21 +166,19 @@
                         </div>
 
                         <div id="uploadProgressContainer" class="mb-4" style="display: none;">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="text-primary fw-bold small" id="statusText">Uploading...</span>
-                                <span id="uploadPercentage" class="text-primary fw-bold small">0%</span>
+                            <div class="d-flex justify-content-between mb-1 small fw-bold text-primary">
+                                <span id="statusText">Uploading...</span>
+                                <span id="uploadPercentage">0%</span>
                             </div>
-                            <div class="progress" style="height: 10px; border-radius: 5px;">
+                            <div class="progress" style="height: 8px;">
                                 <div id="uploadProgressBar"
-                                    class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                                    style="width: 0%"></div>
+                                    class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%">
+                                </div>
                             </div>
                         </div>
 
                         <button type="submit" id="btnSubmit"
-                            class="btn btn-primary btn-lg w-100 py-3 rounded-3 shadow-lg fw-bold text-uppercase">
-                            <iconify-icon icon="mdi:cloud-upload" class="me-2"
-                                style="vertical-align: middle;"></iconify-icon>
+                            class="btn btn-primary btn-lg w-100 py-3 rounded-3 shadow fw-bold text-uppercase">
                             Publish Music
                         </button>
                     </div>
@@ -201,82 +188,49 @@
     </div>
 
     @push('scripts')
-        <script src="[https://code.jquery.com/jquery-3.7.1.min.js](https://code.jquery.com/jquery-3.7.1.min.js)"></script>
-        <script
-            src="[https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js](https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js)">
-        </script>
-        <script
-            src="[https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js](https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js)">
-        </script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
         <script>
             $(document).ready(function() {
                 $('#featured_image').on('change', function() {
-                    const file = this.files[0];
-                    if (file) {
-                        let reader = new FileReader();
-                        reader.onload = function(e) {
-                            $('#imagePreview').attr('src', e.target.result).show();
-                            $('#previewPlaceholder').hide();
-                        }
-                        reader.readAsDataURL(file);
-                    }
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        $('#imagePreview').attr('src', e.target.result).show();
+                        $('#previewPlaceholder').hide();
+                    };
+                    if (this.files[0]) reader.readAsDataURL(this.files[0]);
                 });
 
                 $("#stemUploadForm").validate({
                     rules: {
-                        title: {
-                            required: true,
-                            maxlength: 255
-                        },
-                        category_id: {
-                            required: true
-                        },
+                        title: "required",
+                        category_id: "required",
                         stem_file: {
                             required: true,
                             extension: "mp3"
-                        },
-                        featured_image: {
-                            extension: "jpg|jpeg|png|webp|jfif"
-                        },
-                        bpm: {
-                            digits: true
-                        },
-                        seo_title: {
-                            maxlength: 70
-                        },
-                        seo_description: {
-                            maxlength: 160
                         }
                     },
-                    messages: {
-                        stem_file: {
-                            extension: "Please upload a valid .mp3 file"
-                        },
-                        featured_image: {
-                            extension: "Only image files are allowed"
-                        }
-                    },
-                    errorElement: 'div',
-                    errorPlacement: function(error, element) {
-                        error.addClass('invalid-feedback');
-                        element.closest('.col-12, .col-md-6, .col-md-4, .card-body').append(error);
-                    },
+                    errorElement: 'span',
+                    errorClass: 'text-danger small mt-1 d-block',
                     highlight: function(element) {
-                        $(element).addClass('is-invalid');
+                        $(element).addClass('border border-danger');
                     },
                     unhighlight: function(element) {
-                        $(element).removeClass('is-invalid');
+                        $(element).removeClass('border border-danger');
                     },
-                    submitHandler: function(form) {
+
+                    submitHandler: function(form, event) {
+                        event.preventDefault(); // CRITICAL: Stop standard form submission
+
                         let formData = new FormData(form);
                         let $btn = $('#btnSubmit');
-                        let $progressContainer = $('#uploadProgressContainer');
-                        let $progressBar = $('#uploadProgressBar');
-                        let $percentage = $('#uploadPercentage');
-                        let $status = $('#statusText');
+                        let $progress = $('#uploadProgressContainer');
 
-                        $btn.prop('disabled', true).text('Processing...');
-                        $progressContainer.fadeIn();
+                        $btn.prop('disabled', true).text('Working...');
+                        $progress.show();
 
                         $.ajax({
                             url: $(form).attr('action'),
@@ -288,65 +242,34 @@
                                 let xhr = new window.XMLHttpRequest();
                                 xhr.upload.addEventListener("progress", function(evt) {
                                     if (evt.lengthComputable) {
-                                        let percent = Math.round((evt.loaded / evt
-                                            .total) * 100);
-                                        $progressBar.css('width', percent + '%');
-                                        $percentage.text(percent + '%');
-                                        if (percent === 100) $status.text(
-                                            'Finalizing Release...');
+                                        let p = Math.round((evt.loaded / evt.total) *
+                                            100);
+                                        $('#uploadProgressBar').css('width', p + '%');
+                                        $('#uploadPercentage').text(p + '%');
                                     }
                                 }, false);
                                 return xhr;
                             },
                             success: function(res) {
-                                toastr.success('Music Published Successfully');
+                                toastr.success('Music uploaded!');
                                 setTimeout(() => window.location.href =
-                                    "{{ route('admin.stems.index') }}", 1500);
+                                    "{{ route('admin.stems.index') }}", 1000);
                             },
                             error: function(xhr) {
-                                $btn.prop('disabled', false).html(
-                                    '<iconify-icon icon="mdi:cloud-upload" class="me-2"></iconify-icon> Publish Music'
-                                    );
-                                $progressContainer.hide();
+                                $btn.prop('disabled', false).text('Publish Music');
+                                $progress.hide();
                                 if (xhr.status === 422) {
-                                    let errors = xhr.responseJSON.errors;
-                                    $.each(errors, function(key, val) {
-                                        toastr.error(val[0]);
-                                    });
+                                    $.each(xhr.responseJSON.errors, (k, v) => toastr.error(v[
+                                        0]));
                                 } else {
-                                    toastr.error('Upload failed. Check server limits.');
+                                    toastr.error('Upload failed. Check file size limits.');
                                 }
                             }
                         });
-                        return false;
+                        return false; // Final backup to stop refresh
                     }
                 });
-
-                $.validator.addMethod("extension", function(value, element, param) {
-                    param = typeof param === "string" ? param.replace(/,/g, '|') : "png|jpe?g|gif";
-                    return this.optional(element) || value.match(new RegExp(".(" + param + ")$", "i"));
-                }, "Invalid file format.");
             });
         </script>
-        <style>
-            .form-control:focus,
-            .form-select:focus {
-                background-color: #fff !important;
-                border: 1px solid #0d6efd !important;
-                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1) !important;
-            }
-
-            .invalid-feedback {
-                display: block;
-                font-size: 0.75rem;
-                color: #dc3545;
-                margin-top: 0.25rem;
-            }
-
-            .is-invalid {
-                border: 1px solid #dc3545 !important;
-            }
-        </style>
     @endpush
-
 </x-app-layout>
