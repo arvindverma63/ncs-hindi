@@ -11,12 +11,7 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         // Register custom route files here
-        then: function () {
-            Route::middleware('web')
-                ->prefix('coach')
-                ->name('coach.')
-                ->group(base_path('routes/coach.php'));
-        },
+
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Register the middleware alias
