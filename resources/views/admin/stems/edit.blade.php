@@ -116,7 +116,7 @@
                             <div class="card-header bg-white border-bottom py-3 text-start fw-bold">Cover Art</div>
                             <div class="bg-light d-flex align-items-center justify-content-center border-bottom"
                                 style="height: 250px;">
-                                <img id="imagePreview" src="{{  $stem->featured_image ? asset('storage/' . $stem->featured_image) : '' }}" alt="Cover Art Preview"
+                                <img id="imagePreview" src="{{  $stem->featured_image ?? '' }}" alt="Cover Art Preview"
                                     class="w-100 h-100"
                                     style="{{ $stem->featured_image ? '' : 'display: none;' }} object-fit: cover;">
                                 <div id="previewPlaceholder" class="p-4"
