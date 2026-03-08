@@ -150,6 +150,4 @@ Route::middleware('auth', 'role:0,1')->group(function () {
 });
 
 require __DIR__ . '/auth.php';
-require __DIR__ . '/coach.php';
-require __DIR__ . '/seeker.php';
 require __DIR__ . '/webapp.php';
