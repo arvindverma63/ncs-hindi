@@ -12,7 +12,7 @@
 
         <div class="flex items-center gap-4 bg-zinc-900/30 p-2 rounded-2xl border border-zinc-800">
             <div class="px-4 py-2 border-r border-zinc-800 text-center">
-                <p class="text-lg font-black text-white leading-none">{{ $stems->count() }}</p>
+                <p class="text-lg font-black text-white leading-none">{{ $stems->total() }}</p>
                 <p class="text-[8px] text-zinc-500 uppercase font-bold tracking-tighter mt-1">Available</p>
             </div>
             <div class="px-4 py-2 text-center">
@@ -53,12 +53,12 @@
             <div
                 class="forum-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 group hover:bg-[#121215] transition-all border border-transparent hover:border-zinc-800 rounded-2xl">
                 <div class="flex items-center gap-5">
-                    {{-- Visual Indicator: Image or Icon --}}
+                    {{-- Visual Indicator --}}
                     <div
                         class="w-14 h-14 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center overflow-hidden group-hover:border-amber-600 transition duration-300">
                         @if ($stem->featured_image)
-                            <img src="{{ $stem->featured_image ?? "" }}"
-                                class="w-full h-full object-cover" alt="{{ $stem->title }}">
+                            <img src="{{ $stem->featured_image }}" class="w-full h-full object-cover"
+                                alt="{{ $stem->title }}">
                         @else
                             @php
                                 $icon = 'fa-music';
@@ -95,31 +95,33 @@
                     </div>
                 </div>
 
-                {{-- Technical Stats --}}
+                {{-- Swapped Stats Area --}}
                 <div class="flex flex-wrap items-center gap-6 lg:gap-12 px-2">
+                    {{-- 1. Likes instead of BPM --}}
                     <div class="text-center min-w-[45px]">
-                        <p class="text-xs font-black text-zinc-300">{{ $stem->bpm ?? '--' }}</p>
-                        <p class="text-[8px] font-bold text-zinc-600 uppercase tracking-tighter">BPM</p>
+                        <p class="text-xs font-black text-zinc-300">{{ number_format($stem->like_count ?? 0) }}</p>
+                        <p class="text-[8px] font-bold text-zinc-600 uppercase tracking-tighter">Likes</p>
                     </div>
+                    {{-- 2. Views instead of Key --}}
                     <div class="text-center min-w-[45px]">
-                        <p class="text-xs font-black text-zinc-300">{{ $stem->music_key ?? '--' }}</p>
-                        <p class="text-[8px] font-bold text-zinc-600 uppercase tracking-tighter">Key</p>
+                        <p class="text-xs font-black text-zinc-300">{{ number_format($stem->view_count ?? 0) }}</p>
+                        <p class="text-[8px] font-bold text-zinc-600 uppercase tracking-tighter">Views</p>
                     </div>
+                    {{-- 3. Date instead of Downloads --}}
                     <div class="text-center hidden sm:block">
-                        <p class="text-xs font-black text-zinc-300">{{ number_format($stem->download_count) }}</p>
-                        <p class="text-[8px] font-bold text-zinc-600 uppercase tracking-tighter">Downloads</p>
+                        <p class="text-xs font-black text-zinc-300">{{ $stem->created_at->format('d M Y') }}</p>
+                        <p class="text-[8px] font-bold text-zinc-600 uppercase tracking-tighter">Uploaded</p>
                     </div>
                 </div>
 
                 {{-- Actions --}}
                 <div class="flex items-center gap-3 ml-auto lg:ml-0">
-                    <button type="button"
-                        onclick="window.location.href='{{ route('webapp.stems.show', $stem->id ?? 1) }}'"
+                    <button type="button" onclick="window.location.href='{{ route('webapp.stems.show', $stem->id) }}'"
                         class="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-white transition group/btn">
                         <i class="fa-solid fa-circle-info group-hover/btn:scale-110 transition"></i>
                     </button>
 
-                    <a href="{{ asset('storage/' . $stem->file_path) }}" download
+                    <a href="{{ route('webapp.stems.download', $stem->id) }}"
                         class="btn-vault px-6 py-2.5 rounded-xl text-[10px] font-black flex items-center gap-2 hover:scale-105 transition-transform">
                         <i class="fa-solid fa-download"></i> GET STEMS
                     </a>
@@ -127,7 +129,7 @@
             </div>
         @empty
             <div class="py-20 text-center bg-zinc-900/20 rounded-[32px] border border-dashed border-zinc-800">
-                <i class="fa-solid fa- music-slash text-4xl text-zinc-800 mb-4"></i>
+                <i class="fa-solid fa-music-slash text-4xl text-zinc-800 mb-4"></i>
                 <h5 class="text-zinc-500 font-bold uppercase tracking-widest text-xs">No studio assets match your
                     criteria</h5>
             </div>
