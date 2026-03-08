@@ -17,9 +17,11 @@ class StemRepository implements StemRepositoryInterface
             $audioFile = $data['stem_file'];
             $imageFile = $data['featured_image'] ?? null;
 
-            $audioName = time() . '_' . $audioFile->getClientOriginalName();
+            // Handle Audio Upload
+            $audioName = time() . '_' . Str::slug($data['title']) . '.' . $audioFile->getClientOriginalExtension();
             $audioPath = $audioFile->storeAs('uploads/stems', $audioName, 'public');
 
+            // Handle Cover Image Upload
             $imagePath = null;
             if ($imageFile) {
                 $imageName = time() . '_cover.' . $imageFile->getClientOriginalExtension();
@@ -27,16 +29,22 @@ class StemRepository implements StemRepositoryInterface
             }
 
             $stem = MusicStem::create([
-                'id' => (string) Str::uuid(),
-                'category_id' => $categoryId,
-                'title' => $data['title'],
-                'description' => $data['description'] ?? null,
-                'file_name' => $audioFile->getClientOriginalName(),
-                'file_path' => $audioPath,
-                'featured_image' => $imagePath,
-                'file_size' => $this->formatBytes($audioFile->getSize()),
-                'bpm' => $data['bpm'] ?? null,
-                'music_key' => $data['music_key'] ?? null,
+                'category_id'      => $categoryId,
+                'title'            => $data['title'],
+                'artist_name'      => $data['artist_name'] ?? null,
+                'album_movie_name' => $data['album_movie_name'] ?? null,
+                'language'         => $data['language'] ?? null,
+                'description'      => $data['description'] ?? null,
+                'tags_keywords'    => $data['tags_keywords'] ?? null,
+                'file_name'        => $audioFile->getClientOriginalName(),
+                'file_path'        => $audioPath,
+                'featured_image'   => $imagePath,
+                'file_size'        => $this->formatBytes($audioFile->getSize()),
+                'bpm'              => $data['bpm'] ?? null,
+                'music_key'        => $data['music_key'] ?? null,
+                'seo_title'        => $data['seo_title'] ?? $data['title'],
+                'seo_description'  => $data['seo_description'] ?? Str::limit($data['description'] ?? '', 150),
+                'is_public'        => $data['is_public'] ?? true,
             ]);
 
             Log::info("Stem uploaded successfully", ['id' => $stem->id, 'title' => $stem->title]);
@@ -49,30 +57,35 @@ class StemRepository implements StemRepositoryInterface
 
     public function getLibraryStems($filters = [])
     {
-        return MusicStem::with('category')
-            ->withCount([
-                'interactions as likes_count' => function ($query) {
-                    $query->where('type', 'like');
-                },
-                'interactions as downloads_count' => function ($query) {
-                    $query->where('type', 'download');
-                }
-            ])
-            ->latest()
-            ->get();
+        $query = MusicStem::with('category');
+
+        // If you want to filter by category or public status
+        if (isset($filters['category_id'])) {
+            $query->where('category_id', $filters['category_id']);
+        }
+
+        return $query->latest()->get();
     }
 
     public function logInteraction($stemId, $userId, $type)
     {
         try {
             $interaction = StemInteraction::create([
-                'id' => (string) Str::uuid(),
+                'id'      => (string) Str::uuid(),
                 'user_id' => $userId,
                 'stem_id' => $stemId,
-                'type' => $type,
+                'type'    => $type, // 'like', 'download', 'view', 'share'
             ]);
 
-            Log::debug("Stem interaction logged", ['user_id' => $userId, 'stem_id' => $stemId, 'type' => $type]);
+            // Increment the counter directly on the music_stems table for fast retrieval
+            $column = $type . '_count'; // e.g., view_count, like_count
+            MusicStem::where('id', $stemId)->increment($column);
+
+            Log::debug("Stem interaction logged and counter incremented", [
+                'stem_id' => $stemId,
+                'type'    => $type
+            ]);
+
             return $interaction;
         } catch (\Exception $e) {
             Log::error("Failed to log stem interaction", ['error' => $e->getMessage(), 'stem_id' => $stemId]);
