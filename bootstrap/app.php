@@ -26,7 +26,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 if ($request->user()->role === 'admin') {
                     return route('admin.dashboard');
                 }
-                return route('coach.dashboard');
             }
         );
     })
