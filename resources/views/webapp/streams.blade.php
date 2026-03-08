@@ -1,4 +1,5 @@
 <x-webapp-layout>
+    {{-- 1. Header Section --}}
     <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12 px-2">
         <div class="flex-1">
             <h1 class="font-brand text-3xl font-black text-white uppercase tracking-tighter">
@@ -21,6 +22,7 @@
         </div>
     </section>
 
+    {{-- 2. Filtering System --}}
     <form action="{{ route('webapp.streams') }}" method="GET" class="flex flex-wrap gap-3 mb-10">
         <div class="relative flex-1 min-w-[280px]">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-amber-600 text-xs"></i>
@@ -45,11 +47,13 @@
         </select>
     </form>
 
+    {{-- 3. High-Density List --}}
     <section class="space-y-4">
         @forelse($stems as $stem)
             <div
                 class="forum-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 group hover:bg-[#121215] transition-all border border-transparent hover:border-zinc-800 rounded-2xl">
                 <div class="flex items-center gap-5">
+                    {{-- Artwork & Play Button --}}
                     <div
                         class="w-14 h-14 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center overflow-hidden relative group/play">
                         @if ($stem->featured_image)
@@ -63,8 +67,9 @@
                             </div>
                         @endif
 
+                        {{-- Fixed JavaScript String Injection --}}
                         <button
-                            onclick="togglePreview(this, '{{ asset('storage/' . $stem->file_path) }}', {{ $stem->id }})"
+                            onclick="togglePreview(this, '{{ asset('storage/' . $stem->file_path) }}', '{{ $stem->id }}')"
                             class="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100">
                             <i class="fa-solid fa-play text-xl play-icon"></i>
                             <i class="fa-solid fa-pause text-xl pause-icon hidden"></i>
@@ -86,6 +91,7 @@
                     </div>
                 </div>
 
+                {{-- Dynamic Stats: Likes, Views, Uploaded Date --}}
                 <div class="flex flex-wrap items-center gap-6 lg:gap-12 px-2">
                     <div class="text-center min-w-[45px]">
                         <p class="text-xs font-black text-zinc-300">{{ number_format($stem->like_count ?? 0) }}</p>
@@ -101,6 +107,7 @@
                     </div>
                 </div>
 
+                {{-- Actions --}}
                 <div class="flex items-center gap-3 ml-auto lg:ml-0">
                     <button type="button" onclick="window.location.href='{{ route('webapp.stems.show', $stem->id) }}'"
                         class="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-white transition group/btn">
@@ -125,73 +132,53 @@
     <div class="mt-10">
         {{ $stems->links() }}
     </div>
-
-    <section
-        class="mt-12 bg-gradient-to-r from-red-950/20 to-amber-950/10 border border-red-900/30 rounded-[32px] p-6 lg:p-10 flex flex-col md:flex-row items-center gap-8 shadow-2xl">
-        <div
-            class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-600 to-red-600 flex items-center justify-center flex-shrink-0">
-            <i class="fa-solid fa-file-contract text-2xl text-white"></i>
-        </div>
-        <div class="flex-1 text-center md:text-left">
-            <h3 class="font-brand text-lg font-bold text-white uppercase italic tracking-tight">Royalty-Free Creator
-                License</h3>
-            <p class="text-xs text-zinc-400 mt-1 font-medium leading-relaxed max-w-xl">
-                All stems are 100% royalty-free for content creators. No copyright strikes on social platforms when you
-                link back to the official NCS Hindi channel.
-            </p>
-        </div>
-        <button
-            class="bg-white text-black text-[10px] font-black uppercase tracking-widest px-8 py-3 rounded-xl hover:bg-zinc-200 transition">
-            Usage Guide
-        </button>
-    </section>
-
-    @push('scripts')
-        <script>
-            let currentAudio = new Audio();
-            let currentBtn = null;
-
-            function togglePreview(btn, url, id) {
-                const playIcon = btn.querySelector('.play-icon');
-                const pauseIcon = btn.querySelector('.pause-icon');
-
-                if (currentBtn === btn) {
-                    if (currentAudio.paused) {
-                        currentAudio.play();
-                        showPause(btn);
-                    } else {
-                        currentAudio.pause();
-                        showPlay(btn);
-                    }
-                    return;
-                }
-
-                if (currentBtn) {
-                    showPlay(currentBtn);
-                }
-
-                currentAudio.src = url;
-                currentAudio.play();
-                currentBtn = btn;
-                showPause(btn);
-
-                currentAudio.onended = () => {
-                    showPlay(btn);
-                    currentBtn = null;
-                };
-            }
-
-            function showPlay(btn) {
-                btn.querySelector('.play-icon').classList.remove('hidden');
-                btn.querySelector('.pause-icon').classList.add('hidden');
-                btn.closest('.w-14').classList.remove('border-amber-500', 'ring-2', 'ring-amber-500/20');
-            }
-
-            function showPause(btn) {
-                btn.querySelector('.play-icon').classList.add('hidden');
-                btn.querySelector('.pause-icon').classList.remove('hidden');
-                btn.closest('.w-14').classList.add('border-amber-500', 'ring-2', 'ring-amber-500/20');
-            }
-        </script>
-    @endpush
 </x-webapp-layout>
+
+@push('scripts')
+    <script>
+        let currentAudio = new Audio();
+        let currentBtn = null;
+
+        function togglePreview(btn, url, id) {
+            const playIcon = btn.querySelector('.play-icon');
+            const pauseIcon = btn.querySelector('.pause-icon');
+
+            if (currentBtn === btn) {
+                if (currentAudio.paused) {
+                    currentAudio.play();
+                    showPause(btn);
+                } else {
+                    currentAudio.pause();
+                    showPlay(btn);
+                }
+                return;
+            }
+
+            if (currentBtn) {
+                showPlay(currentBtn);
+            }
+
+            currentAudio.src = url;
+            currentAudio.play();
+            currentBtn = btn;
+            showPause(btn);
+
+            currentAudio.onended = () => {
+                showPlay(btn);
+                currentBtn = null;
+            };
+        }
+
+        function showPlay(btn) {
+            btn.querySelector('.play-icon').classList.remove('hidden');
+            btn.querySelector('.pause-icon').classList.add('hidden');
+            btn.closest('.w-14').classList.remove('border-amber-500', 'ring-2', 'ring-amber-500/20');
+        }
+
+        function showPause(btn) {
+            btn.querySelector('.play-icon').classList.add('hidden');
+            btn.querySelector('.pause-icon').classList.remove('hidden');
+            btn.closest('.w-14').classList.add('border-amber-500', 'ring-2', 'ring-amber-500/20');
+        }
+    </script>
+@endpush
