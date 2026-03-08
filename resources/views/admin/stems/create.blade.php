@@ -195,42 +195,79 @@
 
         <script>
             $(document).ready(function() {
+                // 1. Image Preview Logic
                 $('#featured_image').on('change', function() {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        $('#imagePreview').attr('src', e.target.result).show();
-                        $('#previewPlaceholder').hide();
-                    };
-                    if (this.files[0]) reader.readAsDataURL(this.files[0]);
+                    const file = this.files[0];
+                    if (file) {
+                        let reader = new FileReader();
+                        reader.onload = function(e) {
+                            $('#imagePreview').attr('src', e.target.result).show();
+                            $('#previewPlaceholder').hide();
+                        }
+                        reader.readAsDataURL(file);
+                    }
                 });
 
+                // 2. Custom Validation Method for File Size (Optional but recommended)
+                $.validator.addMethod("filesize", function(value, element, param) {
+                    return this.optional(element) || (element.files[0].size <= param);
+                }, "File size must be less than {0} bytes");
+
+                // 3. Form Validation and AJAX Submission
                 $("#stemUploadForm").validate({
                     rules: {
-                        title: "required",
-                        category_id: "required",
+                        title: {
+                            required: true,
+                            maxlength: 255
+                        },
+                        category_id: {
+                            required: true
+                        },
                         stem_file: {
                             required: true,
-                            extension: "mp3"
+                            extension: "mp3" // Fixes the 'valid mimetype' error by checking extension instead
+                        },
+                        featured_image: {
+                            extension: "jpg|jpeg|png|webp"
+                        },
+                        bpm: {
+                            digits: true
+                        }
+                    },
+                    messages: {
+                        title: "Please enter a music title.",
+                        category_id: "Please select a category.",
+                        stem_file: {
+                            required: "Audio file is required.",
+                            extension: "Only .mp3 files are allowed."
+                        },
+                        featured_image: {
+                            extension: "Please upload a valid image (jpg, jpeg, png, or webp)."
                         }
                     },
                     errorElement: 'span',
                     errorClass: 'text-danger small mt-1 d-block',
                     highlight: function(element) {
-                        $(element).addClass('border border-danger');
+                        $(element).addClass('is-invalid border-danger');
                     },
                     unhighlight: function(element) {
-                        $(element).removeClass('border border-danger');
+                        $(element).removeClass('is-invalid border-danger');
                     },
 
                     submitHandler: function(form, event) {
-                        event.preventDefault(); // CRITICAL: Stop standard form submission
+                        event.preventDefault(); // Prevents the default page refresh
 
                         let formData = new FormData(form);
                         let $btn = $('#btnSubmit');
-                        let $progress = $('#uploadProgressContainer');
+                        let $progressContainer = $('#uploadProgressContainer');
+                        let $progressBar = $('#uploadProgressBar');
+                        let $percentage = $('#uploadPercentage');
+                        let $status = $('#statusText');
 
-                        $btn.prop('disabled', true).text('Working...');
-                        $progress.show();
+                        // UI State Change
+                        $btn.prop('disabled', true).html(
+                            '<span class="spinner-border spinner-border-sm me-2"></span> Publishing...');
+                        $progressContainer.show();
 
                         $.ajax({
                             url: $(form).attr('action'),
@@ -242,31 +279,45 @@
                                 let xhr = new window.XMLHttpRequest();
                                 xhr.upload.addEventListener("progress", function(evt) {
                                     if (evt.lengthComputable) {
-                                        let p = Math.round((evt.loaded / evt.total) *
-                                            100);
-                                        $('#uploadProgressBar').css('width', p + '%');
-                                        $('#uploadPercentage').text(p + '%');
+                                        let percentComplete = Math.round((evt.loaded /
+                                            evt.total) * 100);
+                                        $progressBar.css('width', percentComplete +
+                                        '%');
+                                        $percentage.text(percentComplete + '%');
+
+                                        if (percentComplete === 100) {
+                                            $status.text(
+                                                'Finalizing assets on server...');
+                                        }
                                     }
                                 }, false);
                                 return xhr;
                             },
-                            success: function(res) {
-                                toastr.success('Music uploaded!');
-                                setTimeout(() => window.location.href =
-                                    "{{ route('admin.stems.index') }}", 1000);
+                            success: function(response) {
+                                toastr.success('Music asset published successfully!');
+                                setTimeout(function() {
+                                    window.location.href =
+                                        "{{ route('admin.stems.index') }}";
+                                }, 1500);
                             },
                             error: function(xhr) {
                                 $btn.prop('disabled', false).text('Publish Music');
-                                $progress.hide();
+                                $progressContainer.hide();
+
                                 if (xhr.status === 422) {
-                                    $.each(xhr.responseJSON.errors, (k, v) => toastr.error(v[
-                                        0]));
+                                    let errors = xhr.responseJSON.errors;
+                                    $.each(errors, function(key, value) {
+                                        toastr.error(value[0]);
+                                    });
                                 } else {
-                                    toastr.error('Upload failed. Check file size limits.');
+                                    toastr.error(
+                                        'Upload failed. Check your internet or server file size limits.'
+                                        );
                                 }
                             }
                         });
-                        return false; // Final backup to stop refresh
+
+                        return false;
                     }
                 });
             });
