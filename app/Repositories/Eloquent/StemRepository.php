@@ -54,6 +54,65 @@ class StemRepository implements StemRepositoryInterface
             throw $e;
         }
     }
+    public function updateStem($stemId, array $data)
+    {
+        try {
+            $stem = MusicStem::findOrFail($stemId);
+
+            // 1. Handle Audio File Update
+            if (isset($data['stem_file'])) {
+                // Delete old audio file
+                if ($stem->file_path) {
+                    Storage::disk('public')->delete($stem->file_path);
+                }
+
+                $audioFile = $data['stem_file'];
+                $audioName = time() . '_' . Str::slug($data['title']) . '.' . $audioFile->getClientOriginalExtension();
+                $audioPath = $audioFile->storeAs('uploads/stems', $audioName, 'public');
+
+                $stem->file_name = $audioFile->getClientOriginalName();
+                $stem->file_path = $audioPath;
+                $stem->file_size = $this->formatBytes($audioFile->getSize());
+            }
+
+            // 2. Handle Cover Image Update
+            if (isset($data['featured_image'])) {
+                // Delete old image
+                if ($stem->featured_image) {
+                    Storage::disk('public')->delete($stem->featured_image);
+                }
+
+                $imageFile = $data['featured_image'];
+                $imageName = time() . '_cover.' . $imageFile->getClientOriginalExtension();
+                $imagePath = $imageFile->storeAs('uploads/stems/covers', $imageName, 'public');
+
+                $stem->featured_image = $imagePath;
+            }
+
+            // 3. Update Text Metadata
+            $stem->update([
+                'category_id'      => $data['category_id'] ?? $stem->category_id,
+                'title'            => $data['title'] ?? $stem->title,
+                'artist_name'      => $data['artist_name'] ?? $stem->artist_name,
+                'album_movie_name' => $data['album_movie_name'] ?? $stem->album_movie_name,
+                'language'         => $data['language'] ?? $stem->language,
+                'description'      => $data['description'] ?? $stem->description,
+                'tags_keywords'    => $data['tags_keywords'] ?? $stem->tags_keywords,
+                'bpm'              => $data['bpm'] ?? $stem->bpm,
+                'music_key'        => $data['music_key'] ?? $stem->music_key,
+                'seo_title'        => $data['seo_title'] ?? $stem->seo_title,
+                'seo_description'  => $data['seo_description'] ?? $stem->seo_description,
+                'is_public'        => isset($data['is_public']) ? (bool)$data['is_public'] : $stem->is_public,
+                'slug'             => isset($data['title']) ? Str::slug($data['title']) : $stem->slug,
+            ]);
+
+            Log::info("Stem updated successfully", ['id' => $stem->id]);
+            return $stem;
+        } catch (\Exception $e) {
+            Log::error("Failed to update stem", ['error' => $e->getMessage(), 'id' => $stemId]);
+            throw $e;
+        }
+    }
 
     public function getLibraryStems($filters = [])
     {
