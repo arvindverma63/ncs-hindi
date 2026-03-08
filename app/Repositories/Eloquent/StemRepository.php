@@ -118,12 +118,22 @@ class StemRepository implements StemRepositoryInterface
     {
         $query = MusicStem::with('category');
 
-        // If you want to filter by category or public status
-        if (isset($filters['category_id'])) {
+        if (!empty($filters['search'])) {
+            $query->where('title', 'LIKE', '%' . $filters['search'] . '%')
+                ->orWhere('artist_name', 'LIKE', '%' . $filters['search'] . '%');
+        }
+
+        if (!empty($filters['category_id'])) {
             $query->where('category_id', $filters['category_id']);
         }
 
-        return $query->latest()->get();
+        if (($filters['sort'] ?? '') === 'popular') {
+            $query->orderBy('download_count', 'desc');
+        } else {
+            $query->latest();
+        }
+
+        return $query->paginate(20);
     }
 
     public function logInteraction($stemId, $userId, $type)

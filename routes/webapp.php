@@ -50,6 +50,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/stems/{id}/download', [StemController::class, 'download'])->name('webapp.stems.download');
 });
 
+Route::prefix('stems')->name('webapp.')->group(function () {
+    Route::get('/', [StemController::class, 'index'])->name('streams');
+    Route::get('/{id}', [StemController::class, 'show'])->name('stems.show');
+    Route::get('/{id}/download', [StemController::class, 'download'])->name('stems.download');
+    Route::post('/{id}/like', [StemController::class, 'toggleLike'])->name('stems.like');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Shared Vault Features (Discovery)
