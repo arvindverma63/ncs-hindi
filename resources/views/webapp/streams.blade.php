@@ -1,5 +1,4 @@
 <x-webapp-layout>
-    {{-- 1. Library Search & Stats --}}
     <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12 px-2">
         <div class="flex-1">
             <h1 class="font-brand text-3xl font-black text-white uppercase tracking-tighter">
@@ -22,7 +21,6 @@
         </div>
     </section>
 
-    {{-- 2. Technical Filtering System --}}
     <form action="{{ route('webapp.streams') }}" method="GET" class="flex flex-wrap gap-3 mb-10">
         <div class="relative flex-1 min-w-[280px]">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-amber-600 text-xs"></i>
@@ -47,37 +45,30 @@
         </select>
     </form>
 
-    {{-- 3. Stems List (High Density) --}}
     <section class="space-y-4">
         @forelse($stems as $stem)
             <div
                 class="forum-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 group hover:bg-[#121215] transition-all border border-transparent hover:border-zinc-800 rounded-2xl">
                 <div class="flex items-center gap-5">
-                    {{-- Visual Indicator --}}
                     <div
-                        class="w-14 h-14 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center overflow-hidden group-hover:border-amber-600 transition duration-300">
+                        class="w-14 h-14 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center overflow-hidden relative group/play">
                         @if ($stem->featured_image)
-                            <img src="{{ $stem->featured_image }}" class="w-full h-full object-cover"
+                            <img src="{{ $stem->featured_image }}"
+                                class="w-full h-full object-cover group-hover:opacity-40 transition"
                                 alt="{{ $stem->title }}">
                         @else
-                            @php
-                                $icon = 'fa-music';
-                                $color = 'text-zinc-600';
-                                if ($stem->category) {
-                                    if (Str::contains(strtolower($stem->category->name), 'vocal')) {
-                                        $icon = 'fa-microphone';
-                                        $color = 'text-red-600';
-                                    } elseif (Str::contains(strtolower($stem->category->name), 'bass')) {
-                                        $icon = 'fa-wave-square';
-                                        $color = 'text-amber-600';
-                                    } elseif (Str::contains(strtolower($stem->category->name), 'drum')) {
-                                        $icon = 'fa-drum';
-                                        $color = 'text-blue-600';
-                                    }
-                                }
-                            @endphp
-                            <i class="fa-solid {{ $icon }} text-xl {{ $color }}"></i>
+                            <div
+                                class="w-full h-full flex items-center justify-center group-hover:opacity-20 transition text-zinc-600">
+                                <i class="fa-solid fa-music text-xl"></i>
+                            </div>
                         @endif
+
+                        <button
+                            onclick="togglePreview(this, '{{ asset('storage/' . $stem->file_path) }}', {{ $stem->id }})"
+                            class="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100">
+                            <i class="fa-solid fa-play text-xl play-icon"></i>
+                            <i class="fa-solid fa-pause text-xl pause-icon hidden"></i>
+                        </button>
                     </div>
 
                     <div class="overflow-hidden">
@@ -95,26 +86,21 @@
                     </div>
                 </div>
 
-                {{-- Swapped Stats Area --}}
                 <div class="flex flex-wrap items-center gap-6 lg:gap-12 px-2">
-                    {{-- 1. Likes instead of BPM --}}
                     <div class="text-center min-w-[45px]">
                         <p class="text-xs font-black text-zinc-300">{{ number_format($stem->like_count ?? 0) }}</p>
                         <p class="text-[8px] font-bold text-zinc-600 uppercase tracking-tighter">Likes</p>
                     </div>
-                    {{-- 2. Views instead of Key --}}
                     <div class="text-center min-w-[45px]">
                         <p class="text-xs font-black text-zinc-300">{{ number_format($stem->view_count ?? 0) }}</p>
                         <p class="text-[8px] font-bold text-zinc-600 uppercase tracking-tighter">Views</p>
                     </div>
-                    {{-- 3. Date instead of Downloads --}}
                     <div class="text-center hidden sm:block">
                         <p class="text-xs font-black text-zinc-300">{{ $stem->created_at->format('d M Y') }}</p>
                         <p class="text-[8px] font-bold text-zinc-600 uppercase tracking-tighter">Uploaded</p>
                     </div>
                 </div>
 
-                {{-- Actions --}}
                 <div class="flex items-center gap-3 ml-auto lg:ml-0">
                     <button type="button" onclick="window.location.href='{{ route('webapp.stems.show', $stem->id) }}'"
                         class="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-white transition group/btn">
@@ -136,12 +122,10 @@
         @endforelse
     </section>
 
-    {{-- Pagination --}}
     <div class="mt-10">
         {{ $stems->links() }}
     </div>
 
-    {{-- 4. Storage & Licensing Alert --}}
     <section
         class="mt-12 bg-gradient-to-r from-red-950/20 to-amber-950/10 border border-red-900/30 rounded-[32px] p-6 lg:p-10 flex flex-col md:flex-row items-center gap-8 shadow-2xl">
         <div
@@ -161,4 +145,53 @@
             Usage Guide
         </button>
     </section>
+
+    @push('scripts')
+        <script>
+            let currentAudio = new Audio();
+            let currentBtn = null;
+
+            function togglePreview(btn, url, id) {
+                const playIcon = btn.querySelector('.play-icon');
+                const pauseIcon = btn.querySelector('.pause-icon');
+
+                if (currentBtn === btn) {
+                    if (currentAudio.paused) {
+                        currentAudio.play();
+                        showPause(btn);
+                    } else {
+                        currentAudio.pause();
+                        showPlay(btn);
+                    }
+                    return;
+                }
+
+                if (currentBtn) {
+                    showPlay(currentBtn);
+                }
+
+                currentAudio.src = url;
+                currentAudio.play();
+                currentBtn = btn;
+                showPause(btn);
+
+                currentAudio.onended = () => {
+                    showPlay(btn);
+                    currentBtn = null;
+                };
+            }
+
+            function showPlay(btn) {
+                btn.querySelector('.play-icon').classList.remove('hidden');
+                btn.querySelector('.pause-icon').classList.add('hidden');
+                btn.closest('.w-14').classList.remove('border-amber-500', 'ring-2', 'ring-amber-500/20');
+            }
+
+            function showPause(btn) {
+                btn.querySelector('.play-icon').classList.add('hidden');
+                btn.querySelector('.pause-icon').classList.remove('hidden');
+                btn.closest('.w-14').classList.add('border-amber-500', 'ring-2', 'ring-amber-500/20');
+            }
+        </script>
+    @endpush
 </x-webapp-layout>
