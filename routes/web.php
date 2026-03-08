@@ -26,9 +26,20 @@ use Illuminate\Support\Facades\Artisan;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
 
+use Illuminate\Support\Facades\File;
 
-Route::get('/SeekerLayout', function () {
-    Artisan::call('make:component SeekerLayout');
+Route::get('/manual-link', function () {
+    $target = storage_path('app/public');
+    $link = public_path('storage');
+
+    if (File::exists($link)) {
+        return "The 'public/storage' directory already exists.";
+    }
+
+    // Try to create the link
+    app()->make('files')->link($target, $link);
+
+    return "Symbolic link created successfully!";
 });
 
 
