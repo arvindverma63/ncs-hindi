@@ -19,11 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectTo(
             guests: '/login',
             users: function ($request) {
-                // Ensure we return a STRING path
                 if ($request->user()->role === 'admin') {
-                    return '/admin/dashboard';
+                    return route('admin.dashboard', absolute: false);
                 }
-                return '/dashboard';
+
+                return route('dashboard', absolute: false);
             }
         );
     })
