@@ -125,7 +125,7 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             @if ($stem->featured_image)
-                                                <img src="{{ asset('storage/' . $stem->featured_image) }}"
+                                                <img src="{{ $stem->featured_image }}" alt="{{ $stem->title }}"
                                                     class="stem-img border me-3">
                                             @else
                                                 <div
