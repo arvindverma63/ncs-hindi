@@ -3,7 +3,7 @@
     <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12 px-2">
         <div class="flex-1">
             <h1 class="font-brand text-3xl font-black text-white uppercase tracking-tighter">
-                Stems <span class="text-amber-500 italic">Library</span>
+                MUSIC <span class="text-amber-500 italic">Library</span>
             </h1>
             <p class="text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1">
                 Explore Official High-Fidelity Hindi NCS Assets
