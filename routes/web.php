@@ -26,25 +26,6 @@ use Illuminate\Support\Facades\Artisan;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
 
-use Illuminate\Support\Facades\File;
-
-Route::get('/fix-storage', function () {
-    $target = storage_path('app/public');
-    $link = public_path('storage');
-
-    if (File::exists($link)) {
-        return "The 'public/storage' link already exists.";
-    }
-
-    try {
-        // This uses PHP's internal linking without calling the terminal
-        app()->make('files')->link($target, $link);
-        return "Storage link created successfully!";
-    } catch (\Exception $e) {
-        return "Error: " . $e->getMessage();
-    }
-});
-
 
 Route::get('setup-notification', function () {
     Artisan::call('notifications:table');

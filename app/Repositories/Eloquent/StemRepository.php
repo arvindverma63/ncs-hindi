@@ -4,6 +4,7 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\MusicStem;
 use App\Models\StemInteraction;
+use App\Services\ImgBBService;
 use App\Repositories\Contracts\StemRepositoryInterface;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -11,21 +12,23 @@ use Illuminate\Support\Facades\Log;
 
 class StemRepository implements StemRepositoryInterface
 {
+    protected $imgBB;
+
+    public function __construct(ImgBBService $imgBB)
+    {
+        $this->imgBB = $imgBB;
+    }
+
     public function uploadStem($categoryId, array $data)
     {
         try {
             $audioFile = $data['stem_file'];
-            $imageFile = $data['featured_image'] ?? null;
-
-            // Handle Audio Upload
             $audioName = time() . '_' . Str::slug($data['title']) . '.' . $audioFile->getClientOriginalExtension();
             $audioPath = $audioFile->storeAs('uploads/stems', $audioName, 'public');
 
-            // Handle Cover Image Upload
-            $imagePath = null;
-            if ($imageFile) {
-                $imageName = time() . '_cover.' . $imageFile->getClientOriginalExtension();
-                $imagePath = $imageFile->storeAs('uploads/stems/covers', $imageName, 'public');
+            $imageUrl = null;
+            if (isset($data['featured_image'])) {
+                $imageUrl = $this->imgBB->upload($data['featured_image']);
             }
 
             $stem = MusicStem::create([
@@ -38,36 +41,36 @@ class StemRepository implements StemRepositoryInterface
                 'tags_keywords'    => $data['tags_keywords'] ?? null,
                 'file_name'        => $audioFile->getClientOriginalName(),
                 'file_path'        => $audioPath,
-                'featured_image'   => $imagePath,
+                'featured_image'   => $imageUrl,
                 'file_size'        => $this->formatBytes($audioFile->getSize()),
                 'bpm'              => $data['bpm'] ?? null,
                 'music_key'        => $data['music_key'] ?? null,
                 'seo_title'        => $data['seo_title'] ?? $data['title'],
                 'seo_description'  => $data['seo_description'] ?? Str::limit($data['description'] ?? '', 150),
                 'is_public'        => $data['is_public'] ?? true,
+                'slug'             => Str::slug($data['title']),
             ]);
 
-            Log::info("Stem uploaded successfully", ['id' => $stem->id, 'title' => $stem->title]);
+            Log::info("Stem uploaded successfully", ['id' => $stem->id]);
             return $stem;
         } catch (\Exception $e) {
-            Log::error("Failed to upload stem", ['error' => $e->getMessage(), 'category_id' => $categoryId]);
+            Log::error("Failed to upload stem", ['error' => $e->getMessage()]);
             throw $e;
         }
     }
+
     public function updateStem($stemId, array $data)
     {
         try {
             $stem = MusicStem::findOrFail($stemId);
 
-            // 1. Handle Audio File Update
             if (isset($data['stem_file'])) {
-                // Delete old audio file
                 if ($stem->file_path) {
                     Storage::disk('public')->delete($stem->file_path);
                 }
 
                 $audioFile = $data['stem_file'];
-                $audioName = time() . '_' . Str::slug($data['title']) . '.' . $audioFile->getClientOriginalExtension();
+                $audioName = time() . '_' . Str::slug($data['title'] ?? $stem->title) . '.' . $audioFile->getClientOriginalExtension();
                 $audioPath = $audioFile->storeAs('uploads/stems', $audioName, 'public');
 
                 $stem->file_name = $audioFile->getClientOriginalName();
@@ -75,21 +78,13 @@ class StemRepository implements StemRepositoryInterface
                 $stem->file_size = $this->formatBytes($audioFile->getSize());
             }
 
-            // 2. Handle Cover Image Update
             if (isset($data['featured_image'])) {
-                // Delete old image
-                if ($stem->featured_image) {
-                    Storage::disk('public')->delete($stem->featured_image);
+                $imageUrl = $this->imgBB->upload($data['featured_image']);
+                if ($imageUrl) {
+                    $stem->featured_image = $imageUrl;
                 }
-
-                $imageFile = $data['featured_image'];
-                $imageName = time() . '_cover.' . $imageFile->getClientOriginalExtension();
-                $imagePath = $imageFile->storeAs('uploads/stems/covers', $imageName, 'public');
-
-                $stem->featured_image = $imagePath;
             }
 
-            // 3. Update Text Metadata
             $stem->update([
                 'category_id'      => $data['category_id'] ?? $stem->category_id,
                 'title'            => $data['title'] ?? $stem->title,
@@ -109,7 +104,7 @@ class StemRepository implements StemRepositoryInterface
             Log::info("Stem updated successfully", ['id' => $stem->id]);
             return $stem;
         } catch (\Exception $e) {
-            Log::error("Failed to update stem", ['error' => $e->getMessage(), 'id' => $stemId]);
+            Log::error("Failed to update stem", ['error' => $e->getMessage()]);
             throw $e;
         }
     }
@@ -119,8 +114,10 @@ class StemRepository implements StemRepositoryInterface
         $query = MusicStem::with('category');
 
         if (!empty($filters['search'])) {
-            $query->where('title', 'LIKE', '%' . $filters['search'] . '%')
-                ->orWhere('artist_name', 'LIKE', '%' . $filters['search'] . '%');
+            $query->where(function ($q) use ($filters) {
+                $q->where('title', 'LIKE', '%' . $filters['search'] . '%')
+                    ->orWhere('artist_name', 'LIKE', '%' . $filters['search'] . '%');
+            });
         }
 
         if (!empty($filters['category_id'])) {
@@ -143,21 +140,15 @@ class StemRepository implements StemRepositoryInterface
                 'id'      => (string) Str::uuid(),
                 'user_id' => $userId,
                 'stem_id' => $stemId,
-                'type'    => $type, // 'like', 'download', 'view', 'share'
+                'type'    => $type,
             ]);
 
-            // Increment the counter directly on the music_stems table for fast retrieval
-            $column = $type . '_count'; // e.g., view_count, like_count
+            $column = $type . '_count';
             MusicStem::where('id', $stemId)->increment($column);
-
-            Log::debug("Stem interaction logged and counter incremented", [
-                'stem_id' => $stemId,
-                'type'    => $type
-            ]);
 
             return $interaction;
         } catch (\Exception $e) {
-            Log::error("Failed to log stem interaction", ['error' => $e->getMessage(), 'stem_id' => $stemId]);
+            Log::error("Failed to log interaction", ['error' => $e->getMessage()]);
             return null;
         }
     }
@@ -167,14 +158,15 @@ class StemRepository implements StemRepositoryInterface
         try {
             $stem = MusicStem::findOrFail($stemId);
 
-            if ($stem->file_path) Storage::disk('public')->delete($stem->file_path);
-            if ($stem->featured_image) Storage::disk('public')->delete($stem->featured_image);
+            if ($stem->file_path) {
+                Storage::disk('public')->delete($stem->file_path);
+            }
 
             $stem->delete();
             Log::info("Stem deleted successfully", ['id' => $stemId]);
             return true;
         } catch (\Exception $e) {
-            Log::error("Failed to delete stem", ['error' => $e->getMessage(), 'id' => $stemId]);
+            Log::error("Failed to delete stem", ['error' => $e->getMessage()]);
             return false;
         }
     }
