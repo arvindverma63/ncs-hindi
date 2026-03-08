@@ -7,7 +7,7 @@
             {{-- Artwork --}}
             <div class="w-48 h-48 lg:w-64 lg:h-64 flex-shrink-0 shadow-2xl shadow-black/50">
                 @if ($stem->featured_image)
-                    <img src="{{ asset('storage/' . $stem->featured_image) }}"
+                    <img src="{{ $stem->featured_image ?? "" }}"
                         class="w-full h-full object-cover rounded-3xl border border-zinc-700" alt="{{ $stem->title }}">
                 @else
                     <div

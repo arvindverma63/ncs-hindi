@@ -57,7 +57,7 @@
                     <div
                         class="w-14 h-14 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center overflow-hidden group-hover:border-amber-600 transition duration-300">
                         @if ($stem->featured_image)
-                            <img src="{{ asset('storage/' . $stem->featured_image) }}"
+                            <img src="{{ $stem->featured_image ?? "" }}"
                                 class="w-full h-full object-cover" alt="{{ $stem->title }}">
                         @else
                             @php

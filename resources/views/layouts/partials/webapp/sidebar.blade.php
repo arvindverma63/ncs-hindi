@@ -35,7 +35,7 @@
                     class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all group {{ request()->routeIs('webapp.streams') ? 'bg-gradient-to-r from-amber-600/10 to-transparent text-amber-500 font-bold border-l-2 border-amber-600' : 'text-zinc-500 hover:text-white hover:bg-zinc-900/50' }}">
                     <i
                         class="fa-solid fa-box-open text-sm {{ request()->routeIs('webapp.streams') ? 'text-amber-500' : 'group-hover:text-amber-500' }}"></i>
-                    <span class="text-sm">Stems Library</span>
+                    <span class="text-sm">Music Library</span>
                 </a>
             </div>
         </div>
