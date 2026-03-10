@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebApp\AuthController;
+use App\Http\Controllers\WebApp\ForumReplyController;
 use App\Http\Controllers\WebApp\LikeController;
 use App\Http\Controllers\WebApp\PageController;
 use App\Http\Controllers\WebApp\StemController;
@@ -44,6 +45,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile/edit', [PageController::class, 'editProfile'])->name('profile.edit');
         Route::post('/profile/update', [PageController::class, 'updateProfile'])->name('profile.update');
     });
+
+    Route::post('/forum/thread/{thread}/reply', [ForumReplyController::class, 'store'])
+        ->name('webapp.forum.reply')
+        ->middleware('auth');
+
+    Route::put('/forum/reply/{id}', [ForumReplyController::class, 'update'])->name('webapp.forum.reply.update');
+    Route::delete('/forum/reply/{id}', [ForumReplyController::class, 'destroy'])->name('webapp.forum.reply.delete');
 });
 
 Route::middleware('auth')->group(function () {
