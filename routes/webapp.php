@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebApp\AuthController;
+use App\Http\Controllers\WebApp\LikeController;
 use App\Http\Controllers\WebApp\PageController;
 use App\Http\Controllers\WebApp\StemController;
 
@@ -48,6 +49,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/stems/{id}/like', [StemController::class, 'toggleLike'])->name('webapp.stems.like');
     Route::get('/stems/{id}/download', [StemController::class, 'download'])->name('webapp.stems.download');
+    Route::post('/toggle-like', [LikeController::class, 'toggle'])->name('webapp.like.toggle');
 });
 
 Route::prefix('stems')->name('webapp.')->group(function () {

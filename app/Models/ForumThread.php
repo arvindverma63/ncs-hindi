@@ -11,8 +11,14 @@ class ForumThread extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'id', 'user_id', 'category_id', 'title', 'slug',
-        'content', 'is_sticky', 'is_verified'
+        'id',
+        'user_id',
+        'category_id',
+        'title',
+        'slug',
+        'content',
+        'is_sticky',
+        'is_verified'
     ];
 
     protected $keyType = 'string';
@@ -28,6 +34,23 @@ class ForumThread extends Model
         });
     }
 
+    /**
+     * Get all likes for the thread.
+     */
+    public function likes()
+    {
+        return $this->morphMany(Like::class, 'likeable');
+    }
+
+    /**
+     * Check if the thread is liked by a specific user.
+     */
+    public function isLikedBy($userId)
+    {
+        if (!$userId) return false;
+        return $this->likes()->where('user_id', $userId)->exists();
+    }
+
     public function author()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -36,11 +59,6 @@ class ForumThread extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
-    }
-
-    public function stems()
-    {
-        return $this->hasMany(MusicStem::class, 'thread_id');
     }
 
     public function replies()

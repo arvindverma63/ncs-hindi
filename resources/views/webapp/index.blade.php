@@ -50,96 +50,97 @@
     </div>
 
     @foreach ($posts as $post)
-        <article class="forum-card p-6 lg:p-8 mb-6 bg-[#0a0a0c]">
+        <article
+            class="forum-card p-6 lg:p-8 mb-6 bg-[#0a0a0c] border border-zinc-900/50 hover:border-zinc-700 transition-all duration-300 rounded-3xl relative overflow-hidden group">
+            {{-- Category Badge --}}
+            <div class="absolute top-0 right-0">
+                <div
+                    class="bg-gradient-to-l from-amber-600/20 to-transparent px-6 py-2 border-b border-l border-zinc-800 rounded-bl-2xl">
+                    <span class="text-[9px] font-black text-amber-500 uppercase tracking-[0.2em]">
+                        {{ $post->category->name ?? 'Community' }}
+                    </span>
+                </div>
+            </div>
+
             <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-black text-red-700 font-brand overflow-hidden">
-                        @if ($post->author && $post->author->avatar)
-                            <img src="{{ asset('uploads/avatars/' . $post->author->avatar) }}"
-                                class="w-full h-full object-cover">
-                        @else
-                            NC
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-black text-red-700 font-brand overflow-hidden shadow-inner">
+                            @if ($post->author && $post->author->avatar)
+                                <img src="{{ asset('uploads/avatars/' . $post->author->avatar) }}"
+                                    class="w-full h-full object-cover">
+                            @else
+                                NC
+                            @endif
+                        </div>
+                        @if ($post->is_verified)
+                            <div
+                                class="absolute -bottom-1 -right-1 w-5 h-5 bg-amber-600 rounded-lg flex items-center justify-center border-2 border-[#0a0a0c]">
+                                <i class="fa-solid fa-check text-[10px] text-white"></i>
+                            </div>
                         @endif
                     </div>
                     <div>
-                        <h5 class="text-sm font-bold text-white">
+                        <h5 class="text-sm font-bold text-white flex items-center gap-2">
                             {{ $post->author->name ?? 'Artist' }}
-                            @if ($post->is_verified)
-                                <span
-                                    class="bg-amber-600/20 text-amber-500 text-[8px] px-1.5 py-0.5 rounded ml-2 font-black uppercase tracking-tighter border border-amber-600/30">Verified</span>
-                            @endif
                         </h5>
-                        <p class="text-[10px] text-zinc-600 uppercase font-mono tracking-tighter">
+                        <p
+                            class="text-[10px] text-zinc-600 uppercase font-mono tracking-tighter flex items-center gap-2">
+                            <i class="fa-regular fa-clock text-[9px]"></i>
                             {{ $post->created_at->diffForHumans() }}
                         </p>
                     </div>
                 </div>
-                <button class="text-zinc-600 hover:text-white transition">
+                <button
+                    class="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-600 hover:text-white hover:bg-zinc-800 transition">
                     <i class="fa-solid fa-ellipsis"></i>
                 </button>
             </div>
 
-            <a href="{{ route('webapp.forum.show', $post->id) }}">
-                <h2
-                    class="text-2xl font-bold mb-4 tracking-tight leading-tight hover:text-amber-600 transition cursor-pointer font-brand uppercase italic text-white">
-                    {{ $post->title }}
-                </h2>
-            </a>
+            <div class="mb-4">
+                <a href="{{ route('webapp.forum.show', $post->id) }}" class="inline-block">
+                    <h2
+                        class="text-2xl font-bold tracking-tight leading-tight group-hover:text-amber-500 transition-colors cursor-pointer font-brand uppercase italic text-white">
+                        {{ $post->title }}
+                    </h2>
+                </a>
+            </div>
 
-            <div class="text-zinc-400 text-sm leading-relaxed mb-6 font-medium line-clamp-2">
+            <div class="text-zinc-400 text-sm leading-relaxed mb-8 font-medium line-clamp-2 max-w-3xl">
                 {!! Str::limit(strip_tags($post->content), 180) !!}
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                <div class="h-56 rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl relative group">
-                    <img src="https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&w=800&q=80"
-                        class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-700">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6">
-                        <span
-                            class="text-[10px] font-black text-white uppercase tracking-widest">{{ $post->category->name ?? 'Vault' }}</span>
-                    </div>
-                </div>
-
-                <div
-                    class="h-56 rounded-3xl overflow-hidden border border-zinc-800 bg-black flex flex-col items-center justify-center space-y-3 group cursor-pointer hover:bg-zinc-900/50 transition">
-                    <div
-                        class="w-16 h-16 rounded-2xl bg-zinc-900 flex items-center justify-center group-hover:rotate-12 transition duration-500">
-                        <i class="fa-solid fa-file-zipper text-3xl text-red-700"></i>
-                    </div>
-                    <div class="text-center">
-                        <span class="text-xs font-bold text-zinc-300 block">Stems_Package.zip</span>
-                        <span class="text-[10px] text-zinc-600 uppercase font-bold tracking-widest">
-                            @if ($post->stems_count)
-                                {{ $post->stems_count }} Files
-                            @else
-                                Get Stems
-                            @endif
+            <div class="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-zinc-900/80 gap-6">
+                <div class="flex items-center gap-10">
+                    {{-- Updated Like Button with JS Hooks --}}
+                    <button
+                        class="js-like-btn flex items-center gap-2.5 text-zinc-500 hover:text-red-500 transition group/stat"
+                        data-id="{{ $post->id }}" data-type="thread">
+                        <div
+                            class="w-8 h-8 rounded-full {{ $post->isLikedBy(auth()->id()) ? 'bg-red-500/10' : 'bg-zinc-900' }} flex items-center justify-center transition">
+                            <i
+                                class="fa-solid fa-heart text-xs {{ $post->isLikedBy(auth()->id()) ? 'text-red-500' : 'text-zinc-500' }}"></i>
+                        </div>
+                        <span class="js-like-count text-xs font-black tracking-widest">
+                            {{ number_format($post->likes()->count()) }}
                         </span>
-                    </div>
-                </div>
-            </div>
+                    </button>
 
-            <div class="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-zinc-900 gap-6">
-                <div class="flex items-center gap-8">
-                    <button class="flex items-center gap-2 text-zinc-500 hover:text-red-600 transition group">
-                        <i class="fa-solid fa-heart group-hover:scale-125 transition"></i>
-                        <span class="text-xs font-bold">{{ number_format($post->likes_count ?? 0) }}</span>
-                    </button>
-                    <button class="flex items-center gap-2 text-zinc-500 hover:text-amber-500 transition group">
-                        <i class="fa-solid fa-comment-dots group-hover:scale-125 transition"></i>
-                        <span class="text-xs font-bold">{{ $post->replies_count ?? 0 }}</span>
+                    <button class="flex items-center gap-2.5 text-zinc-500 hover:text-amber-500 transition group/stat">
+                        <div
+                            class="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center group-hover/stat:bg-amber-500/10 transition">
+                            <i class="fa-solid fa-comment-dots text-xs group-hover/stat:scale-125 transition"></i>
+                        </div>
+                        <span class="text-xs font-black tracking-widest">{{ $post->replies_count ?? 0 }}</span>
                     </button>
                 </div>
+
                 <div class="flex items-center gap-3 w-full sm:w-auto">
                     <a href="{{ route('webapp.forum.show', $post->id) }}"
-                        class="flex-1 sm:flex-none px-6 py-2.5 rounded-xl border border-zinc-800 text-[10px] text-center font-bold text-zinc-400 hover:text-white hover:bg-zinc-900 transition uppercase tracking-widest">
-                        Details
+                        class="flex-1 sm:flex-none px-8 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-[10px] text-center font-black text-zinc-400 hover:text-white hover:bg-zinc-800 transition uppercase tracking-[0.2em]">
+                        Open Thread
                     </a>
-                    <button
-                        class="flex-1 sm:flex-none btn-vault px-8 py-2.5 text-[10px] uppercase font-black flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-download"></i> Download
-                    </button>
                 </div>
             </div>
         </article>
@@ -160,4 +161,38 @@
             </a>
         </div>
     </section>
+
+    @push('scripts')
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $(document).on('click', '.js-like-btn', function(e) {
+                    e.preventDefault();
+                    const $btn = $(this);
+                    const $icon = $btn.find('i');
+                    const $count = $btn.find('.js-like-count');
+                    const $circle = $btn.find('.w-8');
+
+                    $.post('{{ route('webapp.like.toggle') }}', {
+                            _token: '{{ csrf_token() }}',
+                            id: $btn.data('id'),
+                            type: $btn.data('type')
+                        })
+                        .done(function(res) {
+                            $count.text(res.count);
+                            if (res.status === 'liked') {
+                                $icon.addClass('text-red-500').removeClass('text-zinc-500');
+                                $circle.addClass('bg-red-500/10').removeClass('bg-zinc-900');
+                            } else {
+                                $icon.addClass('text-zinc-500').removeClass('text-red-500');
+                                $circle.addClass('bg-zinc-900').removeClass('bg-red-500/10');
+                            }
+                        })
+                        .fail(function(xhr) {
+                            if (xhr.status === 401) alert('Please login to like this post.');
+                        });
+                });
+            });
+        </script>
+    @endpush
 </x-webapp-layout>
