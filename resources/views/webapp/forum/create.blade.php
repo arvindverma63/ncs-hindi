@@ -76,18 +76,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div>
-                            <label
-                                class="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-2">BPM</label>
-                            <input name="bpm" type="number" placeholder="128"
-                                class="w-full bg-black border border-zinc-800 rounded-xl p-4 text-sm text-white focus:border-amber-600 outline-none transition mt-1">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-2">Scale /
-                                Key</label>
-                            <input name="music_key" type="text" placeholder="Am"
-                                class="w-full bg-black border border-zinc-800 rounded-xl p-4 text-sm text-white focus:border-amber-600 outline-none transition mt-1">
-                        </div>
+
                     </div>
 
                     {{-- Quill Editor Description --}}

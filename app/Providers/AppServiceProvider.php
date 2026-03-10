@@ -58,7 +58,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(BlogRepositoryInterface::class, EloquentBlogRepository::class);
         $this->app->bind(BlogCommentRepositoryInterface::class, EloquentBlogCommentRepository::class);
         $this->app->bind(MediaGalleryInterface::class, EloquentMediaGalleryRepository::class);
-        $this->app->bind(MessageRequestInterface::class, EloquentMessageRequestRepository::class);
         $this->app->bind(ForumRepositoryInterface::class, ForumRepository::class);
         $this->app->bind(ContractsStemRepositoryInterface::class, StemRepository::class);
         $this->app->bind(ContractsProfileRepositoryInterface::class, ProfileRepository::class);
