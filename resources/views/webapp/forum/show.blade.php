@@ -50,29 +50,7 @@
                 {!! $post->content !!}
             </div>
 
-            {{-- Stem Download Section --}}
-            @if ($post->stems->count() > 0 || true)
-                {{-- Fallback for UI preview --}}
-                <div
-                    class="bg-zinc-950 rounded-[32px] p-8 border border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div class="flex items-center gap-6">
-                        <div
-                            class="w-20 h-20 rounded-[24px] bg-gradient-to-br from-red-600 to-amber-700 flex items-center justify-center shadow-2xl shadow-red-900/40">
-                            <i class="fa-solid fa-file-zipper text-3xl text-white"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-black text-white uppercase italic tracking-tighter font-brand">
-                                Master_Stems_Pack.zip</h3>
-                            <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">High-Quality
-                                WAV Files • 42 MB</p>
-                        </div>
-                    </div>
-                    <button
-                        class="btn-vault px-10 py-4 text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-red-900/30 w-full md:w-auto">
-                        Download Stems
-                    </button>
-                </div>
-            @endif
+
         </article>
 
         {{-- Discussion Section --}}
