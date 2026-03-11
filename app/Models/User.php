@@ -51,37 +51,22 @@ class User extends Authenticatable
         return $this->morphMany(Media::class, 'model');
     }
 
-    public function getProfileImageAttribute($value)
-    {
-        // 1. Check if the direct database column has a value
-        if ($value && file_exists(public_path($value))) {
-            return asset($value);
-        }
+    // public function getProfileImageAttribute($value)
+    // {
+    //     // 1. Check if the direct database column has a value
+    //     if ($value && file_exists(public_path($value))) {
+    //         return asset($value);
+    //     }
 
-        // 2. Fallback to your media relationship logic (if still needed)
-        $media = $this->media()->where('collection_name', 'profile')->latest()->first();
-        if ($media && file_exists(public_path($media->file_name))) {
-            return asset($media->file_name);
-        }
+    //     // 2. Fallback to your media relationship logic (if still needed)
+    //     $media = $this->media()->where('collection_name', 'profile')->latest()->first();
+    //     if ($media && file_exists(public_path($media->file_name))) {
+    //         return asset($media->file_name);
+    //     }
 
-        // 3. Final fallback to default
-        return asset('assets/images/users/user-1.jpg');
-    }
-    /**
-     * Get the Coach Profile associated with the user.
-     */
-    public function coachProfile()
-    {
-        return $this->hasOne(CoachProfile::class);
-    }
-
-    /**
-     * Get the Seeker Profile associated with the user.
-     */
-    public function seekerProfile()
-    {
-        return $this->hasOne(SeekerProfile::class);
-    }
+    //     // 3. Final fallback to default
+    //     return asset('assets/images/users/user-1.jpg');
+    // }
 
     public function profile()
     {

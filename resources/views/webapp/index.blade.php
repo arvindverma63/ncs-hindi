@@ -1,5 +1,6 @@
 <x-webapp-layout>
     <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {{-- Category Header Cards remain the same --}}
         <a href="{{ route('webapp.streams') }}" class="forum-card p-5 text-center group cursor-pointer border-dashed">
             <div
                 class="w-12 h-12 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition duration-300">
@@ -67,12 +68,19 @@
                     <div class="relative">
                         <div
                             class="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-black text-red-700 font-brand overflow-hidden shadow-inner">
-                            @if ($post->author && $post->author->avatar)
-                                <img src="{{ asset('uploads/avatars/' . $post->author->avatar) }}"
-                                    class="w-full h-full object-cover">
-                            @else
-                                NC
-                            @endif
+                            @php
+                                $authorAvatar = $post->author->profile_image ?? $post->author->avatar;
+                                $defaultAvatar =
+                                    'https://ui-avatars.com/api/?name=' .
+                                    urlencode($post->author->name) .
+                                    '&background=b45309&color=fff';
+                            @endphp
+
+                            {{-- Logic to prioritize Profile Image (Google/Custom) then Avatar --}}
+                            <img src="{{ $authorAvatar ?? $defaultAvatar }}"
+                                onerror="this.onerror=null;this.src='{{ $defaultAvatar }}';"
+                                referrerpolicy="no-referrer" class="w-full h-full object-cover"
+                                alt="{{ $post->author->name }}">
                         </div>
                         @if ($post->is_verified)
                             <div
@@ -113,7 +121,6 @@
 
             <div class="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-zinc-900/80 gap-6">
                 <div class="flex items-center gap-10">
-                    {{-- Updated Like Button with JS Hooks --}}
                     <button
                         class="js-like-btn flex items-center gap-2.5 text-zinc-500 hover:text-red-500 transition group/stat"
                         data-id="{{ $post->id }}" data-type="thread">
@@ -146,6 +153,7 @@
         </article>
     @endforeach
 
+    {{-- Marketplace Snippets and Scripts remain the same --}}
     <section class="mt-12">
         <h3 class="font-brand text-xl font-bold mb-6 text-zinc-500 uppercase tracking-widest px-2">Marketplace Snippets
         </h3>
@@ -162,36 +170,35 @@
         </div>
     </section>
 
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-        <script>
-            $(document).ready(function() {
-                $(document).on('click', '.js-like-btn', function(e) {
-                    e.preventDefault();
-                    const $btn = $(this);
-                    const $icon = $btn.find('i');
-                    const $count = $btn.find('.js-like-count');
-                    const $circle = $btn.find('.w-8');
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(document).on('click', '.js-like-btn', function(e) {
+                e.preventDefault();
+                const $btn = $(this);
+                const $icon = $btn.find('i');
+                const $count = $btn.find('.js-like-count');
+                const $circle = $btn.find('.w-8');
 
-                    $.post('{{ route('webapp.like.toggle') }}', {
-                            _token: '{{ csrf_token() }}',
-                            id: $btn.data('id'),
-                            type: $btn.data('type')
-                        })
-                        .done(function(res) {
-                            $count.text(res.count);
-                            if (res.status === 'liked') {
-                                $icon.addClass('text-red-500').removeClass('text-zinc-500');
-                                $circle.addClass('bg-red-500/10').removeClass('bg-zinc-900');
-                            } else {
-                                $icon.addClass('text-zinc-500').removeClass('text-red-500');
-                                $circle.addClass('bg-zinc-900').removeClass('bg-red-500/10');
-                            }
-                        })
-                        .fail(function(xhr) {
-                            if (xhr.status === 401) alert('Please login to like this post.');
-                        });
-                });
+                $.post('{{ route('webapp.like.toggle') }}', {
+                        _token: '{{ csrf_token() }}',
+                        id: $btn.data('id'),
+                        type: $btn.data('type')
+                    })
+                    .done(function(res) {
+                        $count.text(res.count);
+                        if (res.status === 'liked') {
+                            $icon.addClass('text-red-500').removeClass('text-zinc-500');
+                            $circle.addClass('bg-red-500/10').removeClass('bg-zinc-900');
+                        } else {
+                            $icon.addClass('text-zinc-500').removeClass('text-red-500');
+                            $circle.addClass('bg-zinc-900').removeClass('bg-red-500/10');
+                        }
+                    })
+                    .fail(function(xhr) {
+                        if (xhr.status === 401) alert('Please login to like this post.');
+                    });
             });
-        </script>
-
+        });
+    </script>
 </x-webapp-layout>

@@ -1,4 +1,5 @@
 <aside class="hidden lg:flex flex-col w-72 bg-[#050505] border-r border-[#1a1a1c] h-screen sticky top-0">
+    {{-- Brand Identity --}}
     <div class="p-8 mb-4">
         <div class="flex items-center gap-3 group cursor-pointer">
             <div
@@ -14,6 +15,7 @@
         </div>
     </div>
 
+    {{-- Navigation --}}
     <nav class="flex-1 px-4 overflow-y-auto no-scrollbar space-y-8">
         <div>
             <p class="px-4 text-[10px] font-black text-zinc-700 uppercase tracking-widest mb-4">Discovery</p>
@@ -60,13 +62,30 @@
         </div>
     </nav>
 
+    {{-- User Profile Section --}}
     <div class="p-4">
         @auth
             <div class="bg-gradient-to-b from-[#111114] to-[#050505] rounded-3xl p-4 border border-[#1a1a1c] shadow-2xl">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="relative">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=b45309&color=fff"
-                            class="w-10 h-10 rounded-xl object-cover border border-white/10" alt="Avatar">
+                        @php
+                            // Check if image exists and is not a placeholder string
+                            $userAvatar =
+                                Auth::user()->profile_image && strlen(Auth::user()->profile_image) > 20
+                                    ? Auth::user()->profile_image
+                                    : null;
+
+                            $defaultAvatar =
+                                'https://ui-avatars.com/api/?name=' .
+                                urlencode(Auth::user()->name) .
+                                '&background=b45309&color=fff';
+                        @endphp
+
+                        <img src="{{ $userAvatar ?? $defaultAvatar }}"
+                            onerror="this.onerror=null;this.src='{{ $defaultAvatar }}';" referrerpolicy="no-referrer"
+                            class="w-10 h-10 rounded-xl object-cover border border-white/10"
+                            alt="{{ Auth::user()->name }}">
+
                         <div
                             class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-[#111114] rounded-full">
                         </div>
@@ -79,6 +98,7 @@
                     </div>
                 </div>
 
+                {{-- XP Progress Bar --}}
                 <div class="space-y-1.5 mb-4">
                     <div class="flex justify-between text-[8px] font-black uppercase text-zinc-600 tracking-widest">
                         <span>Rank XP</span>
@@ -98,7 +118,7 @@
                 <form action="{{ route('logout') }}" method="POST" class="mt-2">
                     @csrf
                     <button type="submit"
-                        class="w-full text-[8px] font-black text-zinc-700 hover:text-red-600 uppercase tracking-widest transition-colors">
+                        class="w-full text-[8px] font-black text-zinc-700 hover:text-red-600 uppercase tracking-widest transition-colors outline-none">
                         Sign Out
                     </button>
                 </form>
