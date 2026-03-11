@@ -20,6 +20,9 @@ Route::get('/', [PageController::class, 'index'])->name('home');
 | Guest Routes (Login / Register)
 |--------------------------------------------------------------------------
 */
+
+Route::get('auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('google/callback', [AuthController::class, 'handleGoogleCallback']);
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
