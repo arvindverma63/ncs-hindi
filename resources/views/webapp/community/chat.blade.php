@@ -197,8 +197,21 @@
 
                 scrollToBottom();
 
+                // Track last message ID to avoid duplicates
+                let lastMessageId = null;
+                const existingMessages = container.find('[id^="msg-"]');
+                if (existingMessages.length > 0) {
+                    const lastMsg = existingMessages.last();
+                    lastMessageId = lastMsg.attr('id')?.replace('msg-', '') || null;
+                }
+
                 // Function to generate the HTML for a single message
                 function appendMessageToUI(data, isMe) {
+                    // Check if message already exists
+                    if ($(`#msg-${data.id}`).length > 0) {
+                        return;
+                    }
+
                     // Check if empty state exists and remove it
                     if (container.find('.fa-comments').length > 0) {
                         container.empty();
@@ -227,18 +240,44 @@
                     </div>
                 `;
                     container.append(html);
+                    lastMessageId = data.id;
                     scrollToBottom();
                 }
 
-                // 1. WebSocket Listener
+                // POLLING: Fetch new messages every 2 seconds
+                function pollForNewMessages() {
+                    $.ajax({
+                        url: '{{ route('community.message.index', ['channelId' => $activeChannel->id]) }}',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response && response.data) {
+                                // Process each message in reverse order (oldest first)
+                                response.data.forEach(msg => {
+                                    appendMessageToUI(msg, msg.user_id ===
+                                        '{{ Auth::id() }}');
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Failed to fetch messages:', xhr);
+                        }
+                    });
+                }
+
+                // Start polling
+                setInterval(pollForNewMessages, 6000);
+
+                // 2. WebSocket Listener (as fallback)
                 if (typeof Echo !== 'undefined') {
                     Echo.channel('community.chat.{{ $activeChannel->id }}')
                         .listen('MessageSent', (e) => {
-                            // ONLY append if the message is from someone else
-                            if (e.message.user_id !== '{{ Auth::id() }}') {
-                                appendMessageToUI(e.message, false);
-                            }
+                            console.log('Message received via Echo:', e.message);
+                            // Append any message (helps with real-time on production with WebSockets)
+                            appendMessageToUI(e.message, e.message.user_id === '{{ Auth::id() }}');
                         });
+                } else {
+                    console.log('Echo not available, relying on polling');
                 }
 
                 // 2. Handle Form Submission
@@ -261,10 +300,9 @@
                         success: function(response) {
                             quill.setContents([]);
                             quill.focus();
-                            $submitBtn.prop('disabled', false);
+                            $submitBtn.prop('disabled', false).removeClass('opacity-50');
 
-                            // MANUAL APPEND: If Echo isn't working or to make it instant
-                            // The WebSocket listener is set to ignore 'isMe', so we handle it here
+                            // Manually append because Echo will ignore this message for the sender
                             appendMessageToUI(response.message, true);
                         },
                         error: function(xhr) {

@@ -37,7 +37,7 @@ Route::prefix('community')->middleware('auth')->group(function () {
 
     Route::get('/api/messages/{channel}', [CommunityMessageController::class, 'fetchMessages'])
         ->where('channel', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
-    Route::get('/messages/{channelId}', [CommunityMessageController::class, 'index']);
+    Route::get('/messages/{channelId}', [CommunityMessageController::class, 'index'])->name('community.message.index');
     Route::post('/messages', [CommunityMessageController::class, 'store'])->name('community.message.store');
     Route::delete('/messages/{id}', [CommunityMessageController::class, 'destroy']);
 });
