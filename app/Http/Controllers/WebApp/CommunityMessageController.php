@@ -39,6 +39,7 @@ class CommunityMessageController extends Controller
             $messages = CommunityMessage::where('channel_id', $activeChannel->id)
                 ->with('user:id,name,profile_image') // Optimized to only select needed columns
                 ->whereNull('parent_id')
+                ->whereNull('deleted_at') // Explicitly exclude soft-deleted messages
                 ->latest()
                 ->limit(50)
                 ->get()
@@ -55,6 +56,7 @@ class CommunityMessageController extends Controller
         $messages = CommunityMessage::where('channel_id', $channelId)
             ->with(['user:id,name,profile_image', 'replies.user'])
             ->whereNull('parent_id') // Get main thread messages
+            ->whereNull('deleted_at') // Explicitly exclude soft-deleted messages
             ->latest()
             ->paginate(50);
 
@@ -138,6 +140,15 @@ class CommunityMessageController extends Controller
 
         $message->delete();
 
-        return response()->json(['status' => 'deleted']);
+        // Broadcast deletion to all users
+        broadcast(function() use ($message) {
+            return new \Illuminate
+            \Broadcasting\PrivateChannel('community.chat.' . $message->channel_id);
+        })->toOthers();
+
+        return response()->json([
+            'status' => 'deleted',
+            'message_id' => $id
+        ]);
     }
 }

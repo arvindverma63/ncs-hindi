@@ -459,12 +459,31 @@
                         type: 'GET',
                         dataType: 'json',
                         success: function(response) {
-                            if (response && response.data && response.data.length > 0) {
-                                response.data.forEach(msg => {
-                                    if (!loadedMessageIds.has(msg.id)) {
-                                        appendMessageToUI(msg, msg.user_id === '{{ Auth::id() }}');
+                            if (response && response.data) {
+                                // Get IDs of messages from the API
+                                const apiMessageIds = new Set(response.data.map(msg => msg.id));
+
+                                // Check for deleted messages (present in DOM but not in API)
+                                const displayedMessages = container.find('[id^="msg-"]');
+                                displayedMessages.each(function() {
+                                    const msgId = $(this).attr('id')?.replace('msg-', '');
+                                    if (msgId && !apiMessageIds.has(msgId) && loadedMessageIds.has(msgId)) {
+                                        // Message was deleted
+                                        $(this).fadeOut(300, function() {
+                                            $(this).remove();
+                                            loadedMessageIds.delete(msgId);
+                                        });
                                     }
                                 });
+
+                                // Add new messages
+                                if (response.data.length > 0) {
+                                    response.data.forEach(msg => {
+                                        if (!loadedMessageIds.has(msg.id)) {
+                                            appendMessageToUI(msg, msg.user_id === '{{ Auth::id() }}');
+                                        }
+                                    });
+                                }
                             }
                         },
                         error: function(xhr) {
