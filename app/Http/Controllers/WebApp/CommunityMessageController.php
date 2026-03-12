@@ -140,12 +140,6 @@ class CommunityMessageController extends Controller
 
         $message->delete();
 
-        // Broadcast deletion to all users
-        broadcast(function() use ($message) {
-            return new \Illuminate
-            \Broadcasting\PrivateChannel('community.chat.' . $message->channel_id);
-        })->toOthers();
-
         return response()->json([
             'status' => 'deleted',
             'message_id' => $id
