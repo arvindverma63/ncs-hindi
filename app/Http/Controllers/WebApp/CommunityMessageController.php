@@ -9,6 +9,7 @@ use App\Models\CommunityChannel;
 use App\Events\MessageSent;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CommunityMessageController extends Controller
 {
@@ -86,11 +87,23 @@ class CommunityMessageController extends Controller
         // Handle File Uploads (Stems, Images, Audio)
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $path = $file->store('community/attachments', 'public');
+
+            // Store file with proper naming to avoid collisions
+            $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('community/attachments', $filename, 'public');
+
             $type = $this->determineMessageType($file);
 
+            // Generate proper file URL - with symlink check
+            if (file_exists(public_path('storage'))) {
+                $fileUrl = Storage::disk('public')->url($path);
+            } else {
+                // Fallback if symlink doesn't exist - direct path
+                $fileUrl = url('storage/' . $path);
+            }
+
             $metadata = [
-                'file_path' => Storage::url($path),
+                'file_path' => $fileUrl,
                 'file_name' => $file->getClientOriginalName(),
                 'file_size' => $file->getSize(),
                 'mime_type' => $file->getMimeType(),
