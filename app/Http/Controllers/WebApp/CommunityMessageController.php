@@ -68,10 +68,15 @@ class CommunityMessageController extends Controller
     {
         $request->validate([
             'channel_id' => 'required|string|size:36',
-            'message'    => 'required|string',
+            'message'    => 'nullable|string',
             'parent_id'  => 'nullable|string|size:36',
             'file'       => 'nullable|file|max:10240', // 10MB limit
         ]);
+
+        // At least message or file must be provided
+        if (!$request->filled('message') && !$request->hasFile('file')) {
+            return response()->json(['error' => 'Message or file is required'], 422);
+        }
 
         $type = 'text';
         $metadata = [];
@@ -94,7 +99,7 @@ class CommunityMessageController extends Controller
             'user_id'    => Auth::id(),
             'channel_id' => $request->channel_id,
             'parent_id'  => $request->parent_id,
-            'message'    => $request->message,
+            'message'    => $request->message ?? '',
             'type'       => $type,
             'metadata'   => $metadata,
         ]);
