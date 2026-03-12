@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebApp\AuthController;
+use App\Http\Controllers\WebApp\CommunityMessageController;
 use App\Http\Controllers\WebApp\ForumReplyController;
 use App\Http\Controllers\WebApp\LikeController;
 use App\Http\Controllers\WebApp\PageController;
@@ -28,6 +29,17 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+});
+
+Route::prefix('community')->middleware('auth')->group(function () {
+    Route::get('/chat/{channel?}', [CommunityMessageController::class, 'showChat'])
+        ->name('webapp.community.chat');
+
+    Route::get('/api/messages/{channel}', [CommunityMessageController::class, 'fetchMessages'])
+        ->where('channel', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+    Route::get('/messages/{channelId}', [CommunityMessageController::class, 'index']);
+    Route::post('/messages', [CommunityMessageController::class, 'store'])->name('community.message.store');
+    Route::delete('/messages/{id}', [CommunityMessageController::class, 'destroy']);
 });
 
 Route::get('/vault/download/{id}', [StemController::class, 'download'])->name('webapp.stems.download');

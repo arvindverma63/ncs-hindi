@@ -7,12 +7,12 @@
                     <div class="card-body p-5">
 
                         <div class="text-center mb-4">
-                            
+
                             <h3 class="fw-bold text-dark">Welcome Back</h3>
                             <p class="text-muted">Please sign in to continue to Business Coach Admin.</p>
                         </div>
 
-                        <form method="POST" action="{{ route('login') }}">
+                        <form method="POST" action="{{ route('super.login') }}">
                             @csrf
 
                             <div class="mb-3">

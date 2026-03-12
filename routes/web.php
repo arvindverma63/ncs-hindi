@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\StemController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\Admin\ChannelController;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
 
@@ -49,14 +50,12 @@ Route::middleware('auth', 'role:0,1')->group(function () {
 
     // 1. Main Dashboard (Redirects here after login)
 
+    Route::resource('community-channels', ChannelController::class);
 
     Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('admin')->as('admin.')->group(function () {
-
-        Route::get('/connection-logs', [MessageRequestController::class, 'index'])->name('requests.index');
-        Route::delete('/connection-logs/{id}', [MessageRequestController::class, 'destroy'])->name('requests.destroy');
         Route::get('/message-user/{id}', [InteractionController::class, 'createDirectMessage'])->name('messages.create');
         Route::post('/message-user', [InteractionController::class, 'storeDirectMessage'])->name('messages.store');
 
@@ -113,19 +112,8 @@ Route::middleware('auth', 'role:0,1')->group(function () {
 
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);
-        Route::resource('seekers', SeekerController::class);
-        Route::get('seekers/export/excel', [SeekerController::class, 'exportExcel'])->name('seekers.export.excel');
-        Route::get('seekers/export/pdf', [SeekerController::class, 'exportPdf'])->name('seekers.export.pdf');
-        Route::post('seekers/import', [SeekerController::class, 'importExcel'])->name('seekers.import');
-        Route::resource('coaches', CoachController::class);
-        Route::post('coaches/import', [CoachController::class, 'importExcel'])->name('coaches.import');
-        // Coach Exports
-        Route::get('coaches/export/excel', [CoachController::class, 'exportExcel'])->name('coaches.export.excel');
-        Route::get('coaches/export/pdf', [CoachController::class, 'exportPdf'])->name('coaches.export.pdf');
-        Route::resource('categories', CategoryController::class);
+          Route::resource('categories', CategoryController::class);
 
-        Route::patch('/coaches/{id}/status', [CoachController::class, 'updateStatus'])
-            ->name('coaches.update-status');
 
         // Page Routes
         Route::controller(PageController::class)->group(function () {

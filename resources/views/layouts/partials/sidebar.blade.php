@@ -36,17 +36,6 @@
                     </a>
                 </li>
 
-                {{-- NEW: Messaging Section for Admin --}}
-                <li class="menu-title mt-2">Communications</li>
-                <li>
-                    <a href="{{ route('admin.requests.index') }}"
-                        class="tp-link {{ request()->routeIs('admin.requests.*') ? 'active' : '' }}">
-                        <span class="nav-icon">
-                            <iconify-icon icon="tabler:arrows-exchange"></iconify-icon>
-                        </span>
-                        <span class="sidebar-text"> Connection Logs </span>
-                    </a>
-                </li>
 
                 @can('users.view')
                     <li class="menu-title mt-2">User Management</li>
@@ -80,6 +69,16 @@
                         auth()->user()->can('blogs.view'))
                     <li class="menu-title mt-2">Platform Management</li>
                 @endif
+
+                <li>
+                    <a href="{{ route('community-channels.index') }}"
+                        class="tp-link {{ request()->routeIs('community-channels.*') ? 'active' : '' }}">
+                        <span class="nav-icon">
+                            <iconify-icon icon="tabler:messages"></iconify-icon>
+                        </span>
+                        <span class="sidebar-text"> Studio Rooms </span>
+                    </a>
+                </li>
 
                 {{-- NEW: Stem Management Section --}}
                 @can('stems.view')

@@ -26,6 +26,14 @@
                     <span class="text-sm">Vault Feed</span>
                 </a>
 
+                {{-- Added: Community Chat Route --}}
+                <a href="{{ route('webapp.community.chat') }}"
+                    class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all group {{ request()->routeIs('webapp.community.chat*') ? 'bg-gradient-to-r from-amber-600/10 to-transparent text-amber-500 font-bold border-l-2 border-amber-600' : 'text-zinc-500 hover:text-white hover:bg-zinc-900/50' }}">
+                    <i
+                        class="fa-solid fa-comments text-sm {{ request()->routeIs('webapp.community.chat*') ? 'text-amber-500' : 'group-hover:text-amber-500' }}"></i>
+                    <span class="text-sm">Community Chat</span>
+                </a>
+
                 <a href="{{ route('webapp.trending') }}"
                     class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all group {{ request()->routeIs('webapp.trending') ? 'bg-gradient-to-r from-amber-600/10 to-transparent text-amber-500 font-bold border-l-2 border-amber-600' : 'text-zinc-500 hover:text-white hover:bg-zinc-900/50' }}">
                     <i
@@ -69,7 +77,6 @@
                 <div class="flex items-center gap-3 mb-4">
                     <div class="relative">
                         @php
-                            // Check if image exists and is not a placeholder string
                             $userAvatar =
                                 Auth::user()->profile_image && strlen(Auth::user()->profile_image) > 20
                                     ? Auth::user()->profile_image
