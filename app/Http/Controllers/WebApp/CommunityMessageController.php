@@ -94,14 +94,8 @@ class CommunityMessageController extends Controller
 
             $type = $this->determineMessageType($file);
 
-            // Generate proper file URL with app/public path
-            if (file_exists(public_path('storage'))) {
-                // Use full path including app/public structure
-                $fileUrl = url('storage/app/public/' . $path);
-            } else {
-                // Fallback if symlink doesn't exist - direct path
-                $fileUrl = url('storage/app/public/' . $path);
-            }
+            // Generate proper file URL using Laravel Storage facade
+            $fileUrl = Storage::disk('public')->url($path);
 
             $metadata = [
                 'file_path' => $fileUrl,
