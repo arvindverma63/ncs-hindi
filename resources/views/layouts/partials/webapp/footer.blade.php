@@ -221,7 +221,7 @@
                 <p class="text-zinc-400 text-xs max-w-md mx-auto leading-relaxed mb-6">
                     Play mini games, earn exclusive NCS Credits, and view your points history. Join the rhythm challenge today!
                 </p>
-                <a href="{{ route('game') }}" target="_blank" id="adLinkButton" class="inline-flex items-center gap-2 btn-vault px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                <a href="{{ route('webapp.game') }}" target="_blank" id="adLinkButton" class="inline-flex items-center gap-2 btn-vault px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">
                     Play Games <i class="fa-solid fa-chevron-right"></i>
                 </a>
             </div>
