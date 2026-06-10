@@ -297,6 +297,7 @@ HTML;
 
             .chat-layout-wrapper footer {
                 padding: 0.75rem !important;
+                padding-bottom: 24px !important; /* Safety margin for mobile browser navigation bars */
             }
         }
 
