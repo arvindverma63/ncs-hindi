@@ -168,6 +168,7 @@ Route::prefix('vault')->name('webapp.')->group(function () {
     Route::get('/forum/{slug}', [PageController::class, 'show'])->name('forum.show');
     Route::get('/game', [PageController::class, 'gamesList'])->name('game');
     Route::get('/game/rhythm-tapper', [PageController::class, 'game'])->name('game.rhythm-tapper');
+    Route::get('/game/2048', [PageController::class, 'game2048'])->name('game.2048');
     Route::post('/game/award-credits', [PageController::class, 'awardCredits'])->name('game.award-credits');
 });
 

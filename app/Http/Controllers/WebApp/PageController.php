@@ -261,6 +261,16 @@ class PageController extends Controller
         return view('webapp.games_list', compact('credits', 'history', 'seo'));
     }
 
+    public function game2048()
+    {
+        $seo = [
+            'title' => 'NCS 2048 | Play Sliding Puzzle Music Game',
+            'description' => 'Play the open-source puzzle game 2048 styled with premium NCS visualizers. Slide tiles to reach 2048 and earn credits!',
+            'keywords' => '2048 game, sliding puzzle, ncs hindi puzzle, play 2048 online'
+        ];
+        return view('webapp.game_2048', compact('seo'));
+    }
+
     public function awardCredits(Request $request)
     {
         if (!auth()->check()) {
@@ -269,11 +279,16 @@ class PageController extends Controller
 
         $request->validate([
             'score' => 'required|integer',
+            'game' => 'nullable|string',
         ]);
 
         $score = $request->score;
-        if ($score < 1000) {
-            return response()->json(['success' => false, 'message' => 'Score must be at least 1000 points to earn credits.']);
+        $gameName = $request->input('game', 'NCS Rhythm Tapper');
+        
+        $minScore = ($gameName === '2048') ? 2048 : 1000;
+
+        if ($score < $minScore) {
+            return response()->json(['success' => false, 'message' => "Score must be at least {$minScore} points to earn credits."]);
         }
 
         $amount = 50;
@@ -283,7 +298,7 @@ class PageController extends Controller
         NcsCreditHistory::create([
             'user_id' => $user->id,
             'amount' => $amount,
-            'description' => "Scored {$score} points in NCS Rhythm Tapper",
+            'description' => "Scored {$score} points in {$gameName}",
         ]);
 
         return response()->json([
