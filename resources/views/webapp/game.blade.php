@@ -188,6 +188,7 @@
             let score = 0;
             let combo = 0;
             let maxCombo = localStorage.getItem('ncs_rhythm_max_combo') || 0;
+            let timeLeft = 45;
             
             const laneColors = ['#ef4444', '#3b82f6', '#eab308', '#22c55e'];
             const laneKeys = ['D', 'F', 'J', 'K'];
@@ -298,6 +299,13 @@
 
             function update(dt) {
                 if (!isPlaying) return;
+                
+                timeLeft -= dt;
+                if (timeLeft <= 0) {
+                    timeLeft = 0;
+                    endGame();
+                    return;
+                }
                 
                 noteSpeed = canvas.height * 0.7; 
 
@@ -489,6 +497,15 @@
                 ctx.fillStyle = '#eab308';
                 ctx.fillText(score, 30, hudY + 40);
                 
+                // Center HUD (Time Remaining)
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '900 20px "Inter", sans-serif';
+                ctx.fillText(`TIME REMAINING`, canvas.width / 2, hudY);
+                ctx.fillStyle = timeLeft < 10 ? '#ef4444' : '#38bdf8';
+                ctx.font = '900 32px "Inter", sans-serif';
+                ctx.fillText(`${Math.ceil(timeLeft)}s`, canvas.width / 2, hudY + 40);
+                
                 // Right HUD
                 ctx.textAlign = 'right';
                 ctx.fillStyle = '#ffffff';
@@ -511,6 +528,33 @@
                 }
             }
 
+            function endGame() {
+                isPlaying = false;
+                cancelAnimationFrame(animationId);
+                
+                overlay.style.opacity = '1';
+                overlay.style.pointerEvents = 'auto';
+                overlay.classList.remove('hidden');
+                
+                document.getElementById('game-status').innerHTML = `Game Over!<br>Score: <span class="text-amber-500">${score}</span>`;
+                
+                @auth
+                if (score >= 1000) {
+                    $.post('{{ route('webapp.game.award-credits') }}', { score: score, _token: '{{ csrf_token() }}' }, function(res) {
+                        if (res.success) {
+                            if (window.toastr) {
+                                toastr.success(res.message);
+                            } else {
+                                alert(res.message);
+                            }
+                        }
+                    }).fail(function(xhr) {
+                        console.error('Failed to award credits:', xhr);
+                    });
+                }
+                @endauth
+            }
+
             function startGame() {
                 if (!audioCtx) audioCtx = new AudioContext();
                 audioCtx.resume();
@@ -521,6 +565,7 @@
                 isPlaying = true;
                 score = 0;
                 combo = 0;
+                timeLeft = 45;
                 notes = [];
                 particles = [];
                 floatingTexts = [];

@@ -27,6 +27,7 @@ class User extends Authenticatable
         'user_type',
         'profile_image',
         'status',
+        'ncs_credits',
     ];
 
     protected $hidden = [
@@ -113,6 +114,11 @@ class User extends Authenticatable
     public function replies()
     {
         return $this->hasMany(ForumReply::class, 'user_id');
+    }
+
+    public function creditHistories()
+    {
+        return $this->hasMany(NcsCreditHistory::class)->orderBy('created_at', 'desc');
     }
 }
 

@@ -8,6 +8,7 @@ use App\Models\ForumThread;
 use App\Models\Music;
 use App\Models\MusicInteraction;
 use App\Models\User;
+use App\Models\NcsCreditHistory;
 use App\Repositories\Contracts\ForumRepositoryInterface;
 use App\Repositories\Contracts\ProfileRepositoryInterface;
 use App\Repositories\Contracts\MusicRepositoryInterface;
@@ -243,6 +244,53 @@ class PageController extends Controller
             'keywords' => 'music game online, rhythm tapper, piano tiles alternative, ncs hindi games, play music games free, royalty free beats game, neon rhythm'
         ];
         return view('webapp.game', compact('seo'));
+    }
+
+    public function gamesList()
+    {
+        $user = auth()->user();
+        $credits = $user ? $user->ncs_credits : 0;
+        $history = $user ? $user->creditHistories()->take(20)->get() : collect();
+
+        $seo = [
+            'title' => 'NCS Arcade Center | Play Music Games & Earn Credits',
+            'description' => 'Browse free online games, earn exclusive NCS Credits, and track your gaming points history.',
+            'keywords' => 'music games, ncs credits, rhythm game, play games free, points history'
+        ];
+
+        return view('webapp.games_list', compact('credits', 'history', 'seo'));
+    }
+
+    public function awardCredits(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Authentication required'], 401);
+        }
+
+        $request->validate([
+            'score' => 'required|integer',
+        ]);
+
+        $score = $request->score;
+        if ($score < 1000) {
+            return response()->json(['success' => false, 'message' => 'Score must be at least 1000 points to earn credits.']);
+        }
+
+        $amount = 50;
+        $user = auth()->user();
+        $user->increment('ncs_credits', $amount);
+
+        NcsCreditHistory::create([
+            'user_id' => $user->id,
+            'amount' => $amount,
+            'description' => "Scored {$score} points in NCS Rhythm Tapper",
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Awarded {$amount} NCS Credits!",
+            'credits' => $user->ncs_credits
+        ]);
     }
 
     private function getUserStemActivity(string $userId, string $type, int $limit = 6): Collection

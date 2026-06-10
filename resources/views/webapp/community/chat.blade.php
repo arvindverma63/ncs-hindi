@@ -345,6 +345,27 @@ HTML;
                                 <div
                                     class="p-3 md:p-4 rounded-2xl text-xs md:text-sm leading-relaxed {{ Auth::id() == $message->user_id ? 'bg-amber-600 text-black font-semibold rounded-tr-none' : 'bg-zinc-900 text-zinc-300 rounded-tl-none border border-zinc-800' }}">
                                     {!! $renderCommunityMessage($message->message) !!}
+
+                                    @if ($message->metadata && isset($message->metadata['file_path']))
+                                        @php
+                                            $fileType = $message->metadata['mime_type'] ?? '';
+                                            $fileName = $message->metadata['file_name'] ?? '';
+                                            $fileUrl = $message->metadata['file_path'];
+                                        @endphp
+                                        <div class="mt-2">
+                                            @if (str_starts_with($fileType, 'image/'))
+                                                <img src="{{ $fileUrl }}" class="media-preview" alt="Attached image" />
+                                            @elseif (str_starts_with($fileType, 'audio/'))
+                                                <audio class="media-preview w-full" controls><source src="{{ $fileUrl }}" type="{{ $fileType }}"></audio>
+                                            @elseif (str_starts_with($fileType, 'video/'))
+                                                <video class="media-preview w-full" controls><source src="{{ $fileUrl }}" type="{{ $fileType }}"></video>
+                                            @else
+                                                <a href="{{ $fileUrl }}" class="inline-flex items-center gap-2 p-2 bg-opacity-10 rounded border border-current text-xs">
+                                                    <i class="fa-solid fa-file"></i> {{ $fileName }}
+                                                </a>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
 

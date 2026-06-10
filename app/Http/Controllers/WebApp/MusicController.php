@@ -161,6 +161,7 @@ class MusicController extends Controller
                 'user_id' => $userId,
                 'stem_id' => $id,
                 'type' => 'like',
+                'ip_address' => request()->ip(),
                 'created_at' => now(),
             ]);
 

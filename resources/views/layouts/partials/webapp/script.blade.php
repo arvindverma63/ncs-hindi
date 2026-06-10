@@ -341,6 +341,60 @@
         return token;
     }
 
+    let adTimer = null;
+    function triggerFullScreenAd(downloadUrl) {
+        const adModal = document.getElementById('fullScreenAdModal');
+        const skipBtn = document.getElementById('skipAdBtn');
+        const countdownEl = document.getElementById('adCountdown');
+        const statusText = document.getElementById('adStatusText');
+        
+        if (!adModal) {
+            window.open(downloadUrl, '_blank');
+            return;
+        }
+
+        adModal.classList.remove('hidden');
+        adModal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+
+        let count = 5;
+        skipBtn.disabled = true;
+        skipBtn.innerHTML = `Wait <span id="adCountdown">${count}</span>s`;
+        skipBtn.classList.remove('bg-amber-500', 'text-black', 'hover:bg-amber-400');
+        skipBtn.classList.add('bg-zinc-900', 'text-zinc-500');
+        statusText.textContent = "Preparing your download...";
+
+        clearInterval(adTimer);
+        adTimer = setInterval(() => {
+            count--;
+            if (count > 0) {
+                skipBtn.innerHTML = `Wait <span>${count}</span>s`;
+            } else {
+                clearInterval(adTimer);
+                skipBtn.disabled = false;
+                skipBtn.innerHTML = `Skip Ad & Download <i class="fa-solid fa-circle-down ml-1"></i>`;
+                skipBtn.classList.remove('bg-zinc-900', 'text-zinc-500');
+                skipBtn.classList.add('bg-amber-500', 'text-black', 'hover:bg-amber-400');
+                statusText.textContent = "Ready to download!";
+                window.open(downloadUrl, '_blank');
+            }
+        }, 1000);
+
+        $(skipBtn).off('click').on('click', function() {
+            closeFullScreenAd();
+        });
+    }
+
+    function closeFullScreenAd() {
+        const adModal = document.getElementById('fullScreenAdModal');
+        if (adModal) {
+            adModal.classList.add('hidden');
+            adModal.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
+        }
+        clearInterval(adTimer);
+    }
+
     $(document).on('click', '[data-notification-gate]', function(e) {
         e.preventDefault();
         const $btn = $(this);
@@ -351,7 +405,7 @@
         if (localStorage.getItem(notificationGateKey) || localStorage.getItem(notificationPromptKey)) {
             if (actionUrl) {
                 if (isDownload) {
-                    window.open(actionUrl, '_blank');
+                    triggerFullScreenAd(actionUrl);
                 } else {
                     window.location.href = actionUrl;
                 }
@@ -426,13 +480,12 @@
             return;
         }
 
-        // Set prompt as seen/dismissed for this session to avoid showing on every page change
         localStorage.setItem(notificationPromptKey, '1');
 
         closeNotificationGate();
         
         if (actionType === 'download') {
-            window.open(actionUrl, '_blank');
+            triggerFullScreenAd(actionUrl);
         } else {
             window.location.href = actionUrl;
         }

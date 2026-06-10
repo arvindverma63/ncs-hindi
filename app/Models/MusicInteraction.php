@@ -18,6 +18,7 @@ class MusicInteraction extends Model
         'user_id',
         'stem_id',
         'type', // 'like', 'download', or 'view'
+        'ip_address',
         'created_at',
     ];
 

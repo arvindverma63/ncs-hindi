@@ -494,9 +494,14 @@
                 {{-- Right Column: Live Audit Activity Feed --}}
                 <div class="col-lg-4">
                     <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100">
-                        <div class="mb-4">
-                            <h4 class="fw-bold text-dark mb-0">Platform Interaction Feed</h4>
-                            <p class="text-muted fs-12 mb-0">Chronological telemetry of guest and authenticated user operations.</p>
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <div>
+                                <h4 class="fw-bold text-dark mb-0">Platform Interaction Feed</h4>
+                                <p class="text-muted fs-12 mb-0">Chronological telemetry of guest and authenticated user operations.</p>
+                            </div>
+                            <a href="{{ route('admin.interactions.history') }}" class="btn btn-sm btn-outline-secondary rounded-3 px-3 py-1 fw-bold fs-11 text-nowrap">
+                                View 1 Day History
+                            </a>
                         </div>
 
                         <div class="activity-timeline">

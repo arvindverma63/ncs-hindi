@@ -57,6 +57,16 @@ class DashboardController extends Controller
             'recentInteractions'
         ));
     }
+
+    public function history()
+    {
+        $interactions = MusicInteraction::with(['music', 'user'])
+            ->where('created_at', '>=', now()->subDay())
+            ->latest('created_at')
+            ->paginate(50);
+
+        return view('admin.interactions.history', compact('interactions'));
+    }
 }
 
 

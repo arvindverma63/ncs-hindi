@@ -58,6 +58,7 @@ Route::middleware('auth', 'role:0,1')->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('admin')->as('admin.')->group(function () {
+        Route::get('/interactions-history', [DashboardController::class, 'history'])->name('interactions.history');
         Route::get('/message-user/{id}', [InteractionController::class, 'createDirectMessage'])->name('messages.create');
         Route::post('/message-user', [InteractionController::class, 'storeDirectMessage'])->name('messages.store');
 

@@ -240,11 +240,28 @@ class MusicRepository implements MusicRepositoryInterface
     public function logInteraction($musicId, $userId, $type)
     {
         try {
+            $ipAddress = request()->ip();
+
+            $query = MusicInteraction::where('stem_id', $musicId)
+                ->where('type', $type);
+
+            if ($userId) {
+                $query->where('user_id', $userId);
+            } else {
+                $query->whereNull('user_id')
+                      ->where('ip_address', $ipAddress);
+            }
+
+            if ($query->exists()) {
+                return null;
+            }
+
             $interaction = MusicInteraction::create([
                 'id'      => (string) Str::uuid(),
                 'user_id' => $userId,
                 'stem_id' => $musicId,
                 'type'    => $type,
+                'ip_address' => $ipAddress,
                 'created_at' => now(),
             ]);
 
