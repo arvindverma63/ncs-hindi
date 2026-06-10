@@ -1,4 +1,4 @@
-<x-webapp-layout>
+<x-webapp-layout class="!p-0 !pb-0 !space-y-0 !overflow-hidden">
     {{-- 1. Quill Assets --}}
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
@@ -223,8 +223,8 @@ HTML;
         }
 
         @media (max-width: 768px) {
-            .flex.h-\[calc\(100vh-64px\)\] {
-                flex-direction: column;
+            .chat-layout-wrapper {
+                flex-direction: column !important;
             }
 
             aside {
@@ -277,8 +277,10 @@ HTML;
             }
 
             main {
-                width: 100%;
-                height: calc(100vh - 64px - 52px);
+                width: 100% !important;
+                height: auto !important;
+                flex: 1 !important;
+                min-height: 0 !important;
             }
 
             .max-w-\[70%\] {
@@ -318,7 +320,7 @@ HTML;
         }
     </style>
 
-    <div class="flex h-[calc(100vh-64px)] overflow-hidden bg-[#050505]">
+    <div class="chat-layout-wrapper flex h-[calc(100vh-64px)] overflow-hidden bg-[#050505]">
 
         {{-- 1. Channels Sidebar --}}
         <aside class="w-64 border-r border-zinc-900 flex flex-col bg-[#08080a] overflow-y-auto">
@@ -330,7 +332,7 @@ HTML;
 
             <nav class="flex-1 px-3 space-y-1 overflow-y-auto">
                 @forelse ($channels as $channel)
-                    <a href="?channel={{ $channel->id }}"
+                    <a href="{{ route('webapp.community.chat', $channel->id) }}"
                         class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ optional($activeChannel)->id == $channel->id ? 'bg-amber-600/10 text-amber-500 border border-amber-600/20' : 'text-zinc-500 hover:bg-zinc-900 hover:text-white' }}">
                         <i class="fa-solid {{ $channel->icon }} text-sm"></i>
                         <span class="text-xs font-bold uppercase tracking-widest">{{ $channel->name }}</span>

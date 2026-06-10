@@ -25,6 +25,7 @@ class CommunityMessageController extends Controller
         $channels = CommunityChannel::orderBy('sort_order', 'asc')->get();
 
         // 2. Identify the active channel with a fallback
+        $channelId = $channelId ?: request()->query('channel');
         $activeChannel = $channelId
             ? CommunityChannel::find($channelId)
             : $channels->first();

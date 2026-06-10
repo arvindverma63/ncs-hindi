@@ -10,7 +10,7 @@
     <div class="flex-1 flex flex-col overflow-hidden bg-black">
        @include('layouts.partials.webapp.header')
 
-        <main class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-10 no-scrollbar space-y-6 sm:space-y-12 pb-36">
+        <main {{ $attributes->merge(['class' => 'flex-1 overflow-y-auto p-3 sm:p-6 lg:p-10 no-scrollbar space-y-6 sm:space-y-12 pb-36']) }}>
             {{ $slot }}
         </main>
     </div>
