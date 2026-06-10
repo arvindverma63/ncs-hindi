@@ -271,6 +271,16 @@ class PageController extends Controller
         return view('webapp.game_2048', compact('seo'));
     }
 
+    public function gameNeonSerpent()
+    {
+        $seo = [
+            'title' => 'NCS Neon Serpent | Retro Arcade Music Snake Game',
+            'description' => 'Play the glowing retro 2D snake game Neon Serpent with neon lights and audio feedback. Score 150 points to earn rewards!',
+            'keywords' => 'snake game, retro game, neon snake, html5 canvas snake, play snake online'
+        ];
+        return view('webapp.game_neon_serpent', compact('seo'));
+    }
+
     public function awardCredits(Request $request)
     {
         if (!auth()->check()) {
@@ -285,7 +295,12 @@ class PageController extends Controller
         $score = $request->score;
         $gameName = $request->input('game', 'NCS Rhythm Tapper');
         
-        $minScore = ($gameName === '2048') ? 2048 : 1000;
+        $minScore = 1000;
+        if ($gameName === '2048') {
+            $minScore = 2048;
+        } elseif ($gameName === 'Neon Serpent') {
+            $minScore = 150;
+        }
 
         if ($score < $minScore) {
             return response()->json(['success' => false, 'message' => "Score must be at least {$minScore} points to earn credits."]);

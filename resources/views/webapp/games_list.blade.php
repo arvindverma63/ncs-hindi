@@ -113,7 +113,42 @@
                     </div>
                 </div>
 
-                {{-- Game 3: Beat Maker Challenge (Coming Soon) --}}
+                {{-- Game 3: NCS Neon Serpent --}}
+                <div class="group bg-zinc-900/30 border border-zinc-800/60 rounded-[30px] overflow-hidden hover:border-amber-500/40 transition-all duration-500 flex flex-col h-full shadow-lg">
+                    <div class="relative aspect-video overflow-hidden bg-zinc-850">
+                        <img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                            alt="NCS Neon Serpent">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
+                        <div class="absolute top-4 left-4">
+                            <span class="px-2.5 py-1 bg-green-500/90 text-[8px] font-black text-black rounded-lg uppercase tracking-wider">
+                                Playable
+                            </span>
+                        </div>
+                        <div class="absolute bottom-4 right-4">
+                            <span class="px-3 py-1 bg-black/60 border border-white/10 rounded-lg text-[9px] font-black text-amber-500 uppercase tracking-widest">
+                                +50 Credits per win
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="font-brand text-lg font-black uppercase text-white tracking-tight mb-2">
+                                NCS Neon Serpent
+                            </h4>
+                            <p class="text-xs text-zinc-500 leading-relaxed mb-6 font-medium">
+                                A highly visual, retro arcade snake game styled with ambient neon grid glows and retro audio sounds. Score 150 points to win credits!
+                            </p>
+                        </div>
+                        <a href="{{ route('webapp.game.neon-serpent') }}"
+                            class="block w-full py-3 bg-white hover:bg-amber-500 text-black hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest text-center transition-all">
+                            Start Playing
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Game 4: Beat Maker Challenge (Coming Soon) --}}
                 <div class="group bg-zinc-900/10 border border-zinc-900 rounded-[30px] overflow-hidden opacity-60 flex flex-col h-full">
                     <div class="relative aspect-video overflow-hidden bg-zinc-900">
                         <div class="w-full h-full flex items-center justify-center bg-zinc-950">
