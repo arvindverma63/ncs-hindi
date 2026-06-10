@@ -86,6 +86,25 @@ class Music extends Model
         return $slug;
     }
 
+    public function getFeaturedImageAttribute($value)
+    {
+        if (!$value) {
+            return null;
+        }
+
+        $url = null;
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            $url = $value;
+        } elseif (file_exists(public_path($value))) {
+            $url = asset($value);
+        } else {
+            $url = asset($value);
+        }
+
+        $timestamp = $this->updated_at ? $this->updated_at->timestamp : time();
+        return str_contains($url, '?') ? $url . '&v=' . $timestamp : $url . '?v=' . $timestamp;
+    }
+
     // --- Relationships ---
 
     public function category()

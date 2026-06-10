@@ -52,22 +52,31 @@ class User extends Authenticatable
         return $this->morphMany(Media::class, 'model');
     }
 
-    // public function getProfileImageAttribute($value)
-    // {
-    //     // 1. Check if the direct database column has a value
-    //     if ($value && file_exists(public_path($value))) {
-    //         return asset($value);
-    //     }
+    public function getProfileImageAttribute($value)
+    {
+        $url = null;
+        if ($value) {
+            if (filter_var($value, FILTER_VALIDATE_URL)) {
+                $url = $value;
+            } elseif (file_exists(public_path($value))) {
+                $url = asset($value);
+            }
+        }
 
-    //     // 2. Fallback to your media relationship logic (if still needed)
-    //     $media = $this->media()->where('collection_name', 'profile')->latest()->first();
-    //     if ($media && file_exists(public_path($media->file_name))) {
-    //         return asset($media->file_name);
-    //     }
+        if (!$url) {
+            $media = $this->media()->where('collection_name', 'profile')->latest()->first();
+            if ($media && file_exists(public_path($media->file_name))) {
+                $url = asset($media->file_name);
+            }
+        }
 
-    //     // 3. Final fallback to default
-    //     return asset('assets/images/users/user-1.jpg');
-    // }
+        if (!$url) {
+            $url = asset('assets/images/users/user-1.jpg');
+        }
+
+        $timestamp = $this->updated_at ? $this->updated_at->timestamp : time();
+        return str_contains($url, '?') ? $url . '&v=' . $timestamp : $url . '?v=' . $timestamp;
+    }
 
     public function profile()
     {

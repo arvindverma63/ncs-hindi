@@ -11,15 +11,43 @@ class ImgBBService
     public function upload($image)
     {
         try {
-            // Fetch the API key from your settings table (id 66 in your screenshot)
+            // Fetch the API key from settings table
             $apiKey = Setting::where('key', 'imgbb_key')->first()?->value;
 
             if (!$apiKey) {
                 throw new \Exception("ImgBB API key not found in settings.");
             }
 
-            // Convert image to base64 as required by ImgBB API
-            $imageData = base64_encode(file_get_contents($image->getRealPath()));
+            $path = $image->getRealPath();
+            $info = @getimagesize($path);
+            $srcImg = null;
+
+            if ($info) {
+                $mime = $info['mime'];
+                if ($mime === 'image/jpeg' || $mime === 'image/jpg') {
+                    $srcImg = @imagecreatefromjpeg($path);
+                } elseif ($mime === 'image/png') {
+                    $srcImg = @imagecreatefrompng($path);
+                } elseif ($mime === 'image/gif') {
+                    $srcImg = @imagecreatefromgif($path);
+                } elseif ($mime === 'image/webp') {
+                    $srcImg = @imagecreatefromwebp($path);
+                }
+            }
+
+            if ($srcImg) {
+                ob_start();
+                if (@imagewebp($srcImg, null, 80)) {
+                    $webpData = ob_get_clean();
+                    $imageData = base64_encode($webpData);
+                } else {
+                    ob_end_clean();
+                    $imageData = base64_encode(file_get_contents($path));
+                }
+                @imagedestroy($srcImg);
+            } else {
+                $imageData = base64_encode(file_get_contents($path));
+            }
 
             $response = Http::asForm()->post("https://api.imgbb.com/1/upload", [
                 'key'   => $apiKey,
