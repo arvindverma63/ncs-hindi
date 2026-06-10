@@ -225,7 +225,6 @@ HTML;
         @media (max-width: 768px) {
             .chat-layout-wrapper {
                 flex-direction: column !important;
-                padding-bottom: 90px; /* Prevent overlap with global mobile footer */
             }
 
             .chat-layout-wrapper aside {
@@ -298,6 +297,7 @@ HTML;
 
             .chat-layout-wrapper footer {
                 padding: 0.75rem !important;
+                padding-bottom: 110px !important; /* Pushes the input box above the global bottom nav */
             }
         }
 
