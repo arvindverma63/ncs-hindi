@@ -351,6 +351,9 @@
             // Keyboard controls
             window.addEventListener('keydown', (e) => {
                 const key = e.key.toLowerCase();
+                if (['arrowleft', 'a', 'arrowright', 'd', 'arrowup', 'w', 'arrowdown', 's'].includes(key)) {
+                    e.preventDefault();
+                }
                 if ((key === 'arrowleft' || key === 'a') && dx === 0) {
                     dx = -gridSize; dy = 0;
                 } else if ((key === 'arrowright' || key === 'd') && dx === 0) {
@@ -361,6 +364,49 @@
                     dx = 0; dy = gridSize;
                 }
             });
+
+            // Touch swipe controls directly on canvas
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            canvas.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }, { passive: false });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', (e) => {
+                if (!touchStartX || !touchStartY) return;
+
+                let diffX = e.changedTouches[0].clientX - touchStartX;
+                let diffY = e.changedTouches[0].clientY - touchStartY;
+
+                const threshold = 30;
+
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    if (Math.abs(diffX) > threshold) {
+                        if (diffX > 0 && dx === 0) {
+                            dx = gridSize; dy = 0;
+                        } else if (diffX < 0 && dx === 0) {
+                            dx = -gridSize; dy = 0;
+                        }
+                    }
+                } else {
+                    if (Math.abs(diffY) > threshold) {
+                        if (diffY > 0 && dy === 0) {
+                            dx = 0; dy = gridSize;
+                        } else if (diffY < 0 && dy === 0) {
+                            dx = 0; dy = -gridSize;
+                        }
+                    }
+                }
+
+                touchStartX = 0;
+                touchStartY = 0;
+            }, { passive: false });
 
             // On-screen D-Pad controls
             document.getElementById('btn-up').addEventListener('click', () => { if (dy === 0) { dx = 0; dy = -gridSize; } });

@@ -307,7 +307,11 @@
             board.addEventListener('touchstart', (e) => {
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
-            }, { passive: true });
+            }, { passive: false });
+
+            board.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+            }, { passive: false });
 
             board.addEventListener('touchend', (e) => {
                 if (!touchStartX || !touchStartY) return;
@@ -315,7 +319,7 @@
                 let diffX = e.changedTouches[0].clientX - touchStartX;
                 let diffY = e.changedTouches[0].clientY - touchStartY;
                 
-                const threshold = 50;
+                const threshold = 30;
                 
                 if (Math.abs(diffX) > Math.abs(diffY)) {
                     if (Math.abs(diffX) > threshold) {
@@ -329,7 +333,7 @@
                 
                 touchStartX = 0;
                 touchStartY = 0;
-            }, { passive: true });
+            }, { passive: false });
 
             window.resetGame = function() {
                 grid = Array(16).fill(0);
