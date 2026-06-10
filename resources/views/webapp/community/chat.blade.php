@@ -225,9 +225,10 @@ HTML;
         @media (max-width: 768px) {
             .chat-layout-wrapper {
                 flex-direction: column !important;
+                padding-bottom: 90px; /* Prevent overlap with global mobile footer */
             }
 
-            aside {
+            .chat-layout-wrapper aside {
                 width: 100% !important;
                 max-height: 52px !important;
                 flex-direction: row !important;
@@ -241,17 +242,17 @@ HTML;
                 background-color: #08080a;
             }
 
-            aside .p-6 {
+            .chat-layout-wrapper aside .p-6 {
                 padding: 0 !important;
                 margin-right: 0.75rem;
                 flex-shrink: 0;
             }
 
-            aside h2 {
+            .chat-layout-wrapper aside h2 {
                 font-size: 13px !important;
             }
 
-            nav {
+            .chat-layout-wrapper nav {
                 display: flex !important;
                 flex-direction: row !important;
                 padding: 0 !important;
@@ -263,11 +264,11 @@ HTML;
                 -webkit-overflow-scrolling: touch;
             }
             
-            nav::-webkit-scrollbar {
+            .chat-layout-wrapper nav::-webkit-scrollbar {
                 display: none;
             }
 
-            nav a {
+            .chat-layout-wrapper nav a {
                 padding: 6px 12px !important;
                 margin: 0 !important;
                 flex-shrink: 0;
@@ -276,7 +277,7 @@ HTML;
                 align-items: center;
             }
 
-            main {
+            .chat-layout-wrapper main {
                 width: 100% !important;
                 height: auto !important;
                 flex: 1 !important;
@@ -295,7 +296,7 @@ HTML;
                 font-size: 0.75rem;
             }
 
-            footer {
+            .chat-layout-wrapper footer {
                 padding: 0.75rem !important;
             }
         }
