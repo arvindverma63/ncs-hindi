@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+use App\Services\ImgBBService;
+
 class CommunityMessageController extends Controller
 {
     /**
@@ -67,13 +69,13 @@ class CommunityMessageController extends Controller
     /**
      * Store and Broadcast a new message.
      */
-    public function store(Request $request)
+    public function store(Request $request, ImgBBService $imgBB)
     {
         $request->validate([
             'channel_id' => 'required|string|size:36',
             'message'    => 'nullable|string',
             'parent_id'  => 'nullable|string|size:36',
-            'file'       => 'nullable|file|max:10240', // 10MB limit
+            'file'       => 'nullable|image|max:10240', // 10MB limit
         ]);
 
         // At least message or file must be provided
@@ -84,19 +86,16 @@ class CommunityMessageController extends Controller
         $type = 'text';
         $metadata = [];
 
-        // Handle File Uploads (music, Images, Audio)
+        // Handle File Uploads (ImgBB service only)
         if ($request->hasFile('file')) {
             $file = $request->file('file');
 
-            // Store file with proper naming to avoid collisions
-            $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('community/attachments', $filename, 'public');
+            $fileUrl = $imgBB->upload($file);
+            if (!$fileUrl) {
+                return response()->json(['error' => 'Image upload to ImgBB failed.'], 400);
+            }
 
-            $type = $this->determineMessageType($file);
-
-            // Generate proper file URL using Laravel Storage facade
-            $fileUrl = Storage::disk('public')->url($path);
-
+            $type = 'image';
             $metadata = [
                 'file_path' => $fileUrl,
                 'file_name' => $file->getClientOriginalName(),

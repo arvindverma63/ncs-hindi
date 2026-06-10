@@ -228,21 +228,57 @@ HTML;
             }
 
             aside {
-                width: 100%;
-                max-height: 120px;
-                flex-direction: row;
+                width: 100% !important;
+                max-height: 52px !important;
+                flex-direction: row !important;
                 overflow-x: auto;
+                overflow-y: hidden !important;
                 border-right: none;
-                border-bottom: 1px solid #27272a;
+                border-bottom: 1px solid #18181b;
+                display: flex !important;
+                align-items: center;
+                padding: 0 0.75rem;
+                background-color: #08080a;
+            }
+
+            aside .p-6 {
+                padding: 0 !important;
+                margin-right: 0.75rem;
+                flex-shrink: 0;
+            }
+
+            aside h2 {
+                font-size: 13px !important;
             }
 
             nav {
+                display: flex !important;
                 flex-direction: row !important;
-                padding-right: 1rem !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                gap: 6px;
+                overflow-x: auto;
+                white-space: nowrap;
+                flex-wrap: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            nav::-webkit-scrollbar {
+                display: none;
+            }
+
+            nav a {
+                padding: 6px 12px !important;
+                margin: 0 !important;
+                flex-shrink: 0;
+                height: 32px;
+                display: flex;
+                align-items: center;
             }
 
             main {
                 width: 100%;
+                height: calc(100vh - 64px - 52px);
             }
 
             .max-w-\[70%\] {
@@ -258,7 +294,7 @@ HTML;
             }
 
             footer {
-                padding: 1rem !important;
+                padding: 0.75rem !important;
             }
         }
 
@@ -268,12 +304,12 @@ HTML;
             }
 
             .w-10.h-10 {
-                width: 2rem;
-                height: 2rem;
+                width: 2.25rem;
+                height: 2.25rem;
             }
 
             .p-4 {
-                padding: 0.75rem;
+                padding: 0.5rem;
             }
 
             .text-sm {
@@ -394,35 +430,38 @@ HTML;
                 </div>
 
                 {{-- 3. Input Area --}}
-                <footer class="p-4 md:p-6 bg-[#0a0a0c] border-t border-zinc-900">
-                    <form id="chat-form" class="relative">
+                <footer class="p-3 md:p-4 bg-[#0a0a0c] border-t border-zinc-900">
+                    <form id="chat-form" class="flex flex-col gap-2">
                         @csrf
                         <input type="hidden" name="channel_id" value="{{ $activeChannel->id }}">
-                        <input type="file" id="media-input" name="file" class="hidden" accept="image/*,audio/*,video/*,.pdf,.doc,.docx" />
+                        <input type="file" id="media-input" name="file" class="hidden" accept="image/*" />
 
                         {{-- Media Preview --}}
-                        <div id="media-preview" class="mb-3 hidden">
-                            <img id="preview-img" class="media-preview hidden" />
-                            <video id="preview-video" class="media-preview hidden" controls />
-                            <div id="preview-filename" class="text-[10px] text-zinc-400 mt-2"></div>
+                        <div id="media-preview" class="hidden bg-zinc-950 p-2 rounded-xl border border-zinc-900 flex items-center gap-3 max-w-xs relative group/preview">
+                            <img id="preview-img" class="w-12 h-12 rounded-lg object-cover border border-zinc-800" />
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[10px] font-black uppercase tracking-wider text-zinc-400 truncate" id="preview-filename"></p>
+                                <p class="text-[8px] text-amber-500 font-bold uppercase tracking-widest">Image ready to upload</p>
+                            </div>
+                            <button type="button" onclick="clearMediaPreview()" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-500 transition shadow-lg">
+                                <i class="fa-solid fa-xmark text-[9px]"></i>
+                            </button>
                         </div>
 
-                        <div id="chat-editor-wrapper"
-                            class="bg-black border border-zinc-800 rounded-2xl overflow-hidden min-h-[48px] focus-within:border-amber-600/50 transition-colors">
-                            <div id="chat-editor"></div>
-                        </div>
-
-                        <div class="absolute right-2 md:right-3 bottom-2 md:bottom-3 flex gap-1 md:gap-2 z-10">
+                        <div class="flex items-end gap-2">
                             <button type="button" id="media-btn" onclick="document.getElementById('media-input').click()"
-                                class="w-7 md:w-8 h-7 md:h-8 rounded-lg bg-zinc-900 text-zinc-500 hover:text-white transition flex items-center justify-center">
-                                <i class="fa-solid fa-paperclip text-xs"></i>
+                                class="w-10 h-10 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition flex items-center justify-center flex-shrink-0 border border-zinc-800" title="Upload Image">
+                                <i class="fa-solid fa-image text-sm"></i>
                             </button>
-                            <button type="button" id="clear-media-btn" onclick="clearMediaPreview()" class="w-7 md:w-8 h-7 md:h-8 rounded-lg bg-red-600/20 text-red-500 hover:bg-red-600/30 transition flex items-center justify-center hidden">
-                                <i class="fa-solid fa-x text-xs"></i>
-                            </button>
+                            
+                            <div id="chat-editor-wrapper"
+                                class="flex-1 bg-black border border-zinc-800 rounded-xl overflow-hidden focus-within:border-amber-600/50 transition-colors">
+                                <div id="chat-editor" style="min-height: 40px; max-height: 120px; overflow-y: auto;"></div>
+                            </div>
+
                             <button type="submit"
-                                class="bg-amber-600 hover:bg-amber-500 text-black px-4 md:px-6 py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition shadow-lg shadow-amber-600/20">
-                                Send
+                                class="bg-amber-600 hover:bg-amber-500 text-black w-10 h-10 rounded-xl transition flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-600/20" title="Send Message">
+                                <i class="fa-solid fa-paper-plane text-xs"></i>
                             </button>
                         </div>
                     </form>
@@ -453,46 +492,34 @@ HTML;
         document.getElementById('media-input')?.addEventListener('change', function(e) {
             selectedFile = this.files[0];
             if (selectedFile) {
-                const previewDiv = document.getElementById('media-preview');
-                const previewImg = document.getElementById('preview-img');
-                const previewVideo = document.getElementById('preview-video');
-                const previewFilename = document.getElementById('preview-filename');
-                const clearBtn = document.getElementById('clear-media-btn');
-
-                // Reset previews
-                previewImg.classList.add('hidden');
-                previewVideo.classList.add('hidden');
-                previewDiv.classList.remove('hidden');
-
-                if (selectedFile.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        previewImg.src = event.target.result;
-                        previewImg.classList.remove('hidden');
-                    };
-                    reader.readAsDataURL(selectedFile);
-                } else if (selectedFile.type.startsWith('video/') || selectedFile.type.startsWith('audio/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        previewVideo.src = event.target.result;
-                        previewVideo.classList.remove('hidden');
-                    };
-                    reader.readAsDataURL(selectedFile);
-                } else {
-                    previewFilename.textContent = selectedFile.name;
+                if (!selectedFile.type.startsWith('image/')) {
+                    alert('Only image uploads are allowed.');
+                    clearMediaPreview();
+                    return;
                 }
 
-                clearBtn.classList.remove('hidden');
+                const previewDiv = document.getElementById('media-preview');
+                const previewImg = document.getElementById('preview-img');
+                const previewFilename = document.getElementById('preview-filename');
+
+                previewFilename.textContent = selectedFile.name;
+                previewDiv.classList.remove('hidden');
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewImg.src = event.target.result;
+                };
+                reader.readAsDataURL(selectedFile);
             }
         });
 
         function clearMediaPreview() {
             selectedFile = null;
-            document.getElementById('media-input').value = '';
-            document.getElementById('media-preview').classList.add('hidden');
-            document.getElementById('preview-img').classList.add('hidden');
-            document.getElementById('preview-video').classList.add('hidden');
-            document.getElementById('clear-media-btn').classList.add('hidden');
+            const input = document.getElementById('media-input');
+            if (input) input.value = '';
+            document.getElementById('media-preview')?.classList.add('hidden');
+            const previewImg = document.getElementById('preview-img');
+            if (previewImg) previewImg.src = '';
         }
 
         function deleteMessage(messageId) {
