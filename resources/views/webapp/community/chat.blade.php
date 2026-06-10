@@ -297,7 +297,6 @@ HTML;
 
             .chat-layout-wrapper footer {
                 padding: 0.75rem !important;
-                padding-bottom: 110px !important; /* Pushes the input box above the global bottom nav */
             }
         }
 
@@ -325,7 +324,10 @@ HTML;
 
         {{-- 1. Channels Sidebar --}}
         <aside class="w-64 border-r border-zinc-900 flex flex-col bg-[#08080a] overflow-y-auto">
-            <div class="p-6">
+            <div class="p-6 flex items-center gap-3">
+                <a href="{{ route('home') }}" class="md:hidden w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-400 hover:text-white transition" aria-label="Go Back">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
                 <h2 class="font-brand text-xl font-black italic text-white uppercase tracking-tighter">
                     Studio <span class="text-amber-500">Rooms</span>
                 </h2>

@@ -1,3 +1,4 @@
+@if(!request()->routeIs('webapp.community.chat*'))
 <nav class="lg:hidden fixed bottom-4 left-3 right-3 md:bottom-6 md:left-4 md:right-4 h-16 md:h-20 bg-zinc-950/85 border border-zinc-800/50 rounded-[2rem] md:rounded-[2.5rem] px-1 md:px-2 flex items-center justify-around z-[100] backdrop-blur-2xl shadow-2xl shadow-black/50">
 
     {{-- Feeds Feed --}}
@@ -56,6 +57,7 @@
         <span class="text-[6px] md:text-[7px] font-black uppercase tracking-[0.15em] mt-0.5 md:mt-1">Profile</span>
     </a>
 </nav>
+@endif
 
 
 <div id="notificationGateModal"
