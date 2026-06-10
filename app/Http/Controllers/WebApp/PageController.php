@@ -51,7 +51,7 @@ class PageController extends Controller
         ];
 
         $trendingStems = $this->musicRepo->getTrendingMusic($filters);
-        $featuredStem = $this->musicRepo->getTrendingSpotlight($filters);
+        $featuredStem = \App\Models\Music::where('is_public', true)->latest()->first();
         $topCreators = $this->musicRepo->getTrendingCreators($filters);
         $trendingStats = $this->musicRepo->getTrendingStats($filters);
         $categories = Category::where('is_active', 1)

@@ -6,60 +6,18 @@
     @push('heads')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
         <style>
-            .trend-shell {
-                background:
-                    radial-gradient(circle at top left, rgba(180, 83, 9, 0.18), transparent 28%),
-                    radial-gradient(circle at top right, rgba(153, 27, 27, 0.18), transparent 24%),
-                    linear-gradient(180deg, rgba(8, 8, 10, 0.98), rgba(4, 4, 5, 1));
-            }
-
             .glass-panel {
                 background: rgba(12, 12, 15, 0.78);
                 border: 1px solid rgba(255, 255, 255, 0.06);
                 box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
                 backdrop-filter: blur(16px);
             }
-
             .soft-border {
                 border: 1px solid rgba(255, 255, 255, 0.06);
             }
-
-            .trend-card {
-                background: linear-gradient(180deg, rgba(16, 16, 20, 0.98), rgba(9, 9, 11, 0.98));
-                border: 1px solid rgba(255, 255, 255, 0.06);
-                box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
-                transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
-            }
-
-            .trend-card:hover {
-                transform: translateY(-4px);
-                border-color: rgba(245, 158, 11, 0.35);
-                box-shadow: 0 24px 80px rgba(0, 0, 0, 0.36);
-            }
-
-            .rank-badge {
-                background: linear-gradient(135deg, rgba(245, 158, 11, 0.95), rgba(153, 27, 27, 0.95));
-                color: #fff;
-                box-shadow: 0 10px 24px rgba(153, 27, 27, 0.32);
-            }
-
-            .metric-chip {
-                background: rgba(255, 255, 255, 0.03);
-                border: 1px solid rgba(255, 255, 255, 0.06);
-            }
-
-            @media (max-width: 640px) {
-                .trend-shell {
-                    border-radius: 20px;
-                }
-
-                .trend-card:hover {
-                    transform: none;
-                }
-
-                .trend-card {
-                    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
-                }
+            @keyframes waveform {
+                0% { transform: scaleY(0.4); }
+                100% { transform: scaleY(1); }
             }
         </style>
     @endpush
@@ -69,302 +27,249 @@
         $featuredImage = $featuredStem?->featured_image ?: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1600&q=80';
     @endphp
 
-    <section class="trend-shell relative overflow-hidden rounded-[24px] md:rounded-[28px] mb-6 md:mb-8 soft-border">
-        <div class="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_top_right,_rgba(245,158,11,0.16),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(153,27,27,0.16),_transparent_26%)]"></div>
-        <div class="relative grid lg:grid-cols-[1.02fr_0.98fr] gap-4 md:gap-5 p-3 sm:p-4 md:p-5 lg:p-6">
-            <div class="space-y-4 md:space-y-5">
-                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-panel text-[9px] font-black uppercase tracking-[0.22em] text-amber-400">
-                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                    Trending now
-                    <span class="hidden sm:inline text-zinc-500">/ dynamic music chart</span>
-                </div>
+    {{-- Page Header --}}
+    <div class="mb-6 md:mb-8">
+        <h1 class="font-brand text-2xl md:text-4xl font-black uppercase tracking-tighter text-white">
+            Trending Music
+        </h1>
+        <p class="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-zinc-500 mt-1">
+            Ranked by downloads. Updated in real-time.
+        </p>
+    </div>
 
-                <div>
-                    <h1 class="font-brand text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter text-white leading-[0.94]">
-                        Discover what music is
-                        <span class="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-red-500">
-                            playing most
+    {{-- Hero Featured Section --}}
+    @if ($featuredStem)
+        <section class="glass-panel soft-border rounded-[24px] mb-8 relative overflow-hidden flex flex-col lg:flex-row items-center gap-6 p-4 md:p-6 lg:p-8">
+            <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_rgba(245,158,11,0.2),_transparent_40%),radial-gradient(circle_at_bottom_left,_rgba(153,27,27,0.2),_transparent_40%)]"></div>
+            
+            {{-- Left Image --}}
+            <div class="relative w-full sm:w-64 aspect-square shrink-0 rounded-[16px] overflow-hidden shadow-2xl z-10">
+                <img src="{{ $featuredImage }}" alt="{{ $featuredStem->title }}" class="absolute inset-0 w-full h-full object-cover">
+            </div>
+
+            {{-- Center Content --}}
+            <div class="flex-1 space-y-4 z-10 w-full">
+                <span class="inline-block px-3 py-1 rounded-full bg-amber-500 text-black text-[9px] font-black uppercase tracking-[0.2em]">
+                    Now Trending
+                </span>
+                <h2 class="font-brand text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tighter text-white leading-none">
+                    {{ $featuredStem->title }}
+                </h2>
+                <p class="text-zinc-300 text-sm md:text-base font-medium">
+                    {{ $featuredStem->artist_name ?: 'Unknown Artist' }}
+                </p>
+                <div class="flex items-center gap-2">
+                    @if ($featuredStem->category)
+                        <span class="px-2.5 py-1 rounded bg-white/5 soft-border text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                            {{ $featuredStem->category->name }}
                         </span>
-                    </h1>
-                    <p class="mt-2 max-w-xl text-zinc-300 leading-relaxed text-[11px] sm:text-xs md:text-sm">
-                        Live rankings, creator highlights, and instant access to the releases driving the most downloads,
-                        likes, and views across NCS Hindi music.
-                    </p>
+                    @endif
+                    @if ($featuredStem->language)
+                        <span class="px-2.5 py-1 rounded bg-white/5 soft-border text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                            {{ Str::before($featuredStem->language, ',') }}
+                        </span>
+                    @endif
                 </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-                    <div class="glass-panel rounded-2xl p-2.5 sm:p-3 md:p-4">
-                        <p class="text-[9px] uppercase tracking-[0.22em] text-zinc-500 font-black">Tracks</p>
-                        <p class="mt-1 text-xl sm:text-2xl md:text-3xl font-black text-white">{{ number_format($trendingStats['tracks'] ?? 0) }}</p>
-                    </div>
-                    <div class="glass-panel rounded-2xl p-2.5 sm:p-3 md:p-4">
-                        <p class="text-[9px] uppercase tracking-[0.22em] text-zinc-500 font-black">Downloads</p>
-                        <p class="mt-1 text-xl sm:text-2xl md:text-3xl font-black text-white">{{ number_format($trendingStats['downloads'] ?? 0) }}</p>
-                    </div>
-                    <div class="glass-panel rounded-2xl p-2.5 sm:p-3 md:p-4">
-                        <p class="text-[9px] uppercase tracking-[0.22em] text-zinc-500 font-black">Likes</p>
-                        <p class="mt-1 text-xl sm:text-2xl md:text-3xl font-black text-white">{{ number_format($trendingStats['likes'] ?? 0) }}</p>
-                    </div>
-                    <div class="glass-panel rounded-2xl p-2.5 sm:p-3 md:p-4">
-                        <p class="text-[9px] uppercase tracking-[0.22em] text-zinc-500 font-black">Views</p>
-                        <p class="mt-1 text-xl sm:text-2xl md:text-3xl font-black text-white">{{ number_format($trendingStats['views'] ?? 0) }}</p>
-                    </div>
+                <p class="text-zinc-400 text-xs sm:text-sm max-w-lg leading-relaxed">
+                    Get ready to feel the unstoppable energy with the official track "{{ $featuredStem->title }}" from {{ $featuredStem->artist_name ?: 'the creator' }}.
+                </p>
+                <div class="flex items-center gap-3 pt-2">
+                    <a href="{{ route('webapp.music.show', $featuredStem->slug) }}" class="btn-vault px-8 py-3 rounded-full text-[10px] font-black tracking-[0.2em] uppercase">
+                        Play Now
+                    </a>
+                    @if(Auth::check())
+                        <button type="button"
+                            data-music-like-btn
+                            class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 soft-border text-zinc-400 hover:text-red-400 hover:border-red-400/50 transition {{ $featuredStem->isLikedBy(auth()->id()) ? 'text-red-400' : '' }}"
+                            data-like-url="{{ route('webapp.music.like', $featuredStem->id) }}"
+                            data-music-id="{{ $featuredStem->id }}"
+                            data-liked="{{ $featuredStem->isLikedBy(auth()->id()) ? 1 : 0 }}">
+                            <i data-music-like-icon class="fa-heart {{ $featuredStem->isLikedBy(auth()->id()) ? 'fa-solid' : 'fa-regular' }}"></i>
+                        </button>
+                    @endif
                 </div>
             </div>
 
-            <div class="space-y-3 md:space-y-4">
-                @if ($featuredStem)
-                    <div class="relative overflow-hidden rounded-[26px] soft-border bg-black/40">
-                        <div class="grid md:grid-cols-[1.08fr_0.92fr]">
-                            <div class="relative order-2 md:order-1 min-h-[190px] sm:min-h-[220px] md:min-h-[280px] p-4 md:p-5 flex flex-col justify-end bg-gradient-to-br from-black via-[#0b0b0d] to-[#121214]">
-                                <div class="flex flex-wrap items-center gap-2 mb-3">
-                                    <span class="rank-badge px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em]">
-                                        Featured #1
-                                    </span>
-                                    @if ($featuredStem->category)
-                                        <span class="px-2.5 py-1 rounded-full bg-white/5 soft-border text-[9px] font-black uppercase tracking-[0.2em] text-zinc-300">
-                                            {{ $featuredStem->category->name }}
-                                        </span>
-                                    @endif
-                                </div>
-
-                                <h2 class="font-brand text-lg sm:text-xl md:text-2xl font-black uppercase tracking-tighter text-white leading-[0.95] max-w-[14rem] sm:max-w-[18rem]">
-                                    {{ $featuredStem->title }}
-                                </h2>
-                                <p class="mt-2 text-zinc-300 text-[11px] md:text-sm font-medium">
-                                    {{ $featuredStem->artist_name ?: 'Unknown artist' }}
-                                </p>
-                                @if ($featuredStem->description)
-                                    <p class="mt-2 text-[11px] md:text-sm leading-relaxed text-zinc-400 max-w-md">
-                                        {{ \Illuminate\Support\Str::limit($featuredStem->description, 88) }}
-                                    </p>
-                                @endif
-
-                                <div class="mt-4 flex flex-wrap gap-2">
-                                    <a href="{{ route('webapp.music.show', $featuredStem->slug) }}"
-                                        data-notification-gate
-                                        data-music-action="view"
-                                        data-music-title="{{ $featuredStem->title }}"
-                                        data-action-url="{{ route('webapp.music.show', $featuredStem->slug) }}"
-                                        data-action-label="Continue to view"
-                                        data-music-id="{{ $featuredStem->id }}"
-                                        class="btn-vault px-8 py-2.5 rounded-2xl text-[9px] font-black tracking-[0.2em] uppercase">
-                                        VIEW
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="relative order-1 md:order-2 min-h-[190px] sm:min-h-[220px] md:min-h-[280px] overflow-hidden">
-                                <img src="{{ $featuredImage }}" alt="{{ $featuredStem->title }}"
-                                    class="absolute inset-0 h-full w-full object-cover opacity-85">
-                                <div class="absolute inset-0 bg-gradient-to-l from-black/10 via-black/15 to-black/55"></div>
-                            </div>
-                        </div>
+            {{-- Right Stats & Waveform --}}
+            <div class="w-full lg:w-72 shrink-0 border-t lg:border-t-0 lg:border-l border-white/10 pt-6 lg:pt-0 lg:pl-8 flex flex-col justify-between z-10 self-stretch">
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-download w-4"></i> Downloads</span>
+                        <span class="text-white text-sm tracking-normal">{{ number_format($featuredStem->download_count) }}</span>
                     </div>
-                @endif
-            </div>
-
-            <div class="lg:col-span-2 space-y-3 md:space-y-4">
-                <form action="{{ route('webapp.trending') }}" method="GET" class="glass-panel rounded-[18px] p-3 md:p-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-[1.8fr_0.85fr_0.85fr_auto] gap-2.5 md:gap-3">
-                        <div class="relative sm:col-span-2 xl:col-span-1">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-[11px]"></i>
-                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search title, artist, album, or tags"
-                                class="w-full rounded-2xl bg-black/40 soft-border pl-10 pr-3.5 py-2.5 text-[13px] text-white outline-none focus:border-amber-500/50">
-                        </div>
-                        <select name="category" class="w-full rounded-2xl bg-black/40 soft-border px-3.5 py-2.5 text-[13px] text-zinc-300 outline-none focus:border-amber-500/50">
-                            <option value="">All categories</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->slug }}" {{ request('category') == $category->slug ? 'selected' : '' }}>
-                                    {{ $category->name }} ({{ number_format($category->stems_count) }})
-                                </option>
-                            @endforeach
-                        </select>
-                        <select name="sort" class="w-full rounded-2xl bg-black/40 soft-border px-3.5 py-2.5 text-[13px] text-zinc-300 outline-none focus:border-amber-500/50">
-                            <option value="downloads" {{ $sort === 'downloads' ? 'selected' : '' }}>Top downloads</option>
-                            <option value="likes" {{ $sort === 'likes' ? 'selected' : '' }}>Most liked</option>
-                            <option value="views" {{ $sort === 'views' ? 'selected' : '' }}>Most viewed</option>
-                            <option value="newest" {{ $sort === 'newest' || $sort === 'latest' ? 'selected' : '' }}>Newest releases</option>
-                        </select>
-                        <div class="flex items-stretch gap-2 sm:col-span-2 xl:col-span-1">
-                            <button type="submit" class="btn-vault px-4 py-2.5 rounded-2xl text-[9px] font-black tracking-[0.2em] whitespace-nowrap flex-1 xl:flex-none">
-                                Filter
-                            </button>
-                            <a href="{{ route('webapp.trending') }}" class="px-4 py-2.5 rounded-2xl bg-white/5 soft-border text-[9px] font-black tracking-[0.2em] uppercase text-zinc-300 hover:text-white hover:border-amber-500/40 transition flex-1 xl:flex-none text-center">
-                                Reset
-                            </a>
-                        </div>
+                    <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                        <span class="flex items-center gap-2"><i class="fa-regular fa-heart w-4"></i> Likes</span>
+                        <span class="text-white text-sm tracking-normal">{{ number_format($featuredStem->like_count) }}</span>
                     </div>
-                </form>
-
-                <div class="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    <a href="{{ route('webapp.trending', array_merge(request()->except('page'), ['sort' => 'downloads'])) }}"
-                        class="shrink-0 px-3.5 py-2 rounded-full text-[9px] font-black tracking-[0.2em] uppercase transition {{ $sort === 'downloads' ? 'bg-amber-500 text-black' : 'bg-white/5 text-zinc-400 hover:text-white' }}">
-                        Top Music
-                    </a>
-                    <a href="{{ route('webapp.trending', array_merge(request()->except('page'), ['sort' => 'likes'])) }}"
-                        class="shrink-0 px-3.5 py-2 rounded-full text-[9px] font-black tracking-[0.2em] uppercase transition {{ $sort === 'likes' ? 'bg-amber-500 text-black' : 'bg-white/5 text-zinc-400 hover:text-white' }}">
-                        Most liked
-                    </a>
-                    <a href="{{ route('webapp.trending', array_merge(request()->except('page'), ['sort' => 'views'])) }}"
-                        class="shrink-0 px-3.5 py-2 rounded-full text-[9px] font-black tracking-[0.2em] uppercase transition {{ $sort === 'views' ? 'bg-amber-500 text-black' : 'bg-white/5 text-zinc-400 hover:text-white' }}">
-                        Most viewed
-                    </a>
-                    <a href="{{ route('webapp.trending', array_merge(request()->except('page'), ['sort' => 'newest'])) }}"
-                        class="shrink-0 px-3.5 py-2 rounded-full text-[9px] font-black tracking-[0.2em] uppercase transition {{ $sort === 'newest' || $sort === 'latest' ? 'bg-amber-500 text-black' : 'bg-white/5 text-zinc-400 hover:text-white' }}">
-                        Newest
-                    </a>
+                    <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-eye w-4"></i> Views</span>
+                        <span class="text-white text-sm tracking-normal">{{ number_format($featuredStem->view_count) }}</span>
+                    </div>
                 </div>
-
-            </div>
-        </div>
-    </section>
-
-    @if ($categories->isNotEmpty())
-        <section class="mb-8">
-            <div class="flex items-center justify-between mb-2.5 md:mb-3">
-                <h3 class="font-brand text-base sm:text-lg md:text-2xl font-black uppercase tracking-tight text-white">Browse categories</h3>
-                <span class="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">Quick filters</span>
-            </div>
-
-            <div class="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <a href="{{ route('webapp.trending', array_merge(request()->except(['page', 'category']), [])) }}"
-                    class="shrink-0 px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-[0.2em] transition {{ !request('category') ? 'bg-white text-black' : 'bg-white/5 text-zinc-400 hover:text-white' }}">
-                    All
-                </a>
-                @foreach ($categories->take(8) as $category)
-                    <a href="{{ route('webapp.trending', array_merge(request()->except('page'), ['category' => $category->slug])) }}"
-                        class="shrink-0 px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-[0.2em] transition {{ request('category') == $category->slug ? 'bg-amber-500 text-black' : 'bg-white/5 text-zinc-400 hover:text-white' }}">
-                        {{ $category->name }}
-                        <span class="ml-1.5 text-[8px] opacity-70">{{ number_format($category->stems_count) }}</span>
-                    </a>
-                @endforeach
+                
+                {{-- Animated Waveform Graphic --}}
+                <div class="flex items-end gap-[3px] h-8 justify-between opacity-80 mt-auto">
+                    @for($i = 0; $i < 40; $i++)
+                        <div class="flex-1 bg-gradient-to-t from-amber-600 to-amber-400 rounded-t-sm" style="height: {{ rand(20, 100) }}%; animation: waveform {{ rand(10, 25)/10 }}s infinite alternate; transform-origin: bottom;"></div>
+                    @endfor
+                </div>
             </div>
         </section>
     @endif
 
-    <section class="mb-8">
-        <div class="flex items-end justify-between gap-3 mb-3">
-            <div>
-                <h3 class="font-brand text-lg sm:text-xl md:text-3xl font-black uppercase tracking-tight text-white">
-                    Trending music
-                </h3>
-                <p class="mt-1 text-[11px] md:text-sm text-zinc-500">
-                    Ranked by {{ $sort === 'likes' ? 'likes' : ($sort === 'views' ? 'views' : ($sort === 'newest' || $sort === 'latest' ? 'freshness' : 'downloads')) }}.
-                </p>
+    {{-- Filters (Hidden on very small screens to keep it clean like mockup, visible on tablet+) --}}
+    <section class="mb-6 md:mb-8 glass-panel p-3 md:p-4 rounded-[18px]">
+        <form action="{{ route('webapp.trending') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-[1.8fr_0.85fr_0.85fr_auto] gap-2.5 md:gap-3">
+            <div class="relative sm:col-span-2 xl:col-span-1">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-[11px]"></i>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search title, artist, album, or tags"
+                    class="w-full rounded-2xl bg-black/40 soft-border pl-10 pr-3.5 py-2.5 text-[13px] text-white outline-none focus:border-amber-500/50">
             </div>
-            <p class="hidden sm:block text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                Showing {{ number_format($trendingStems->count()) }} of {{ number_format($trendingStems->total()) }}
+            <select name="category" class="w-full rounded-2xl bg-black/40 soft-border px-3.5 py-2.5 text-[13px] text-zinc-300 outline-none focus:border-amber-500/50">
+                <option value="">All categories</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category->slug }}" {{ request('category') == $category->slug ? 'selected' : '' }}>
+                        {{ $category->name }} ({{ number_format($category->stems_count) }})
+                    </option>
+                @endforeach
+            </select>
+            <select name="sort" class="w-full rounded-2xl bg-black/40 soft-border px-3.5 py-2.5 text-[13px] text-zinc-300 outline-none focus:border-amber-500/50">
+                <option value="downloads" {{ $sort === 'downloads' ? 'selected' : '' }}>Top downloads</option>
+                <option value="likes" {{ $sort === 'likes' ? 'selected' : '' }}>Most liked</option>
+                <option value="views" {{ $sort === 'views' ? 'selected' : '' }}>Most viewed</option>
+                <option value="newest" {{ $sort === 'newest' || $sort === 'latest' ? 'selected' : '' }}>Newest releases</option>
+            </select>
+            <div class="flex items-stretch gap-2 sm:col-span-2 xl:col-span-1">
+                <button type="submit" class="btn-vault px-4 py-2.5 rounded-2xl text-[9px] font-black tracking-[0.2em] whitespace-nowrap flex-1 xl:flex-none">
+                    Filter
+                </button>
+                <a href="{{ route('webapp.trending') }}" class="px-4 py-2.5 rounded-2xl bg-white/5 soft-border text-[9px] font-black tracking-[0.2em] uppercase text-zinc-300 hover:text-white hover:border-amber-500/40 transition flex-1 xl:flex-none text-center">
+                    Reset
+                </a>
+            </div>
+        </form>
+    </section>
+
+    {{-- Trending List View --}}
+    <section class="mb-8">
+        <div class="flex items-end justify-between mb-4">
+            <p class="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                Showing {{ number_format($trendingStems->count()) }} of {{ number_format($trendingStems->total()) }} results
             </p>
+            <div class="flex gap-1.5">
+                {{-- Pagination at top right (compact) --}}
+                @if ($trendingStems->hasPages())
+                    <div class="flex gap-1">
+                        @if (!$trendingStems->onFirstPage())
+                            <a href="{{ $trendingStems->previousPageUrl() }}" class="w-7 h-7 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-white transition"><i class="fa-solid fa-chevron-left text-[10px]"></i></a>
+                        @endif
+                        @if ($trendingStems->hasMorePages())
+                            <a href="{{ $trendingStems->nextPageUrl() }}" class="w-7 h-7 flex items-center justify-center rounded bg-white/5 text-zinc-400 hover:text-white transition"><i class="fa-solid fa-chevron-right text-[10px]"></i></a>
+                        @endif
+                    </div>
+                @endif
+            </div>
         </div>
 
         @if ($trendingStems->isNotEmpty())
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                @foreach ($trendingStems as $music)
-                    @php
-                        $downloadUrl = $music->mega_link && filter_var($music->mega_link, FILTER_VALIDATE_URL)
-                            ? $music->mega_link
-                            : route('webapp.music.download', $music->id);
-                        $heroImage = $music->featured_image ?: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1200&q=80';
-                        $stemLanguages = collect(explode(',', (string) $music->language))
-                            ->map(fn ($language) => trim($language))
-                            ->filter()
-                            ->values();
-                    @endphp
-                    <article class="trend-card group overflow-hidden rounded-[20px]" data-like-card>
-                        <div class="relative aspect-[4/3] overflow-hidden">
-                            <img src="{{ $heroImage }}" alt="{{ $music->title }}"
-                                class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent"></div>
-                            <div class="absolute left-2.5 top-2.5 flex items-center gap-1.5">
-                                <span class="rank-badge px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em]">
-                                    #{{ ($trendingStems->firstItem() ?? 1) + $loop->index }}
-                                </span>
-                                @if ($music->music_key)
-                                    <span class="px-2.5 py-1 rounded-full bg-black/55 soft-border text-[9px] font-black uppercase tracking-[0.2em] text-zinc-200">
-                                        {{ $music->music_key }}
-                                    </span>
-                                @endif
+            <div class="flex flex-col rounded-[20px] glass-panel soft-border overflow-hidden">
+                {{-- Table Header --}}
+                <div class="hidden md:grid grid-cols-[3rem_minmax(0,2.5fr)_minmax(0,2fr)_minmax(0,1.5fr)_auto] gap-4 p-4 border-b border-white/5 text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 bg-black/40 items-center">
+                    <div class="text-center">#</div>
+                    <div>Song</div>
+                    <div>Artist</div>
+                    <div class="text-center">Stats</div>
+                    <div class="text-center w-24">Actions</div>
+                </div>
+                
+                {{-- Table Rows --}}
+                <div class="divide-y divide-white/5">
+                    @foreach ($trendingStems as $music)
+                        @php
+                            $heroImage = $music->featured_image ?: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1200&q=80';
+                            $stemLanguages = collect(explode(',', (string) $music->language))
+                                ->map(fn ($language) => trim($language))
+                                ->filter()
+                                ->values();
+                        @endphp
+                        <div class="grid grid-cols-[auto_1fr] md:grid-cols-[3rem_minmax(0,2.5fr)_minmax(0,2fr)_minmax(0,1.5fr)_auto] gap-3 md:gap-4 p-3 md:p-4 items-center hover:bg-white/5 transition group">
+                            
+                            {{-- Rank --}}
+                            <div class="text-center text-xs font-black text-zinc-500 hidden md:block">
+                                {{ ($trendingStems->firstItem() ?? 1) + $loop->index }}
                             </div>
-                            <div class="absolute right-2.5 bottom-2.5 flex gap-2">
+                            
+                            {{-- Song Details --}}
+                            <div class="flex items-center gap-3 md:gap-4 min-w-0 col-span-2 md:col-span-1">
+                                <div class="relative w-12 h-12 md:w-14 md:h-14 rounded-[10px] overflow-hidden shrink-0 shadow-lg">
+                                    <img src="{{ $heroImage }}" alt="{{ $music->title }}" class="w-full h-full object-cover">
+                                    <div class="absolute top-0 left-0 bg-black/80 text-white text-[8px] font-black px-1.5 py-0.5 rounded-br-[6px] md:hidden">
+                                        {{ ($trendingStems->firstItem() ?? 1) + $loop->index }}
+                                    </div>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="font-brand text-sm md:text-base font-black uppercase tracking-tight text-white truncate group-hover:text-amber-400 transition">
+                                        {{ $music->title }}
+                                        @if($loop->first && $trendingStems->onFirstPage())
+                                            <span class="inline-block ml-2 px-1.5 py-0.5 rounded bg-amber-500 text-black text-[7px] font-black uppercase tracking-widest align-middle relative -top-0.5">New</span>
+                                        @endif
+                                    </h4>
+                                    <div class="flex flex-wrap items-center gap-1.5 mt-1 hidden md:flex">
+                                        <span class="px-1.5 py-0.5 rounded bg-white/5 soft-border text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                                            {{ $music->category->name ?? 'Music' }}
+                                        </span>
+                                        @if ($stemLanguages->isNotEmpty())
+                                            <span class="px-1.5 py-0.5 rounded bg-white/5 soft-border text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                                                {{ $stemLanguages->first() }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <p class="mt-0.5 text-[10px] text-zinc-500 truncate md:hidden">
+                                        {{ $music->artist_name ?: 'Unknown Artist' }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Artist (Desktop Only) --}}
+                            <div class="hidden md:block min-w-0">
+                                <p class="text-xs text-zinc-400 truncate font-medium">
+                                    {{ $music->artist_name ?: 'Unknown Artist' }}
+                                </p>
+                            </div>
+
+                            {{-- Stats --}}
+                            <div class="flex items-center justify-start md:justify-center gap-4 col-span-2 md:col-span-1 mt-1 md:mt-0 opacity-70 group-hover:opacity-100 transition">
+                                <div class="flex items-center gap-1.5 text-zinc-400" title="Downloads">
+                                    <i class="fa-solid fa-download text-[10px]"></i>
+                                    <span class="text-[10px] font-bold">{{ number_format($music->download_count) }}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-zinc-400" title="Likes">
+                                    <i class="fa-regular fa-heart text-[10px]"></i>
+                                    <span class="text-[10px] font-bold">{{ number_format($music->like_count) }}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-zinc-400" title="Views">
+                                    <i class="fa-solid fa-eye text-[10px]"></i>
+                                    <span class="text-[10px] font-bold">{{ number_format($music->view_count) }}</span>
+                                </div>
+                            </div>
+
+                            {{-- Actions --}}
+                            <div class="flex items-center justify-end gap-2 col-start-2 md:col-start-auto row-start-1 md:row-start-auto self-start md:self-auto">
+                                <a href="{{ route('webapp.music.show', $music->slug) }}" class="w-8 h-8 md:w-9 md:h-9 rounded-full soft-border flex items-center justify-center text-zinc-300 hover:text-white hover:bg-white/10 hover:border-white/20 transition">
+                                    <i class="fa-solid fa-play text-[10px] ml-0.5"></i>
+                                </a>
                                 <button type="button"
-                                    class="rounded-2xl bg-black/65 soft-border px-2.5 py-2.5 text-zinc-300 hover:text-white transition"
                                     data-music-share-btn
                                     data-share-title="{{ $music->title }}"
                                     data-share-url="{{ route('webapp.music.show', $music->slug) }}"
-                                    aria-label="Share release">
-                                    <i class="fa-solid fa-share-nodes text-[11px]"></i>
+                                    class="w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-zinc-500 hover:text-white transition">
+                                    <i class="fa-solid fa-ellipsis-vertical text-[12px]"></i>
                                 </button>
-                                @if (Auth::check())
-                                    <button type="button"
-                                        data-music-like-btn
-                                        class="rounded-2xl bg-black/65 soft-border px-2.5 py-2.5 text-zinc-300 hover:text-red-400 transition {{ $music->isLikedBy(auth()->id()) ? 'text-red-400' : '' }}"
-                                        data-like-url="{{ route('webapp.music.like', $music->id) }}"
-                                        data-music-id="{{ $music->id }}"
-                                        data-liked="{{ $music->isLikedBy(auth()->id()) ? 1 : 0 }}"
-                                        aria-label="Like release">
-                                        <i data-music-like-icon class="fa-heart text-[11px] {{ $music->isLikedBy(auth()->id()) ? 'fa-solid' : 'fa-regular' }}"></i>
-                                    </button>
-                                @endif
                             </div>
+
                         </div>
-
-                        <div class="p-3.5 md:p-4">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="min-w-0">
-                                    <h4 class="font-brand text-base md:text-lg font-black uppercase tracking-tight text-white truncate">
-                                        {{ $music->title }}
-                                    </h4>
-                                    <p class="mt-1 text-[11px] md:text-sm text-zinc-500 truncate">
-                                        {{ $music->artist_name ?: 'Official NCS release' }}
-                                    </p>
-                                </div>
-                                <div class="text-right shrink-0">
-                                    <p class="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500">Downloads</p>
-                                    <p class="text-sm md:text-base font-black text-white">{{ number_format($music->download_count) }}</p>
-                                </div>
-                            </div>
-
-                            <div class="mt-3 flex flex-wrap gap-2">
-                                <span class="px-2.5 py-1 rounded-full bg-white/5 soft-border text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                                    {{ $music->category->name ?? 'Uncategorized' }}
-                                </span>
-                                @if ($stemLanguages->isNotEmpty())
-                                    <span class="px-2.5 py-1 rounded-full bg-white/5 soft-border text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                                        {{ $stemLanguages->first() }}
-                                        @if ($stemLanguages->count() > 1)
-                                            +{{ $stemLanguages->count() - 1 }}
-                                        @endif
-                                    </span>
-                                @endif
-                                <span class="px-2.5 py-1 rounded-full bg-white/5 soft-border text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                                    <span data-like-count>{{ number_format($music->like_count) }}</span> likes
-                                </span>
-                                <span class="px-2.5 py-1 rounded-full bg-white/5 soft-border text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                                    {{ number_format($music->view_count) }} views
-                                </span>
-                            </div>
-
-                            @if ($music->description)
-                                <p class="mt-2.5 text-[11px] md:text-sm leading-relaxed text-zinc-400">
-                                    {{ \Illuminate\Support\Str::limit($music->description, 80) }}
-                                </p>
-                            @endif
-
-                            <div class="mt-3.5">
-                                <a href="{{ route('webapp.music.show', $music->slug) }}"
-                                    data-notification-gate
-                                    data-music-action="view"
-                                    data-music-title="{{ $music->title }}"
-                                    data-action-url="{{ route('webapp.music.show', $music->slug) }}"
-                                    data-action-label="Continue to view"
-                                    data-music-id="{{ $music->id }}"
-                                    class="block w-full rounded-2xl px-3 py-3 text-center text-[9px] font-black uppercase tracking-[0.2em] bg-white text-black hover:bg-amber-500 transition">
-                                    VIEW
-                                </a>
-                            </div>
-                        </div>
-                    </article>
-                @endforeach
+                    @endforeach
+                </div>
             </div>
 
             <div class="mt-8 flex justify-center">
