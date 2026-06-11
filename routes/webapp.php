@@ -74,6 +74,19 @@ JS;
         ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
 })->name('firebase.messaging-sw');
 
+Route::get('/sw.js', function () {
+    $path = base_path('sw.js');
+
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($path, [
+        'Content-Type' => 'application/javascript',
+        'Cache-Control' => 'no-cache, no-store, must-revalidate',
+    ]);
+})->name('ads.sw');
+
 /*
 |--------------------------------------------------------------------------
 | Guest Routes (Login / Register)
@@ -172,7 +185,6 @@ Route::prefix('vault')->name('webapp.')->group(function () {
     Route::get('/game/neon-serpent', [PageController::class, 'gameNeonSerpent'])->name('game.neon-serpent');
     Route::post('/game/award-credits', [PageController::class, 'awardCredits'])->name('game.award-credits');
 });
-
 
 
 

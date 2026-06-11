@@ -5,6 +5,9 @@
 @endif
 <script defer src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging-compat.js"></script>
+<script>
+    window.ncsAdServiceWorkerUrl = @json(route('ads.sw'));
+</script>
 
 @stack('scripts')
 <script>
@@ -73,6 +76,26 @@
     console.log('[NCS FCM] VAPID key present:', !!window.ncsFirebaseVapidKey);
     console.log('[NCS FCM] Save URL:', window.ncsFirebaseMessagingSaveUrl);
     console.log('[NCS FCM] SW URL:', window.ncsFirebaseServiceWorkerUrl);
+
+    async function registerAdsServiceWorker() {
+        if (!('serviceWorker' in navigator)) {
+            return null;
+        }
+
+        const swUrl = window.ncsAdServiceWorkerUrl || '/sw.js';
+
+        try {
+            const registration = await navigator.serviceWorker.register(swUrl, {
+                scope: '/',
+            });
+
+            console.log('[NCS Ads] Service worker registered', swUrl);
+            return registration;
+        } catch (error) {
+            console.warn('[NCS Ads] Service worker registration failed', error);
+            return null;
+        }
+    }
 
     const notificationGateKey = 'ncs-notification-gate-seen';
     const notificationPromptKey = 'ncs-notification-prompt-dismissed';
@@ -347,9 +370,14 @@
         const skipBtn = document.getElementById('skipAdBtn');
         const countdownEl = document.getElementById('adCountdown');
         const statusText = document.getElementById('adStatusText');
+        const downloadWindow = window.open('about:blank', '_blank');
         
         if (!adModal) {
-            window.open(downloadUrl, '_blank');
+            if (downloadWindow) {
+                downloadWindow.location.href = downloadUrl;
+            } else {
+                window.location.href = downloadUrl;
+            }
             return;
         }
 
@@ -357,12 +385,12 @@
         adModal.classList.add('flex');
         document.body.classList.add('overflow-hidden');
 
-        let count = 5;
+        let count = 10;
         skipBtn.disabled = true;
         skipBtn.innerHTML = `Wait <span id="adCountdown">${count}</span>s`;
         skipBtn.classList.remove('bg-amber-500', 'text-black', 'hover:bg-amber-400');
         skipBtn.classList.add('bg-zinc-900', 'text-zinc-500');
-        statusText.textContent = "Preparing your download...";
+        statusText.textContent = "Showing a short sponsor break before download...";
 
         clearInterval(adTimer);
         adTimer = setInterval(() => {
@@ -375,8 +403,12 @@
                 skipBtn.innerHTML = `Skip Ad & Download <i class="fa-solid fa-circle-down ml-1"></i>`;
                 skipBtn.classList.remove('bg-zinc-900', 'text-zinc-500');
                 skipBtn.classList.add('bg-amber-500', 'text-black', 'hover:bg-amber-400');
-                statusText.textContent = "Ready to download!";
-                window.open(downloadUrl, '_blank');
+                statusText.textContent = "Ready to download.";
+                if (downloadWindow) {
+                    downloadWindow.location.href = downloadUrl;
+                } else {
+                    window.location.href = downloadUrl;
+                }
             }
         }, 1000);
 
@@ -423,6 +455,8 @@
             stemId: $btn.data('music-id') || '',
         });
     });
+
+    registerAdsServiceWorker();
 
     $(document).on('click', '#notificationGateAllow', async function() {
         const $btn = $(this);
@@ -627,8 +661,6 @@
 
     console.log('NCS Hindi WebApp Initialized');
 </script>
-
-
 
 
 
