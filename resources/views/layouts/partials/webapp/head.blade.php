@@ -73,6 +73,12 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 @if(request()->routeIs('webapp.music.show', 'webapp.streams', 'webapp.trending'))
     <script src="https://quge5.com/88/tag.min.js" data-zone="248646" async data-cfasync="false"></script>
+    <script>
+        (function (s) {
+            s.dataset.zone = '11132424';
+            s.src = 'https://n6wxm.com/vignette.min.js';
+        })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+    </script>
 @endif
 @stack('heads')
 <style>
@@ -716,7 +722,6 @@
         color: #ffffff !important;
     }
 </style>
-
 
 
 
