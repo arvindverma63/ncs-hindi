@@ -71,6 +71,9 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+@if(request()->routeIs('webapp.music.show', 'webapp.streams', 'webapp.trending'))
+    <script src="https://quge5.com/88/tag.min.js" data-zone="248646" async data-cfasync="false"></script>
+@endif
 @stack('heads')
 <style>
     /* Default (Dark Mode) Theme Variables */
@@ -713,8 +716,6 @@
         color: #ffffff !important;
     }
 </style>
-
-
 
 
 

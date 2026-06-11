@@ -97,6 +97,22 @@
         }
     }
 
+    const downloadAdCooldownKey = 'ncs-download-ad-last-seen';
+    const downloadAdCooldownHours = 24;
+
+    function isDownloadAdOnCooldown() {
+        const lastSeen = Number(localStorage.getItem(downloadAdCooldownKey) || 0);
+        if (!lastSeen) {
+            return false;
+        }
+
+        return (Date.now() - lastSeen) < (downloadAdCooldownHours * 60 * 60 * 1000);
+    }
+
+    function markDownloadAdSeen() {
+        localStorage.setItem(downloadAdCooldownKey, String(Date.now()));
+    }
+
     const notificationGateKey = 'ncs-notification-gate-seen';
     const notificationPromptKey = 'ncs-notification-prompt-dismissed';
     const notificationModalEl = document.getElementById('notificationGateModal');
@@ -370,9 +386,16 @@
         const skipBtn = document.getElementById('skipAdBtn');
         const countdownEl = document.getElementById('adCountdown');
         const statusText = document.getElementById('adStatusText');
+
+        if (isDownloadAdOnCooldown()) {
+            window.location.href = downloadUrl;
+            return;
+        }
+
         const downloadWindow = window.open('about:blank', '_blank');
         
         if (!adModal) {
+            markDownloadAdSeen();
             if (downloadWindow) {
                 downloadWindow.location.href = downloadUrl;
             } else {
@@ -404,6 +427,7 @@
                 skipBtn.classList.remove('bg-zinc-900', 'text-zinc-500');
                 skipBtn.classList.add('bg-amber-500', 'text-black', 'hover:bg-amber-400');
                 statusText.textContent = "Ready to download.";
+                markDownloadAdSeen();
                 if (downloadWindow) {
                     downloadWindow.location.href = downloadUrl;
                 } else {
@@ -661,7 +685,6 @@
 
     console.log('NCS Hindi WebApp Initialized');
 </script>
-
 
 
 
