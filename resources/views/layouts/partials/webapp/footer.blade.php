@@ -199,7 +199,7 @@
         <div class="absolute top-0 right-0 z-10">
             <button type="button" id="skipAdBtn" disabled
                 class="px-5 py-2.5 bg-zinc-900 border border-zinc-800 rounded-full text-xs font-black uppercase tracking-widest text-zinc-500 transition duration-300">
-                Wait <span id="adCountdown">10</span>s
+                Close
             </button>
         </div>
 
@@ -230,12 +230,11 @@
         </div>
 
         <div>
-            <h4 id="adStatusText" class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500 mb-2">Showing a short sponsor break before download...</h4>
-            <p class="text-[9px] text-zinc-600 uppercase tracking-widest">Your download opens automatically when the timer ends.</p>
+            <h4 id="adStatusText" class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500 mb-2">Download started in a new tab.</h4>
+            <p class="text-[9px] text-zinc-600 uppercase tracking-widest">You can close this panel anytime.</p>
         </div>
     </div>
 </div>
-
 
 
 

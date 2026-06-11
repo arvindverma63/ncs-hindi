@@ -97,22 +97,6 @@
         }
     }
 
-    const downloadAdCooldownKey = 'ncs-download-ad-last-seen';
-    const downloadAdCooldownHours = 24;
-
-    function isDownloadAdOnCooldown() {
-        const lastSeen = Number(localStorage.getItem(downloadAdCooldownKey) || 0);
-        if (!lastSeen) {
-            return false;
-        }
-
-        return (Date.now() - lastSeen) < (downloadAdCooldownHours * 60 * 60 * 1000);
-    }
-
-    function markDownloadAdSeen() {
-        localStorage.setItem(downloadAdCooldownKey, String(Date.now()));
-    }
-
     const notificationGateKey = 'ncs-notification-gate-seen';
     const notificationPromptKey = 'ncs-notification-prompt-dismissed';
     const notificationModalEl = document.getElementById('notificationGateModal');
@@ -383,58 +367,30 @@
     let adTimer = null;
     function triggerFullScreenAd(downloadUrl) {
         const adModal = document.getElementById('fullScreenAdModal');
-        const skipBtn = document.getElementById('skipAdBtn');
-        const countdownEl = document.getElementById('adCountdown');
-        const statusText = document.getElementById('adStatusText');
-
-        if (isDownloadAdOnCooldown()) {
-            window.location.href = downloadUrl;
-            return;
-        }
-
         const downloadWindow = window.open('about:blank', '_blank');
-        
+
+        if (downloadWindow) {
+            downloadWindow.location.href = downloadUrl;
+        } else {
+            window.location.href = downloadUrl;
+        }
+
         if (!adModal) {
-            markDownloadAdSeen();
-            if (downloadWindow) {
-                downloadWindow.location.href = downloadUrl;
-            } else {
-                window.location.href = downloadUrl;
-            }
             return;
         }
+
+        const skipBtn = document.getElementById('skipAdBtn');
+        const statusText = document.getElementById('adStatusText');
 
         adModal.classList.remove('hidden');
         adModal.classList.add('flex');
         document.body.classList.add('overflow-hidden');
 
-        let count = 10;
-        skipBtn.disabled = true;
-        skipBtn.innerHTML = `Wait <span id="adCountdown">${count}</span>s`;
-        skipBtn.classList.remove('bg-amber-500', 'text-black', 'hover:bg-amber-400');
-        skipBtn.classList.add('bg-zinc-900', 'text-zinc-500');
-        statusText.textContent = "Showing a short sponsor break before download...";
-
-        clearInterval(adTimer);
-        adTimer = setInterval(() => {
-            count--;
-            if (count > 0) {
-                skipBtn.innerHTML = `Wait <span>${count}</span>s`;
-            } else {
-                clearInterval(adTimer);
-                skipBtn.disabled = false;
-                skipBtn.innerHTML = `Skip Ad & Download <i class="fa-solid fa-circle-down ml-1"></i>`;
-                skipBtn.classList.remove('bg-zinc-900', 'text-zinc-500');
-                skipBtn.classList.add('bg-amber-500', 'text-black', 'hover:bg-amber-400');
-                statusText.textContent = "Ready to download.";
-                markDownloadAdSeen();
-                if (downloadWindow) {
-                    downloadWindow.location.href = downloadUrl;
-                } else {
-                    window.location.href = downloadUrl;
-                }
-            }
-        }, 1000);
+        skipBtn.disabled = false;
+        skipBtn.innerHTML = `Close <i class="fa-solid fa-xmark ml-1"></i>`;
+        skipBtn.classList.remove('bg-zinc-900', 'text-zinc-500');
+        skipBtn.classList.add('bg-amber-500', 'text-black', 'hover:bg-amber-400');
+        statusText.textContent = "Download started in a new tab.";
 
         $(skipBtn).off('click').on('click', function() {
             closeFullScreenAd();
@@ -685,7 +641,5 @@
 
     console.log('NCS Hindi WebApp Initialized');
 </script>
-
-
 
 
