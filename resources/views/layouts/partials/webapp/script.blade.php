@@ -525,6 +525,7 @@
         });
     });
 
+    @if(!request()->routeIs('webapp.music.show'))
     if (
         notificationModalEl &&
         !localStorage.getItem(notificationGateKey) &&
@@ -543,6 +544,7 @@
             });
         }, 4000);
     }
+    @endif
 
     $(document).on('keydown', function(e) {
         if (e.key === 'Escape') {
