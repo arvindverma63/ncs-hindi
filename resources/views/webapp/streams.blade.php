@@ -138,12 +138,6 @@
                     {{-- Actions --}}
                     <div class="mt-5">
                         <a href="{{ route('webapp.music.show', $item->slug) }}"
-                            data-notification-gate
-                            data-music-action="view"
-                            data-music-title="{{ $item->title }}"
-                            data-action-url="{{ route('webapp.music.show', $item->slug) }}"
-                            data-action-label="Continue to view"
-                            data-music-id="{{ $item->id }}"
                             class="block w-full py-3 bg-white text-black rounded-xl text-[10px] font-black uppercase text-center hover:bg-amber-500 hover:text-white transition-all">
                             VIEW
                         </a>

@@ -525,26 +525,7 @@
         });
     });
 
-    @if(!request()->routeIs('webapp.music.show'))
-    if (
-        notificationModalEl &&
-        !localStorage.getItem(notificationGateKey) &&
-        !localStorage.getItem(notificationPromptKey) &&
-        'Notification' in window &&
-        Notification.permission === 'default'
-    ) {
-        console.log('[NCS FCM] Auto-opening notification gate');
-        setTimeout(() => {
-            openNotificationGate({
-                title: 'Enable music alerts',
-                description: 'Turn on notifications so you never miss new music, updates, or fresh downloads.',
-                music: '',
-                actionLabel: 'Continue browsing',
-                actionType: 'continue',
-            });
-        }, 4000);
-    }
-    @endif
+
 
     $(document).on('keydown', function(e) {
         if (e.key === 'Escape') {
