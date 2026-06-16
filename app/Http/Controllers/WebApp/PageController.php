@@ -47,7 +47,7 @@ class PageController extends Controller
             'search' => $request->get('search'),
             'category_id' => $request->get('category'),
             'sort' => $request->get('sort', 'downloads'),
-            'per_page' => $request->get('per_page', 9),
+            'per_page' => $request->get('per_page', 20),
         ];
 
         $trendingStems = $this->musicRepo->getTrendingMusic($filters);

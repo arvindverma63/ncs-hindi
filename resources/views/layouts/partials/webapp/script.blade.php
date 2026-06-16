@@ -364,47 +364,25 @@
         return token;
     }
 
-    let adTimer = null;
     function triggerFullScreenAd(downloadUrl) {
-        const adModal = document.getElementById('fullScreenAdModal');
-        const downloadWindow = window.open('about:blank', '_blank');
+        const isSongDetail = window.location.pathname.includes('/music/');
 
-        if (downloadWindow) {
-            downloadWindow.location.href = downloadUrl;
-        } else {
+        if (isSongDetail) {
+            // Onclick popunder ad on download click in song detail screen
+            const adUrl = 'https://3nbf4.com/afu.php?zoneid=11132365';
+            window.open(adUrl, '_blank');
+            
+            // Start download in the current window
             window.location.href = downloadUrl;
+        } else {
+            // On other pages, download starts cleanly without ads
+            const downloadWindow = window.open('about:blank', '_blank');
+            if (downloadWindow) {
+                downloadWindow.location.href = downloadUrl;
+            } else {
+                window.location.href = downloadUrl;
+            }
         }
-
-        if (!adModal) {
-            return;
-        }
-
-        const skipBtn = document.getElementById('skipAdBtn');
-        const statusText = document.getElementById('adStatusText');
-
-        adModal.classList.remove('hidden');
-        adModal.classList.add('flex');
-        document.body.classList.add('overflow-hidden');
-
-        skipBtn.disabled = false;
-        skipBtn.innerHTML = `Close <i class="fa-solid fa-xmark ml-1"></i>`;
-        skipBtn.classList.remove('bg-zinc-900', 'text-zinc-500');
-        skipBtn.classList.add('bg-amber-500', 'text-black', 'hover:bg-amber-400');
-        statusText.textContent = "Download started in a new tab.";
-
-        $(skipBtn).off('click').on('click', function() {
-            closeFullScreenAd();
-        });
-    }
-
-    function closeFullScreenAd() {
-        const adModal = document.getElementById('fullScreenAdModal');
-        if (adModal) {
-            adModal.classList.add('hidden');
-            adModal.classList.remove('flex');
-            document.body.classList.remove('overflow-hidden');
-        }
-        clearInterval(adTimer);
     }
 
     $(document).on('click', '[data-notification-gate]', function(e) {
@@ -436,7 +414,7 @@
         });
     });
 
-    registerAdsServiceWorker();
+    // registerAdsServiceWorker();
 
     $(document).on('click', '#notificationGateAllow', async function() {
         const $btn = $(this);

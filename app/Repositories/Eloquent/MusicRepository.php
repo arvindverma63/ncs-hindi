@@ -63,7 +63,7 @@ class MusicRepository implements MusicRepositoryInterface
 
     public function getTrendingMusic($filters = [])
     {
-        $perPage = max(6, min((int) ($filters['per_page'] ?? 12), 24));
+        $perPage = max(6, min((int) ($filters['per_page'] ?? 20), 24));
         $sort = $filters['sort'] ?? 'downloads';
 
         $query = $this->applyTrendingSort($this->buildTrendingQuery($filters), $sort);
@@ -234,7 +234,7 @@ class MusicRepository implements MusicRepositoryInterface
             $query->latest();
         }
 
-        return $query->paginate(20);
+        return $query->paginate(9);
     }
 
     public function logInteraction($musicId, $userId, $type)

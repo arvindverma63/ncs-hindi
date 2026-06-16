@@ -188,53 +188,7 @@
     </div>
 </div>
 
-<div id="fullScreenAdModal"
-    class="fixed inset-0 z-[300] hidden flex-col items-center justify-center bg-[#050507] text-white p-6">
-    {{-- Background glowing elements --}}
-    <div class="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/10 blur-[120px] rounded-full"></div>
-    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-red-600/10 blur-[120px] rounded-full"></div>
-    
-    <div class="relative w-full max-w-2xl px-4 flex flex-col items-center text-center">
-        {{-- Close / Skip button --}}
-        <div class="absolute top-0 right-0 z-10">
-            <button type="button" id="skipAdBtn" disabled
-                class="px-5 py-2.5 bg-zinc-900 border border-zinc-800 rounded-full text-xs font-black uppercase tracking-widest text-zinc-500 transition duration-300">
-                Close
-            </button>
-        </div>
 
-        <div class="mb-4">
-            <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[10px] font-black uppercase tracking-widest text-amber-500 mb-6">
-                <i class="fa-solid fa-rectangle-ad text-xs"></i> Sponsored Advertisement
-            </div>
-        </div>
-
-        {{-- Simulated Interactive Ad --}}
-        <div class="w-full aspect-[16/9] rounded-3xl border border-zinc-800 bg-zinc-900/40 backdrop-blur-md overflow-hidden relative mb-8 shadow-2xl flex flex-col items-center justify-center p-6 sm:p-10">
-            <div class="absolute inset-0 bg-cover bg-center filter blur-[2px] opacity-20" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80');"></div>
-            
-            <div class="relative z-10">
-                <div class="w-14 h-14 bg-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_30px_rgba(245,158,11,0.4)]">
-                    <i class="fa-solid fa-gamepad text-black text-xl"></i>
-                </div>
-                <h3 class="font-brand text-xl sm:text-2xl font-black uppercase tracking-tight text-white mb-2">
-                    NCS Premium Arcade
-                </h3>
-                <p class="text-zinc-400 text-xs max-w-md mx-auto leading-relaxed mb-6">
-                    Play mini games, earn exclusive NCS Credits, and view your points history. Join the rhythm challenge today!
-                </p>
-                <a href="{{ route('webapp.game') }}" target="_blank" id="adLinkButton" class="inline-flex items-center gap-2 btn-vault px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">
-                    Play Games <i class="fa-solid fa-chevron-right"></i>
-                </a>
-            </div>
-        </div>
-
-        <div>
-            <h4 id="adStatusText" class="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500 mb-2">Download started in a new tab.</h4>
-            <p class="text-[9px] text-zinc-600 uppercase tracking-widest">You can close this panel anytime.</p>
-        </div>
-    </div>
-</div>
 
 
 

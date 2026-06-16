@@ -28,13 +28,33 @@
     @endphp
 
     {{-- Page Header --}}
-    <div class="mb-6 md:mb-8">
-        <h1 class="font-brand text-2xl md:text-4xl font-black uppercase tracking-tighter text-white">
-            Trending Music
-        </h1>
-        <p class="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-zinc-500 mt-1">
-            Ranked by downloads. Updated in real-time.
-        </p>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 md:mb-8">
+        <div>
+            <h1 class="font-brand text-2xl md:text-4xl font-black uppercase tracking-tighter text-white">
+                Trending Music
+            </h1>
+            <p class="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-zinc-500 mt-1">
+                Ranked by downloads. Updated in real-time.
+            </p>
+        </div>
+
+        {{-- Total Stats with Divider Line --}}
+        <div class="flex items-center gap-4 md:gap-6 self-start md:self-auto bg-white/5 soft-border rounded-2xl px-5 py-3 backdrop-blur-md">
+            <div class="text-center">
+                <p class="text-[8px] font-black uppercase tracking-[0.25em] text-zinc-500">Likes</p>
+                <p class="text-sm md:text-base font-black text-amber-500 mt-0.5">{{ number_format($trendingStats['likes']) }}</p>
+            </div>
+            <div class="h-8 w-px bg-white/10"></div>
+            <div class="text-center">
+                <p class="text-[8px] font-black uppercase tracking-[0.25em] text-zinc-500">Downloads</p>
+                <p class="text-sm md:text-base font-black text-amber-500 mt-0.5">{{ number_format($trendingStats['downloads']) }}</p>
+            </div>
+            <div class="h-8 w-px bg-white/10"></div>
+            <div class="text-center">
+                <p class="text-[8px] font-black uppercase tracking-[0.25em] text-zinc-500">Views</p>
+                <p class="text-sm md:text-base font-black text-amber-500 mt-0.5">{{ number_format($trendingStats['views']) }}</p>
+            </div>
+        </div>
     </div>
 
     {{-- Hero Featured Section --}}
