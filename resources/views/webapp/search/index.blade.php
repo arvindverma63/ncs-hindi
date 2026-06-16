@@ -46,11 +46,11 @@
                 </div>
 
                 <div class="grid grid-cols-1 gap-4">
-                    @forelse($music as $music)
+                    @forelse($music as $song)
                         <div class="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl flex items-center gap-4 hover:bg-zinc-800/50 transition">
                             <div class="w-16 h-16 bg-zinc-800 rounded-lg flex-shrink-0 overflow-hidden">
-                                @if($music->featured_image)
-                                    <img src="{{ asset('storage/' . $music->featured_image) }}" class="w-full h-full object-cover">
+                                @if($song->featured_image)
+                                    <img src="{{ asset('storage/' . $song->featured_image) }}" class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-zinc-700">
                                         <i class="fa-solid fa-music text-xl"></i>
@@ -58,9 +58,9 @@
                                 @endif
                             </div>
                             <div class="flex-grow">
-                                <h4 class="font-bold text-sm leading-tight">{{ $music->title }}</h4>
-                                <p class="text-xs text-amber-600 mt-1">{{ $music->artist_name }}</p>
-                                <a href="{{ url('/music/' . $music->slug) }}" class="text-[10px] uppercase font-black text-white mt-2 inline-flex items-center gap-1 hover:underline">
+                                <h4 class="font-bold text-sm leading-tight">{{ $song->title }}</h4>
+                                <p class="text-xs text-amber-600 mt-1">{{ $song->artist_name }}</p>
+                                <a href="{{ url('/music/' . $song->slug) }}" class="text-[10px] uppercase font-black text-white mt-2 inline-flex items-center gap-1 hover:underline">
                                     <i class="fa-solid fa-download"></i> NCS Version
                                 </a>
                             </div>

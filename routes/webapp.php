@@ -113,7 +113,6 @@ Route::prefix('community')->middleware('auth')->group(function () {
     Route::delete('/messages/{id}', [CommunityMessageController::class, 'destroy']);
 });
 
-Route::get('/vault/download/{id}', [MusicController::class, 'download'])->name('webapp.music.download');
 Route::get('/search', [SearchController::class, 'search'])->name('webapp.search');
 Route::get('/search-all', [SearchController::class, 'index'])->name('webapp.search.index');
 Route::get('/forum/thread/{slug}', [PageController::class, 'show']);
@@ -152,7 +151,6 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/music/{id}/like', [MusicController::class, 'toggleLike'])->name('webapp.music.like');
-    Route::get('/music/{id}/download', [MusicController::class, 'download'])->name('webapp.music.download');
     Route::post('/toggle-like', [LikeController::class, 'toggle'])->name('webapp.like.toggle');
 });
 

@@ -250,7 +250,7 @@
                                         <span class="px-2 py-1 rounded-full bg-white/5 text-zinc-400">{{ number_format($song->download_count) }} downloads</span>
                                     </div>
                                 </div>
-                                <a href="{{ route('webapp.music.download', $song->id) }}"
+                                <a href="{{ route('webapp.music.download', $song->id) }}" target="_blank" rel="noopener noreferrer"
                                     class="px-3.5 py-2.5 rounded-2xl bg-emerald-500 text-black text-[9px] font-black uppercase tracking-[0.2em] shrink-0 inline-flex items-center gap-2">
                                     <i class="fa-solid fa-download"></i> NCS Version
                                 </a>

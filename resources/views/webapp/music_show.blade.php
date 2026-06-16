@@ -199,7 +199,7 @@
                         <a href="{{ route('webapp.music.download', $music->id) }}" target="_blank" rel="noopener noreferrer"
                             data-notification-gate data-music-action="download" data-music-title="{{ $music->title }}"
                             data-action-url="{{ route('webapp.music.download', $music->id) }}" data-action-label="Continue to download"
-                            data-music-id="{{ $music->id }}"
+                            data-music-id="{{ $music->id }}" data-is-mega="true"
                             class="w-full sm:w-auto bg-white text-black px-10 py-4 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-amber-500 hover:text-white transition-all duration-300 shadow-xl shadow-white/5">
                             <i class="fa-solid fa-cloud-arrow-down text-lg"></i> NCS Version
                         </a>

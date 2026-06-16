@@ -130,6 +130,7 @@
         $('#notificationGateContinue').data('action-url', notificationGateContext.actionUrl || '');
         $('#notificationGateContinue').data('action-type', notificationGateContext.actionType || 'continue');
         $('#notificationGateContinue').data('music-id', notificationGateContext.stemId || '');
+        $('#notificationGateContinue').data('is-mega', notificationGateContext.isMega || false);
     }
 
     function openNotificationGate(context = {}) {
@@ -364,18 +365,24 @@
         return token;
     }
 
-    function triggerFullScreenAd(downloadUrl) {
+    function triggerFullScreenAd(downloadUrl, isMega = false) {
         const isSongDetail = window.location.pathname.includes('/music/');
 
         if (isSongDetail) {
             // Onclick popunder ad on download click in song detail screen
             const adUrl = 'https://3nbf4.com/afu.php?zoneid=11132365';
-            window.open(adUrl, '_blank');
             
-            // Start download in the current window
-            window.location.href = downloadUrl;
+            if (isMega) {
+                // Open Mega in a new tab first, then attempt to open ad in a new tab
+                window.open(downloadUrl, '_blank');
+                window.open(adUrl, '_blank');
+            } else {
+                // Open ad in a new tab, and start download in the current window
+                window.open(adUrl, '_blank');
+                window.location.href = downloadUrl;
+            }
         } else {
-            // On other pages, download starts cleanly without ads
+            // On other pages, download starts cleanly without ads in a new tab
             const downloadWindow = window.open('about:blank', '_blank');
             if (downloadWindow) {
                 downloadWindow.location.href = downloadUrl;
@@ -390,12 +397,13 @@
         const $btn = $(this);
         const actionUrl = $btn.data('actionUrl') || $btn.attr('href') || '';
         const isDownload = $btn.data('musicAction') === 'download';
+        const isMega = $btn.attr('data-is-mega') === 'true' || $btn.data('is-mega') === true;
 
         // Check if modal was already dismissed or seen
         if (localStorage.getItem(notificationGateKey) || localStorage.getItem(notificationPromptKey)) {
             if (actionUrl) {
                 if (isDownload) {
-                    triggerFullScreenAd(actionUrl);
+                    triggerFullScreenAd(actionUrl, isMega);
                 } else {
                     window.location.href = actionUrl;
                 }
@@ -411,6 +419,7 @@
             actionLabel: $btn.data('actionLabel') || (isDownload ? 'Continue to download' : 'Continue to view'),
             actionType: $btn.data('musicAction') || 'continue',
             stemId: $btn.data('music-id') || '',
+            isMega: isMega,
         });
     });
 
@@ -466,6 +475,7 @@
         const actionUrl = $(this).data('action-url');
         const actionType = $(this).data('action-type');
         const stemId = $(this).data('music-id');
+        const isMega = $(this).data('is-mega') === true || $(this).attr('data-is-mega') === 'true';
 
         if (!actionUrl) {
             closeNotificationGate();
@@ -477,7 +487,7 @@
         closeNotificationGate();
         
         if (actionType === 'download') {
-            triggerFullScreenAd(actionUrl);
+            triggerFullScreenAd(actionUrl, isMega);
         } else {
             window.location.href = actionUrl;
         }
