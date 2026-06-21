@@ -252,8 +252,15 @@ class MusicRepository implements MusicRepositoryInterface
                       ->where('ip_address', $ipAddress);
             }
 
-            if ($query->exists()) {
-                return null;
+            if ($type === 'like') {
+                if ($query->exists()) {
+                    return null;
+                }
+            } else {
+                // For views and downloads, only block duplicates if they occurred in the last hour
+                if ($query->where('created_at', '>=', now()->subHour())->exists()) {
+                    return null;
+                }
             }
 
             $interaction = MusicInteraction::create([
