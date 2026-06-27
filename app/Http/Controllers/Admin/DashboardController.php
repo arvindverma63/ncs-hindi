@@ -67,6 +67,90 @@ class DashboardController extends Controller
 
         return view('admin.interactions.history', compact('interactions'));
     }
+
+    public function statsData(\Illuminate\Http\Request $request)
+    {
+        $days = (int) $request->query('days', 7);
+        if (!in_array($days, [7, 30, 90])) {
+            $days = 7;
+        }
+
+        $startDate = now()->subDays($days - 1)->startOfDay();
+
+        $interactions = DB::table('stem_interactions')
+            ->select(
+                DB::raw('DATE(created_at) as date'),
+                'type',
+                DB::raw('COUNT(*) as count')
+            )
+            ->where('created_at', '>=', $startDate)
+            ->groupBy('date', 'type')
+            ->orderBy('date', 'asc')
+            ->get();
+
+        $dates = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $dateStr = now()->subDays($i)->format('Y-m-d');
+            $dates[$dateStr] = [
+                'date_label' => now()->subDays($i)->format('M d'),
+                'views' => 0,
+                'downloads' => 0,
+                'likes' => 0,
+            ];
+        }
+
+        foreach ($interactions as $row) {
+            $dateStr = $row->date;
+            if (isset($dates[$dateStr])) {
+                if ($row->type === 'view') {
+                    $dates[$dateStr]['views'] = (int) $row->count;
+                } elseif ($row->type === 'download') {
+                    $dates[$dateStr]['downloads'] = (int) $row->count;
+                } elseif ($row->type === 'like') {
+                    $dates[$dateStr]['likes'] = (int) $row->count;
+                }
+            }
+        }
+
+        $labels = [];
+        $views = [];
+        $downloads = [];
+        $likes = [];
+
+        foreach ($dates as $dateData) {
+            $labels[] = $dateData['date_label'];
+            $views[] = $dateData['views'];
+            $downloads[] = $dateData['downloads'];
+            $likes[] = $dateData['likes'];
+        }
+
+        return response()->json([
+            'labels' => $labels,
+            'datasets' => [
+                [
+                    'label' => 'Views',
+                    'data' => $views,
+                    'backgroundColor' => 'rgba(13, 202, 240, 0.75)', // Cyan
+                    'borderColor' => '#0dcaf0',
+                    'borderWidth' => 1,
+                ],
+                [
+                    'label' => 'Downloads',
+                    'data' => $downloads,
+                    'backgroundColor' => 'rgba(25, 135, 84, 0.75)', // Green
+                    'borderColor' => '#198754',
+                    'borderWidth' => 1,
+                ],
+                [
+                    'label' => 'Likes',
+                    'data' => $likes,
+                    'backgroundColor' => 'rgba(220, 53, 69, 0.75)', // Red
+                    'borderColor' => '#dc3545',
+                    'borderWidth' => 1,
+                ],
+            ]
+        ]);
+    }
 }
 
 

@@ -59,7 +59,10 @@ class MusicController extends Controller
             ->firstOrFail();
 
         // Log the view interaction (works for both guests and authenticated users now)
-        $this->musicRepo->logInteraction($music->id, Auth::id(), 'view');
+        $interaction = $this->musicRepo->logInteraction($music->id, Auth::id(), 'view');
+        if ($interaction) {
+            $music->refresh();
+        }
 
         // Load top-level approved comments with replies, user, and reactions
         $comments = MusicComment::where('music_id', $music->id)

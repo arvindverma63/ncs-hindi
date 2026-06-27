@@ -256,8 +256,13 @@ class MusicRepository implements MusicRepositoryInterface
                 if ($query->exists()) {
                     return null;
                 }
+            } elseif ($type === 'view') {
+                // For views, only block duplicates if they occurred in the last 2 minutes
+                if ($query->where('created_at', '>=', now()->subMinutes(2))->exists()) {
+                    return null;
+                }
             } else {
-                // For views and downloads, only block duplicates if they occurred in the last hour
+                // For downloads, block duplicates if they occurred in the last hour
                 if ($query->where('created_at', '>=', now()->subHour())->exists()) {
                     return null;
                 }

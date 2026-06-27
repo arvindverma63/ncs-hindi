@@ -52,13 +52,14 @@
                     <span class="text-sm">Music Library</span>
                 </a>
 
-                <a href="{{ route('webapp.game') }}"
+{{-- Hiding Game Section as requested --}}
+                {{-- <a href="{{ route('webapp.game') }}"
                     aria-label="Play Mini Game"
                     class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all group {{ request()->routeIs('webapp.game') ? 'bg-gradient-to-r from-amber-600/10 to-transparent text-amber-500 font-bold border-l-2 border-amber-600' : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50' }}">
                     <i
                         class="fa-solid fa-gamepad text-sm {{ request()->routeIs('webapp.game') ? 'text-amber-500' : 'group-hover:text-amber-500' }}"></i>
                     <span class="text-sm">Mini Game</span>
-                </a>
+                </a> --}}
             </div>
         </div>
 

@@ -1,6 +1,7 @@
 <x-app-layout title="Dashboard | NCS Hindi Admin">
     @push('heads')
         <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     @endpush
 
     <style>
@@ -266,6 +267,28 @@
                             @else
                                 <span class="badge bg-success-subtle text-success border border-success-subtle fw-normal fs-11">0 pending</span>
                             @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Interactive Performance Chart --}}
+            <div class="row g-4 mb-4">
+                <div class="col-12">
+                    <div class="card border-0 rounded-4 shadow-sm p-4 bg-white" style="border: 1px solid #f3f3f5 !important;">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+                            <div>
+                                <h4 class="fw-bold text-dark mb-0">Platform Telemetry</h4>
+                                <p class="text-muted fs-12 mb-0">Daily breakdown of views, downloads, and likes across the platform.</p>
+                            </div>
+                            <div class="bg-light p-1 rounded-3 d-inline-flex">
+                                <button type="button" class="tab-btn stats-filter-btn active" data-days="7">Past 7 Days</button>
+                                <button type="button" class="tab-btn stats-filter-btn" data-days="30">Past 30 Days</button>
+                                <button type="button" class="tab-btn stats-filter-btn" data-days="90">Past 90 Days</button>
+                            </div>
+                        </div>
+                        <div style="height: 350px; position: relative; width: 100%;">
+                            <canvas id="telemetryChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -557,4 +580,108 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        $(document).ready(function() {
+            let chartInstance = null;
+
+            function loadChartData(days) {
+                $.ajax({
+                    url: "{{ route('admin.dashboard.stats') }}",
+                    method: 'GET',
+                    data: { days: days },
+                    success: function(data) {
+                        renderChart(data);
+                    },
+                    error: function(xhr) {
+                        console.error('Failed to load chart data:', xhr);
+                    }
+                });
+            }
+
+            function renderChart(data) {
+                const ctx = document.getElementById('telemetryChart').getContext('2d');
+
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: data.datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        weight: 'bold',
+                                        family: 'system-ui, -apple-system, sans-serif'
+                                    },
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    padding: 20
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: '#1f0f0a',
+                                titleFont: {
+                                    weight: 'bold',
+                                    family: 'system-ui'
+                                },
+                                bodyFont: {
+                                    family: 'system-ui'
+                                },
+                                padding: 12,
+                                cornerRadius: 8,
+                                displayColors: true
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'system-ui'
+                                    }
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: '#f3f3f5'
+                                },
+                                ticks: {
+                                    precision: 0,
+                                    font: {
+                                        family: 'system-ui'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Initial load
+            loadChartData(7);
+
+            // Filter button handler
+            $('.stats-filter-btn').on('click', function() {
+                $('.stats-filter-btn').removeClass('active');
+                $(this).addClass('active');
+                const days = $(this).data('days');
+                loadChartData(days);
+            });
+        });
+    </script>
+    @endpush
 </x-app-layout>

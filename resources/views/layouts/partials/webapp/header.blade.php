@@ -17,9 +17,9 @@
             <i class="fa-solid fa-sun text-sm hidden" id="theme-toggle-light-icon"></i>
         </button>
         {{-- Mobile Mini Game Link --}}
-        <a href="{{ route('webapp.game') }}" aria-label="Play Mini Game" class="md:hidden w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 hover:bg-amber-500/20 transition shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+        {{-- <a href="{{ route('webapp.game') }}" aria-label="Play Mini Game" class="md:hidden w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 hover:bg-amber-500/20 transition shadow-[0_0_15px_rgba(245,158,11,0.2)]">
             <i class="fa-solid fa-gamepad text-sm"></i>
-        </a>
+        </a> --}}
         <a href="{{ route('webapp.forum.create') }}" aria-label="Create New Thread" class="hidden md:inline-flex btn-vault px-6 py-2.5 text-[10px] uppercase font-black">
             New Thread
         </a>
