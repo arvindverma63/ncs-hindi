@@ -37,8 +37,9 @@ class PageController extends Controller
 
     public function index()
     {
-        $posts = $this->forumRepo->getAllThreads();
-        return view('webapp.index', compact('posts'));
+        $posts = $this->forumRepo->getAllThreads(5);
+        $trendingSongs = $this->musicRepo->getTrendingMusic(['sort' => 'downloads', 'per_page' => 6]);
+        return view('webapp.index', compact('posts', 'trendingSongs'));
     }
 
     public function trending(Request $request)

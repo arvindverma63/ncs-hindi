@@ -37,7 +37,7 @@
                     <span class="text-white font-black">{{ $paginator->lastItem() }}</span>
                     {!! __('of') !!}
                     <span class="text-white font-black">{{ $paginator->total() }}</span>
-                    {!! __('releases') !!}
+                    {!! $paginationLabel ?? __('releases') !!}
                 </p>
             </div>
 

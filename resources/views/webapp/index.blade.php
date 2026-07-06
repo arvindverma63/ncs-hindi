@@ -42,7 +42,75 @@
         </a>
     </section>
 
-    {{-- 2. Feed Header --}}
+    {{-- 2. Trending Music Section --}}
+    <section class="mt-16">
+        <div class="flex items-center justify-between mb-8 px-4">
+            <div>
+                <h3 class="font-brand text-3xl md:text-4xl font-black italic tracking-tighter uppercase text-white leading-none">
+                    Trending <span class="text-amber-500">Releases</span>
+                </h3>
+                <p class="text-[10px] text-zinc-600 font-black tracking-[0.3em] uppercase mt-2">Most Downloaded Sounds this Week</p>
+            </div>
+            <a href="{{ route('webapp.trending') }}" class="px-6 py-2.5 text-[10px] font-black tracking-widest uppercase bg-zinc-900 border border-zinc-800 hover:border-amber-500/50 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl transition duration-300">
+                View All
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            @forelse($trendingSongs as $song)
+                <div class="group relative bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 rounded-[2rem] p-5 transition-all duration-500 hover:border-amber-500/40 hover:bg-zinc-900/60" data-like-card>
+                    <div class="flex items-center gap-4">
+                        {{-- Artwork --}}
+                        <div class="relative w-20 h-20 rounded-2xl overflow-hidden bg-zinc-800 shrink-0">
+                            @if ($song->featured_image)
+                                <img src="{{ $song->featured_image }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="{{ $song->title }}">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <i class="fa-solid fa-music text-xl text-zinc-600"></i>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Metadata --}}
+                        <div class="min-w-0 flex-1">
+                            <span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500 text-[8px] font-black uppercase tracking-wider border border-amber-500/20">
+                                {{ $song->category->name ?? 'Release' }}
+                            </span>
+                            <h4 class="font-brand text-base font-bold text-white uppercase tracking-tighter truncate mt-1.5 group-hover:text-amber-500 transition-colors">
+                                <a href="{{ route('webapp.music.show', $song->slug) }}">
+                                    {{ $song->title }}
+                                </a>
+                            </h4>
+                            <p class="text-xs text-zinc-500 font-bold truncate mt-0.5">
+                                {{ $song->artist_name ?: 'NCS Artist' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- Stats & Quick Links --}}
+                    <div class="flex items-center justify-between mt-5 pt-4 border-t border-zinc-800/50">
+                        <div class="flex items-center gap-3.5">
+                            <span class="flex items-center gap-1 text-[10px] text-zinc-500 font-bold">
+                                <i class="fa-solid fa-heart text-red-500/80"></i> {{ number_format($song->like_count) }}
+                            </span>
+                            <span class="flex items-center gap-1 text-[10px] text-zinc-500 font-bold">
+                                <i class="fa-solid fa-download text-amber-500/80"></i> {{ number_format($song->download_count) }}
+                            </span>
+                        </div>
+                        <a href="{{ route('webapp.music.show', $song->slug) }}" class="px-4 py-2 bg-white hover:bg-amber-500 text-black hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition duration-300">
+                            Listen
+                        </a>
+                    </div>
+                </div>
+            @empty
+                <div class="col-span-full py-10 text-center border border-dashed border-zinc-800 rounded-[2rem]">
+                    <p class="text-xs text-zinc-500 uppercase tracking-widest font-black">No trending sounds found</p>
+                </div>
+            @endforelse
+        </div>
+    </section>
+
+    {{-- 3. Feed Header --}}
     <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 mt-16 px-4 gap-4">
         <div>
             <h3 class="font-brand text-3xl md:text-4xl font-black italic tracking-tighter uppercase text-white leading-none">
@@ -138,6 +206,11 @@
                 </div>
             </article>
         @endforeach
+    </div>
+
+    {{-- Pagination --}}
+    <div class="mt-12 px-4">
+        {{ $posts->links('layouts.partials.webapp.pagination', ['paginationLabel' => 'posts']) }}
     </div>
 
     {{-- Script Section --}}

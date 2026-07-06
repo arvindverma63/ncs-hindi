@@ -9,12 +9,13 @@ use Illuminate\Support\Str;
 
 class ForumRepository implements ForumRepositoryInterface
 {
-    public function getAllThreads()
+    public function getAllThreads($perPage = null)
     {
-        return ForumThread::with(['author', 'category'])
+        $query = ForumThread::with(['author', 'category'])
             ->withCount('replies')
-            ->latest()
-            ->get();
+            ->latest();
+
+        return $perPage ? $query->paginate($perPage) : $query->get();
     }
 
     public function getTrendingThreads($limit = 3)
