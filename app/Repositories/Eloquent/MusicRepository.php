@@ -89,7 +89,7 @@ class MusicRepository implements MusicRepositoryInterface
             ->limit($limit)
             ->get()
             ->map(function ($creator) {
-                $creator->creator_name = blank($creator->artist_name) ? 'Unknown Artist' : $creator->artist_name;
+                $creator->creator_name = blank($creator->artist_name) ? '' : $creator->artist_name;
                 return $creator;
             });
     }
