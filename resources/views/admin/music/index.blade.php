@@ -136,7 +136,7 @@
                                             <div>
                                                 <div class="fw-bold text-dark">{{ $item->title }}</div>
                                                 <div class="text-muted small">
-                                                    {{ $item->artist_name ?: 'Unknown Artist' }}</div>
+                                                    {{ $item->artist_name ?: '' }}</div>
                                             </div>
                                         </div>
                                     </td>

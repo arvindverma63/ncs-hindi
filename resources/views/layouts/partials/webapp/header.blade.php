@@ -90,7 +90,7 @@
                                 <a href="/music/${music.slug}" class="flex items-center gap-3 p-3 hover:bg-white/5 border-b border-white/5 transition">
                                     <div class="text-sm">
                                         <p class="font-medium text-zinc-200">${music.title}</p>
-                                        <p class="text-xs text-zinc-500">${music.artist_name || 'Unknown Artist'}</p>
+                                        <p class="text-xs text-zinc-500">${music.artist_name || ''}</p>
                                     </div>
                                 </a>`;
                             });

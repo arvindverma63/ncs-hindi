@@ -76,7 +76,7 @@
                     {{ $featuredStem->title }}
                 </h2>
                 <p class="text-zinc-300 text-sm md:text-base font-medium">
-                    {{ $featuredStem->artist_name ?: 'Unknown Artist' }}
+                    {{ $featuredStem->artist_name ?: '' }}
                 </p>
                 <div class="flex items-center gap-2">
                     @if ($featuredStem->category)
@@ -245,7 +245,7 @@
                                         @endif
                                     </div>
                                     <p class="mt-0.5 text-[10px] text-zinc-500 truncate md:hidden">
-                                        {{ $music->artist_name ?: 'Unknown Artist' }}
+                                        {{ $music->artist_name ?: '' }}
                                     </p>
                                 </div>
                             </div>
@@ -253,7 +253,7 @@
                             {{-- Artist (Desktop Only) --}}
                             <div class="hidden md:block min-w-0">
                                 <p class="text-xs text-zinc-400 truncate font-medium">
-                                    {{ $music->artist_name ?: 'Unknown Artist' }}
+                                    {{ $music->artist_name ?: '' }}
                                 </p>
                             </div>
 

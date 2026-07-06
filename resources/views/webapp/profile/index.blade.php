@@ -168,7 +168,7 @@
                                 <div class="min-w-0 flex-1">
                                     <p class="text-[9px] uppercase tracking-[0.2em] text-amber-400 font-black">Liked</p>
                                     <h4 class="text-sm font-bold text-white truncate">{{ $song->title }}</h4>
-                                    <p class="text-xs text-zinc-500 truncate">{{ $song->artist_name ?: 'Unknown artist' }}</p>
+                                    <p class="text-xs text-zinc-500 truncate">{{ $song->artist_name ?: '' }}</p>
                                     <div class="mt-2 flex flex-wrap gap-2 text-[9px] uppercase tracking-[0.2em]">
                                         <span class="px-2 py-1 rounded-full bg-white/5 text-zinc-400">{{ $song->category?->name ?? 'Uncategorized' }}</span>
                                         <span class="px-2 py-1 rounded-full bg-white/5 text-zinc-400">{{ number_format($song->like_count) }} likes</span>
@@ -206,7 +206,7 @@
                                 <div class="min-w-0 flex-1">
                                     <p class="text-[9px] uppercase tracking-[0.2em] text-cyan-400 font-black">Viewed</p>
                                     <h4 class="text-sm font-bold text-white truncate">{{ $song->title }}</h4>
-                                    <p class="text-xs text-zinc-500 truncate">{{ $song->artist_name ?: 'Unknown artist' }}</p>
+                                    <p class="text-xs text-zinc-500 truncate">{{ $song->artist_name ?: '' }}</p>
                                     <div class="mt-2 flex flex-wrap gap-2 text-[9px] uppercase tracking-[0.2em]">
                                         <span class="px-2 py-1 rounded-full bg-white/5 text-zinc-400">{{ $song->category?->name ?? 'Uncategorized' }}</span>
                                         <span class="px-2 py-1 rounded-full bg-white/5 text-zinc-400">{{ number_format($song->view_count) }} views</span>
@@ -244,7 +244,7 @@
                                 <div class="min-w-0 flex-1">
                                     <p class="text-[9px] uppercase tracking-[0.2em] text-emerald-400 font-black">Downloaded</p>
                                     <h4 class="text-sm font-bold text-white truncate">{{ $song->title }}</h4>
-                                    <p class="text-xs text-zinc-500 truncate">{{ $song->artist_name ?: 'Unknown artist' }}</p>
+                                    <p class="text-xs text-zinc-500 truncate">{{ $song->artist_name ?: '' }}</p>
                                     <div class="mt-2 flex flex-wrap gap-2 text-[9px] uppercase tracking-[0.2em]">
                                         <span class="px-2 py-1 rounded-full bg-white/5 text-zinc-400">{{ $song->category?->name ?? 'Uncategorized' }}</span>
                                         <span class="px-2 py-1 rounded-full bg-white/5 text-zinc-400">{{ number_format($song->download_count) }} downloads</span>
