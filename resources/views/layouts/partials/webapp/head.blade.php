@@ -45,17 +45,113 @@
     <meta name="twitter:image" content="{{ $ogImage ?? asset('assets/images/logo-dark.png') }}">
 
     {{-- Schema.org Structured Data (JSON-LD) for Search Engine Rich Snippets --}}
+    @php
+        $settingsService = app(\App\Services\SettingService::class);
+        $socialsList = [];
+        foreach(['facebook_url', 'x_url', 'instagram_url', 'whatsapp_url', 'youtube_url', 'linkedin_url'] as $key) {
+            $val = $settingsService->get($key);
+            if ($val) {
+                $socialsList[] = $val;
+            }
+        }
+        $siteLogo = asset('assets/images/logo-dark.png');
+    @endphp
     <script type="application/ld+json">
     {
       "@@context": "https://schema.org",
-      "@@type": "WebSite",
-      "name": "NCS Hindi",
-      "url": "{{ url('/') }}",
-      "potentialAction": {
-        "@@type": "SearchAction",
-        "target": "{{ url('/search-all') }}?query={search_term_string}",
-        "query-input": "required name=search_term_string"
-      }
+      "@@graph": [
+        {
+          "@@type": "Organization",
+          "@@id": "{{ url('/') }}/#organization",
+          "name": "NCS Hindi",
+          "url": "{{ url('/') }}",
+          "logo": {
+            "@@type": "ImageObject",
+            "@@id": "{{ url('/') }}/#logo",
+            "url": "{{ $siteLogo }}",
+            "caption": "NCS Hindi Logo"
+          },
+          "image": {
+            "@@id": "{{ url('/') }}/#logo"
+          },
+          "description": "{{ $description ?? 'NCS Hindi is the ultimate hub for premium, royalty-free Hindi music, non-copyright soundtracks, and studio-grade audio assets for content creators.' }}",
+          @if(!empty($socialsList))
+          "sameAs": {!! json_encode($socialsList) !!},
+          @endif
+          "contactPoint": {
+            "@@type": "ContactPoint",
+            "contactType": "customer support",
+            "email": "support@@ncshindi.com",
+            "url": "{{ url('/') }}"
+          }
+        },
+        {
+          "@@type": "WebSite",
+          "@@id": "{{ url('/') }}/#website",
+          "url": "{{ url('/') }}",
+          "name": "NCS Hindi",
+          "description": "{{ $description ?? 'NCS Hindi is the ultimate hub for premium, royalty-free Hindi music, non-copyright soundtracks, and studio-grade audio assets for content creators.' }}",
+          "publisher": {
+            "@@id": "{{ url('/') }}/#organization"
+          },
+          "potentialAction": {
+            "@@type": "SearchAction",
+            "target": "{{ url('/search-all') }}?query={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@@type": "ItemList",
+          "@@id": "{{ url('/') }}/#navigation",
+          "name": "NCS Hindi Site Navigation",
+          "itemListElement": [
+            {
+              "@@type": "SiteNavigationElement",
+              "position": 1,
+              "name": "Thread Feed",
+              "url": "{{ route('home') }}"
+            },
+            {
+              "@@type": "SiteNavigationElement",
+              "position": 2,
+              "name": "Community Chat",
+              "url": "{{ route('webapp.community.chat') }}"
+            },
+            {
+              "@@type": "SiteNavigationElement",
+              "position": 3,
+              "name": "Trending Music",
+              "url": "{{ route('webapp.trending') }}"
+            },
+            {
+              "@@type": "SiteNavigationElement",
+              "position": 4,
+              "name": "Music Library",
+              "url": "{{ route('webapp.streams') }}"
+            }
+            @php
+              $categoriesList = \App\Models\Category::where('is_active', true)
+                ->withCount([
+                    'music as public_music_count' => function ($query) {
+                        $query->where('is_public', true);
+                    }
+                ])
+                ->orderByDesc('public_music_count')
+                ->limit(4)
+                ->get();
+              $pos = 5;
+            @endphp
+            @foreach($categoriesList as $cat)
+            ,{
+              "@@type": "SiteNavigationElement",
+              "position": {{ $pos++ }},
+              "name": "{{ $cat->name }} Music",
+              "url": "{{ route('webapp.music.genre', $cat->slug) }}"
+            }
+            @endforeach
+          ]
+        }
+      ]
     }
     </script>
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/images/favicon.ico') }}">
