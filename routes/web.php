@@ -60,6 +60,7 @@ Route::middleware('auth', 'role:0,1')->group(function () {
     Route::prefix('admin')->as('admin.')->group(function () {
         Route::get('/interactions-history', [DashboardController::class, 'history'])->name('interactions.history');
         Route::get('/dashboard/stats', [DashboardController::class, 'statsData'])->name('dashboard.stats');
+        Route::get('/dashboard/analytics', [DashboardController::class, 'analyticsData'])->name('dashboard.analytics');
         Route::get('/message-user/{id}', [InteractionController::class, 'createDirectMessage'])->name('messages.create');
         Route::post('/message-user', [InteractionController::class, 'storeDirectMessage'])->name('messages.store');
 

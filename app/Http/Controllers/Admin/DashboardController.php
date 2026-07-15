@@ -151,6 +151,391 @@ class DashboardController extends Controller
             ]
         ]);
     }
+
+    public function analyticsData(\Illuminate\Http\Request $request)
+    {
+        $timeframe = $request->query('timeframe', 'weekly');
+        if (!in_array($timeframe, ['today', 'weekly', 'monthly'])) {
+            $timeframe = 'weekly';
+        }
+
+        // Determine date bounds
+        if ($timeframe === 'today') {
+            $days = 1;
+            $startDate = now()->startOfDay();
+            $endDate = now();
+            
+            $prevStartDate = now()->subDay()->startOfDay();
+            $prevEndDate = now()->subDay()->endOfDay();
+        } elseif ($timeframe === 'weekly') {
+            $days = 7;
+            $startDate = now()->subDays(6)->startOfDay();
+            $endDate = now();
+            
+            $prevStartDate = now()->subDays(13)->startOfDay();
+            $prevEndDate = now()->subDays(7)->endOfDay();
+        } else { // monthly
+            $days = 30;
+            $startDate = now()->subDays(29)->startOfDay();
+            $endDate = now();
+            
+            $prevStartDate = now()->subDays(59)->startOfDay();
+            $prevEndDate = now()->subDays(30)->endOfDay();
+        }
+
+        // Determine DB expression for grouping (SQLite vs MySQL)
+        $driver = DB::connection()->getDriverName();
+        if ($driver === 'sqlite') {
+            $dateExpr = "date(created_at)";
+            $hourExpr = "strftime('%H', created_at)";
+        } else {
+            $dateExpr = "DATE(created_at)";
+            $hourExpr = "HOUR(created_at)";
+        }
+
+        // 1. Calculate Metrics for Current Period
+        $currentStats = DB::table('stem_interactions')
+            ->select('type', DB::raw('count(*) as count'))
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('type')
+            ->pluck('count', 'type');
+
+        $currentViews = (int) $currentStats->get('view', 0);
+        $currentDownloads = (int) $currentStats->get('download', 0);
+        $currentLikes = (int) $currentStats->get('like', 0);
+        
+        $currentUnique = (int) DB::table('stem_interactions')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->distinct('ip_address')
+            ->count('ip_address');
+
+        // 2. Calculate Metrics for Previous Period
+        $prevStats = DB::table('stem_interactions')
+            ->select('type', DB::raw('count(*) as count'))
+            ->whereBetween('created_at', [$prevStartDate, $prevEndDate])
+            ->groupBy('type')
+            ->pluck('count', 'type');
+
+        $prevViews = (int) $prevStats->get('view', 0);
+        $prevDownloads = (int) $prevStats->get('download', 0);
+        $prevLikes = (int) $prevStats->get('like', 0);
+        
+        $prevUnique = (int) DB::table('stem_interactions')
+            ->whereBetween('created_at', [$prevStartDate, $prevEndDate])
+            ->distinct('ip_address')
+            ->count('ip_address');
+
+        // Calculate percentage changes
+        $viewsChange = $this->calculatePercentageChange($currentViews, $prevViews);
+        $downloadsChange = $this->calculatePercentageChange($currentDownloads, $prevDownloads);
+        $likesChange = $this->calculatePercentageChange($currentLikes, $prevLikes);
+        $uniqueChange = $this->calculatePercentageChange($currentUnique, $prevUnique);
+
+        // 3. Generate Trend Chart Datasets
+        $labels = [];
+        $viewsData = [];
+        $downloadsData = [];
+        $likesData = [];
+
+        if ($timeframe === 'today') {
+            // Hourly breakdown (24 hours)
+            $hours = [];
+            for ($i = 0; $i < 24; $i++) {
+                $hours[$i] = [
+                    'label' => Carbon\Carbon::createFromTime($i)->format('g A'),
+                    'views' => 0,
+                    'downloads' => 0,
+                    'likes' => 0,
+                ];
+            }
+
+            $hourlyTrends = DB::table('stem_interactions')
+                ->select(DB::raw("$hourExpr as hr"), 'type', DB::raw('count(*) as count'))
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->groupBy('hr', 'type')
+                ->get();
+
+            foreach ($hourlyTrends as $row) {
+                $hr = (int) $row->hr;
+                if (isset($hours[$hr])) {
+                    if ($row->type === 'view') $hours[$hr]['views'] = (int) $row->count;
+                    elseif ($row->type === 'download') $hours[$hr]['downloads'] = (int) $row->count;
+                    elseif ($row->type === 'like') $hours[$hr]['likes'] = (int) $row->count;
+                }
+            }
+
+            foreach ($hours as $hData) {
+                $labels[] = $hData['label'];
+                $viewsData[] = $hData['views'];
+                $downloadsData[] = $hData['downloads'];
+                $likesData[] = $hData['likes'];
+            }
+        } else {
+            // Daily breakdown for weekly/monthly
+            $dates = [];
+            for ($i = $days - 1; $i >= 0; $i--) {
+                $dStr = now()->subDays($i)->format('Y-m-d');
+                $dates[$dStr] = [
+                    'label' => now()->subDays($i)->format($days === 7 ? 'D, M d' : 'M d'),
+                    'views' => 0,
+                    'downloads' => 0,
+                    'likes' => 0,
+                ];
+            }
+
+            $dailyTrends = DB::table('stem_interactions')
+                ->select(DB::raw("$dateExpr as dt"), 'type', DB::raw('count(*) as count'))
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->groupBy('dt', 'type')
+                ->get();
+
+            foreach ($dailyTrends as $row) {
+                $dt = $row->dt;
+                if (isset($dates[$dt])) {
+                    if ($row->type === 'view') $dates[$dt]['views'] = (int) $row->count;
+                    elseif ($row->type === 'download') $dates[$dt]['downloads'] = (int) $row->count;
+                    elseif ($row->type === 'like') $dates[$dt]['likes'] = (int) $row->count;
+                }
+            }
+
+            foreach ($dates as $dData) {
+                $labels[] = $dData['label'];
+                $viewsData[] = $dData['views'];
+                $downloadsData[] = $dData['downloads'];
+                $likesData[] = $dData['likes'];
+            }
+        }
+
+        // 4. Category Engagement distribution
+        $categoriesStats = DB::table('stem_interactions')
+            ->join('music_stems', 'stem_interactions.stem_id', '=', 'music_stems.id')
+            ->join('categories', 'music_stems.category_id', '=', 'categories.id')
+            ->select('categories.name as category_name', DB::raw('count(*) as count'))
+            ->whereBetween('stem_interactions.created_at', [$startDate, $endDate])
+            ->groupBy('categories.name')
+            ->orderByDesc('count')
+            ->get();
+
+        $catLabels = [];
+        $catData = [];
+        foreach ($categoriesStats as $cs) {
+            $catLabels[] = $cs->category_name;
+            $catData[] = (int) $cs->count;
+        }
+        // Fallback for empty category stats
+        if (empty($catLabels)) {
+            $catLabels = ['No Data'];
+            $catData = [0];
+        }
+
+        // 5. Top 5 Music Tracks (aggregated engagement in timeframe)
+        $topStemsRaw = DB::table('stem_interactions')
+            ->select('stem_id', 
+                DB::raw('SUM(case when type = "view" then 1 else 0 end) as views_in_period'),
+                DB::raw('SUM(case when type = "download" then 1 else 0 end) as downloads_in_period'),
+                DB::raw('SUM(case when type = "like" then 1 else 0 end) as likes_in_period'),
+                DB::raw('COUNT(*) as total_engagement')
+            )
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('stem_id')
+            ->orderByDesc('total_engagement')
+            ->take(5)
+            ->get();
+
+        $topMusicLabels = [];
+        $topMusicViews = [];
+        $topMusicDownloads = [];
+        $topMusicLikes = [];
+        $topMusicStemsList = [];
+
+        if ($topStemsRaw->isNotEmpty()) {
+            $stemIds = $topStemsRaw->pluck('stem_id')->toArray();
+            $musics = Music::with('category')->whereIn('id', $stemIds)->get()->keyBy('id');
+
+            foreach ($topStemsRaw as $row) {
+                $music = $musics->get($row->stem_id);
+                if ($music) {
+                    $topMusicLabels[] = strlen($music->title) > 15 ? substr($music->title, 0, 12) . '...' : $music->title;
+                    $topMusicViews[] = (int) $row->views_in_period;
+                    $topMusicDownloads[] = (int) $row->downloads_in_period;
+                    $topMusicLikes[] = (int) $row->likes_in_period;
+
+                    $topMusicStemsList[] = [
+                        'id' => $music->id,
+                        'title' => $music->title,
+                        'artist_name' => $music->artist_name ?: 'NCS Artist',
+                        'category_name' => $music->category->name ?? 'Vault',
+                        'featured_image' => $music->featured_image,
+                        'bpm' => $music->bpm,
+                        'music_key' => $music->music_key,
+                        'views' => (int) $row->views_in_period,
+                        'downloads' => (int) $row->downloads_in_period,
+                        'likes' => (int) $row->likes_in_period,
+                    ];
+                }
+            }
+        }
+
+        // Fallbacks for empty top music chart
+        if (empty($topMusicLabels)) {
+            // Load 3 music stems and present empty timeframe stats
+            $fallbackStems = Music::with('category')->take(5)->get();
+            foreach ($fallbackStems as $fs) {
+                $topMusicLabels[] = strlen($fs->title) > 15 ? substr($fs->title, 0, 12) . '...' : $fs->title;
+                $topMusicViews[] = 0;
+                $topMusicDownloads[] = 0;
+                $topMusicLikes[] = 0;
+
+                $topMusicStemsList[] = [
+                    'id' => $fs->id,
+                    'title' => $fs->title,
+                    'artist_name' => $fs->artist_name ?: 'NCS Artist',
+                    'category_name' => $fs->category->name ?? 'Vault',
+                    'featured_image' => $fs->featured_image,
+                    'bpm' => $fs->bpm,
+                    'music_key' => $fs->music_key,
+                    'views' => 0,
+                    'downloads' => 0,
+                    'likes' => 0,
+                ];
+            }
+        }
+
+        // 6. Timeframe-based Lists for views, downloads, likes specifically
+        // Top 5 by views
+        $topViewsRaw = DB::table('stem_interactions')
+            ->select('stem_id', DB::raw('count(*) as count'))
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('type', 'view')
+            ->groupBy('stem_id')
+            ->orderByDesc('count')
+            ->take(5)
+            ->get();
+        $topViewsList = $this->buildListingData($topViewsRaw, 'views');
+
+        // Top 5 by downloads
+        $topDownloadsRaw = DB::table('stem_interactions')
+            ->select('stem_id', DB::raw('count(*) as count'))
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('type', 'download')
+            ->groupBy('stem_id')
+            ->orderByDesc('count')
+            ->take(5)
+            ->get();
+        $topDownloadsList = $this->buildListingData($topDownloadsRaw, 'downloads');
+
+        // Top 5 by likes
+        $topLikesRaw = DB::table('stem_interactions')
+            ->select('stem_id', DB::raw('count(*) as count'))
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('type', 'like')
+            ->groupBy('stem_id')
+            ->orderByDesc('count')
+            ->take(5)
+            ->get();
+        $topLikesList = $this->buildListingData($topLikesRaw, 'likes');
+
+        return response()->json([
+            'metrics' => [
+                'views' => [
+                    'count' => $currentViews,
+                    'formatted' => number_format($currentViews),
+                    'change' => $viewsChange,
+                    'direction' => $viewsChange >= 0 ? 'up' : 'down'
+                ],
+                'downloads' => [
+                    'count' => $currentDownloads,
+                    'formatted' => number_format($currentDownloads),
+                    'change' => $downloadsChange,
+                    'direction' => $downloadsChange >= 0 ? 'up' : 'down'
+                ],
+                'likes' => [
+                    'count' => $currentLikes,
+                    'formatted' => number_format($currentLikes),
+                    'change' => $likesChange,
+                    'direction' => $likesChange >= 0 ? 'up' : 'down'
+                ],
+                'unique' => [
+                    'count' => $currentUnique,
+                    'formatted' => number_format($currentUnique),
+                    'change' => $uniqueChange,
+                    'direction' => $uniqueChange >= 0 ? 'up' : 'down'
+                ]
+            ],
+            'trend_chart' => [
+                'labels' => $labels,
+                'views' => $viewsData,
+                'downloads' => $downloadsData,
+                'likes' => $likesData
+            ],
+            'category_chart' => [
+                'labels' => $catLabels,
+                'data' => $catData
+            ],
+            'top_music_chart' => [
+                'labels' => $topMusicLabels,
+                'views' => $topMusicViews,
+                'downloads' => $topMusicDownloads,
+                'likes' => $topMusicLikes
+            ],
+            'tables' => [
+                'views' => $topViewsList,
+                'downloads' => $topDownloadsList,
+                'likes' => $topLikesList
+            ]
+        ]);
+    }
+
+    private function calculatePercentageChange(int $current, int $previous): float
+    {
+        if ($previous === 0) {
+            return $current > 0 ? 100.0 : 0.0;
+        }
+        return round((($current - $previous) / $previous) * 100, 1);
+    }
+
+    private function buildListingData($rawItems, $metricName)
+    {
+        if ($rawItems->isEmpty()) {
+            // Use all-time fallbacks, returning 0 for period counts
+            $fallbacks = Music::with('category')->orderByDesc($metricName == 'views' ? 'view_count' : ($metricName == 'likes' ? 'like_count' : 'download_count'))->take(5)->get();
+            $list = [];
+            foreach ($fallbacks as $fs) {
+                $list[] = [
+                    'id' => $fs->id,
+                    'title' => $fs->title,
+                    'artist_name' => $fs->artist_name ?: 'NCS Artist',
+                    'featured_image' => $fs->featured_image,
+                    'category_name' => $fs->category->name ?? 'Vault',
+                    'bpm' => $fs->bpm,
+                    'music_key' => $fs->music_key,
+                    'count' => 0
+                ];
+            }
+            return $list;
+        }
+
+        $stemIds = $rawItems->pluck('stem_id')->toArray();
+        $musics = Music::with('category')->whereIn('id', $stemIds)->get()->keyBy('id');
+
+        $list = [];
+        foreach ($rawItems as $row) {
+            $music = $musics->get($row->stem_id);
+            if ($music) {
+                $list[] = [
+                    'id' => $music->id,
+                    'title' => $music->title,
+                    'artist_name' => $music->artist_name ?: 'NCS Artist',
+                    'featured_image' => $music->featured_image,
+                    'category_name' => $music->category->name ?? 'Vault',
+                    'bpm' => $music->bpm,
+                    'music_key' => $music->music_key,
+                    'count' => (int) $row->count
+                ];
+            }
+        }
+        return $list;
+    }
 }
 
 

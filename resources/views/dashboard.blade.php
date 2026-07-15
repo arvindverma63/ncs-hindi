@@ -164,6 +164,65 @@
         .table-responsive {
             border-radius: 0.75rem;
         }
+
+        .badge-trend-up {
+            background-color: rgba(25, 135, 84, 0.08) !important;
+            color: #198754 !important;
+            border: 1px solid rgba(25, 135, 84, 0.15);
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            padding: 0.25rem 0.6rem;
+            font-weight: 700;
+        }
+
+        .badge-trend-down {
+            background-color: rgba(220, 53, 69, 0.08) !important;
+            color: #dc3545 !important;
+            border: 1px solid rgba(220, 53, 69, 0.15);
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            padding: 0.25rem 0.6rem;
+            font-weight: 700;
+        }
+
+        .bg-white-10 {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .border-white-20 {
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        }
+
+        .hover-scale {
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.03);
+        }
+
+        /* Overlay Skeleton loading animation */
+        .chart-loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.85);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: inherit;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .chart-loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
     </style>
 
     <div class="py-4">
@@ -174,121 +233,176 @@
                     <h2 class="fw-black m-0 text-white font-brand uppercase tracking-tight">Music Desk</h2>
                     <p class="text-white-50 mt-1 mb-0 fs-14">Real-time engagement analysis, content rankings, and platform telemetry.</p>
                 </div>
-                <div>
-                    <div class="pulse-badge">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <div class="pulse-badge bg-white-10 text-white border-white-20">
                         <span class="pulse-dot"></span>
-                        <span>{{ number_format($activeViews) }} LIVE VISITORS ON WEBSITE</span>
+                        <span>{{ number_format($activeViews) }} LIVE VISITORS</span>
                     </div>
+                    <span class="badge bg-white-10 text-white border-white-20 p-2.5 rounded-3 d-inline-flex align-items-center gap-1.5 fs-12 fw-bold">
+                        <iconify-icon icon="mdi:account-multiple"></iconify-icon>
+                        {{ number_format($totalUsers) }} USERS
+                    </span>
+                    <a href="{{ route('admin.reports.index') }}" class="badge bg-white-10 text-white border-white-20 p-2.5 rounded-3 d-inline-flex align-items-center gap-1.5 fs-12 fw-bold text-decoration-none hover-scale">
+                        <iconify-icon icon="mdi:bug"></iconify-icon>
+                        {{ $openBugs }} BUGS
+                    </a>
+                </div>
+            </div>
+
+            {{-- Timeframe Filter Bar --}}
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4 p-3 bg-white rounded-4 shadow-sm border border-light">
+                <h5 class="m-0 fw-bold text-dark d-flex align-items-center gap-2">
+                    <iconify-icon icon="mdi:chart-timeline-variant" class="text-secondary fs-4"></iconify-icon> 
+                    Music Telemetry Scope
+                </h5>
+                <div class="bg-light p-1 rounded-3 d-inline-flex">
+                    <button type="button" class="tab-btn dashboard-filter-btn" data-timeframe="today">Today</button>
+                    <button type="button" class="tab-btn dashboard-filter-btn active" data-timeframe="weekly">Weekly View</button>
+                    <button type="button" class="tab-btn dashboard-filter-btn" data-timeframe="monthly">Monthly View</button>
                 </div>
             </div>
 
             {{-- Metric Stats Cards --}}
             <div class="row g-4 mb-4">
-                {{-- Card 1: Total Views --}}
+                {{-- Card 1: Views --}}
                 <div class="col-xl-3 col-sm-6">
-                    <div class="stat-card p-4">
+                    <div class="stat-card p-4 h-100">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
-                                <span class="text-muted text-uppercase font-black tracking-wider fs-11">Total Music Views</span>
-                                <h3 class="fw-bold text-dark mt-2 mb-0">{{ number_format($totalViews) }}</h3>
+                                <span class="text-muted text-uppercase font-black tracking-wider fs-11">Views</span>
+                                <h3 class="fw-bold text-dark mt-2 mb-0" id="views-count">0</h3>
                             </div>
                             <div class="bg-primary-subtle text-primary rounded-3 p-2.5 d-flex align-items-center justify-content-center">
                                 <iconify-icon icon="mdi:eye" width="24" height="24"></iconify-icon>
                             </div>
                         </div>
-                        <div class="fs-12 text-muted">
-                            <span class="text-success fw-bold"><iconify-icon icon="mdi:trending-up" class="align-bottom"></iconify-icon> Live</span>
-                            <span>Engagement aggregation</span>
+                        <div class="fs-12 text-muted d-flex align-items-center gap-1.5" id="views-trend-wrapper">
+                            <span class="badge" id="views-trend-badge">
+                                <iconify-icon icon="mdi:trending-up"></iconify-icon> <span id="views-trend-val">0%</span>
+                            </span>
+                            <span class="text-secondary">vs prev period</span>
                         </div>
                     </div>
                 </div>
 
-                {{-- Card 2: Total Downloads --}}
+                {{-- Card 2: Downloads --}}
                 <div class="col-xl-3 col-sm-6">
-                    <div class="stat-card p-4">
+                    <div class="stat-card p-4 h-100">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
-                                <span class="text-muted text-uppercase font-black tracking-wider fs-11">Total Downloads</span>
-                                <h3 class="fw-bold text-dark mt-2 mb-0">{{ number_format($totalDownloads) }}</h3>
+                                <span class="text-muted text-uppercase font-black tracking-wider fs-11">Downloads</span>
+                                <h3 class="fw-bold text-dark mt-2 mb-0" id="downloads-count">0</h3>
                             </div>
                             <div class="bg-success-subtle text-success rounded-3 p-2.5 d-flex align-items-center justify-content-center">
                                 <iconify-icon icon="mdi:download" width="24" height="24"></iconify-icon>
                             </div>
                         </div>
-                        <div class="fs-12 text-muted">
-                            <span class="text-success fw-bold"><iconify-icon icon="mdi:trending-up" class="align-bottom"></iconify-icon> Real-time</span>
-                            <span>Official vault releases</span>
+                        <div class="fs-12 text-muted d-flex align-items-center gap-1.5" id="downloads-trend-wrapper">
+                            <span class="badge" id="downloads-trend-badge">
+                                <iconify-icon icon="mdi:trending-up"></iconify-icon> <span id="downloads-trend-val">0%</span>
+                            </span>
+                            <span class="text-secondary">vs prev period</span>
                         </div>
                     </div>
                 </div>
 
-                {{-- Card 3: Total Likes --}}
+                {{-- Card 3: Likes --}}
                 <div class="col-xl-3 col-sm-6">
-                    <div class="stat-card p-4">
+                    <div class="stat-card p-4 h-100">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
-                                <span class="text-muted text-uppercase font-black tracking-wider fs-11">Total Likes</span>
-                                <h3 class="fw-bold text-dark mt-2 mb-0">{{ number_format($totalLikes) }}</h3>
+                                <span class="text-muted text-uppercase font-black tracking-wider fs-11">Likes</span>
+                                <h3 class="fw-bold text-dark mt-2 mb-0" id="likes-count">0</h3>
                             </div>
                             <div class="bg-danger-subtle text-danger rounded-3 p-2.5 d-flex align-items-center justify-content-center">
                                 <iconify-icon icon="mdi:heart" width="24" height="24"></iconify-icon>
                             </div>
                         </div>
-                        <div class="fs-12 text-muted">
-                            <span class="text-success fw-bold"><iconify-icon icon="mdi:trending-up" class="align-bottom"></iconify-icon> Active</span>
-                            <span>Community reviews</span>
+                        <div class="fs-12 text-muted d-flex align-items-center gap-1.5" id="likes-trend-wrapper">
+                            <span class="badge" id="likes-trend-badge">
+                                <iconify-icon icon="mdi:trending-up"></iconify-icon> <span id="likes-trend-val">0%</span>
+                            </span>
+                            <span class="text-secondary">vs prev period</span>
                         </div>
                     </div>
                 </div>
 
-                {{-- Card 4: Community size & Bugs (Grouped 2-in-1 for perfect fit) --}}
+                {{-- Card 4: Unique Listeners --}}
                 <div class="col-xl-3 col-sm-6">
-                    <div class="stat-card p-4">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="stat-card p-4 h-100">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
-                                <span class="text-muted text-uppercase font-black tracking-wider fs-11">Platform Core</span>
+                                <span class="text-muted text-uppercase font-black tracking-wider fs-11">Unique Listeners</span>
+                                <h3 class="fw-bold text-dark mt-2 mb-0" id="unique-count">0</h3>
                             </div>
-                            <div class="bg-info-subtle text-info rounded-3 p-1.5 d-flex align-items-center justify-content-center">
-                                <iconify-icon icon="mdi:server" width="18" height="18"></iconify-icon>
+                            <div class="bg-info-subtle text-info rounded-3 p-2.5 d-flex align-items-center justify-content-center">
+                                <iconify-icon icon="mdi:account-music" width="24" height="24"></iconify-icon>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center justify-content-between py-1.5 border-bottom border-light">
-                            <span class="fs-13 text-dark fw-medium d-flex align-items-center gap-1.5">
-                                <iconify-icon icon="mdi:account-multiple" class="text-muted"></iconify-icon> Website Users
+                        <div class="fs-12 text-muted d-flex align-items-center gap-1.5" id="unique-trend-wrapper">
+                            <span class="badge" id="unique-trend-badge">
+                                <iconify-icon icon="mdi:trending-up"></iconify-icon> <span id="unique-trend-val">0%</span>
                             </span>
-                            <span class="badge bg-light text-dark border fw-bold fs-11">{{ number_format($totalUsers) }}</span>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between pt-1.5">
-                            <span class="fs-13 text-dark fw-medium d-flex align-items-center gap-1.5">
-                                <iconify-icon icon="mdi:bug" class="text-muted"></iconify-icon> Pending Bug Reports
-                            </span>
-                            @if($openBugs > 0)
-                                <a href="{{ route('admin.reports.index') }}" class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold fs-11 hover-scale">{{ $openBugs }} unresolved</a>
-                            @else
-                                <span class="badge bg-success-subtle text-success border border-success-subtle fw-normal fs-11">0 pending</span>
-                            @endif
+                            <span class="text-secondary">vs prev period</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Interactive Performance Chart --}}
+            {{-- Analytics Charts Grid --}}
             <div class="row g-4 mb-4">
-                <div class="col-12">
-                    <div class="card border-0 rounded-4 shadow-sm p-4 bg-white" style="border: 1px solid #f3f3f5 !important;">
-                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
-                            <div>
-                                <h4 class="fw-bold text-dark mb-0">Platform Telemetry</h4>
-                                <p class="text-muted fs-12 mb-0">Daily breakdown of views, downloads, and likes across the platform.</p>
-                            </div>
-                            <div class="bg-light p-1 rounded-3 d-inline-flex">
-                                <button type="button" class="tab-btn stats-filter-btn active" data-days="7">Past 7 Days</button>
-                                <button type="button" class="tab-btn stats-filter-btn" data-days="30">Past 30 Days</button>
-                                <button type="button" class="tab-btn stats-filter-btn" data-days="90">Past 90 Days</button>
+                {{-- Chart 1: Activity Trend --}}
+                <div class="col-lg-8">
+                    <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100 position-relative" style="border: 1px solid #f3f3f5 !important; min-height: 400px;">
+                        <div class="chart-loading-overlay" id="trend-chart-loader">
+                            <div class="spinner-border text-brown" role="status">
+                                <span class="visually-hidden">Loading...</span>
                             </div>
                         </div>
+                        <div class="mb-3">
+                            <h4 class="fw-bold text-dark mb-0 font-brand uppercase tracking-tight">Engagement Telemetry</h4>
+                            <p class="text-muted fs-12 mb-0">Timeline visualization of Views, Downloads, and Likes.</p>
+                        </div>
+                        <div style="height: 300px; position: relative; width: 100%;">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Chart 2: Category Distribution --}}
+                <div class="col-lg-4">
+                    <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100 position-relative" style="border: 1px solid #f3f3f5 !important; min-height: 400px;">
+                        <div class="chart-loading-overlay" id="category-chart-loader">
+                            <div class="spinner-border text-brown" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h4 class="fw-bold text-dark mb-0 font-brand uppercase tracking-tight">Category Breakdown</h4>
+                            <p class="text-muted fs-12 mb-0">Distribution of user actions across genres/categories.</p>
+                        </div>
+                        <div style="height: 280px; position: relative; width: 100%; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                {{-- Chart 3: Top Music Stems Comparison --}}
+                <div class="col-12">
+                    <div class="card border-0 rounded-4 shadow-sm p-4 bg-white position-relative" style="border: 1px solid #f3f3f5 !important;">
+                        <div class="chart-loading-overlay" id="top-music-chart-loader">
+                            <div class="spinner-border text-brown" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h4 class="fw-bold text-dark mb-0 font-brand uppercase tracking-tight">Top Music Performance</h4>
+                            <p class="text-muted fs-12 mb-0">Side-by-side metric comparison of the top performing music stems in this period.</p>
+                        </div>
                         <div style="height: 350px; position: relative; width: 100%;">
-                            <canvas id="telemetryChart"></canvas>
+                            <canvas id="topMusicChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -296,13 +410,18 @@
 
             {{-- Main Dashboard Layout --}}
             <div class="row g-4">
-                {{-- Left Column: Interactive Content Charts --}}
+                {{-- Left Column: Dynamic Leaderboards --}}
                 <div class="col-lg-8">
-                    <div class="card border-0 rounded-4 shadow-sm p-4 h-100 bg-white">
+                    <div class="card border-0 rounded-4 shadow-sm p-4 h-100 bg-white position-relative">
+                        <div class="chart-loading-overlay" id="tables-loader">
+                            <div class="spinner-border text-brown" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
                         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
                             <div>
-                                <h4 class="fw-bold text-dark mb-0">Engagement Rankings</h4>
-                                <p class="text-muted fs-12 mb-0">Leaderboards tracking the most viewed, liked, and downloaded music stems.</p>
+                                <h4 class="fw-bold text-dark mb-0 font-brand uppercase tracking-tight">Engagement Rankings</h4>
+                                <p class="text-muted fs-12 mb-0">Leaderboards tracking the most active music stems in this period.</p>
                             </div>
 
                             {{-- Tab Headers --}}
@@ -342,49 +461,8 @@
                                                 <th class="text-end pe-3">Action</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            @forelse($topViewedSongs as $index => $song)
-                                                <tr>
-                                                    <td class="ps-3">
-                                                        <span class="rank-number rank-{{ $index + 1 <= 3 ? $index + 1 : 'other' }}">
-                                                            #{{ $index + 1 }}
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center gap-3">
-                                                            @if($song->featured_image)
-                                                                <img src="{{ $song->featured_image }}" alt="" class="music-thumb">
-                                                            @else
-                                                                <div class="music-thumb bg-light border d-flex align-items-center justify-content-center text-muted">
-                                                                    <iconify-icon icon="mdi:music"></iconify-icon>
-                                                                </div>
-                                                            @endif
-                                                            <div>
-                                                                <div class="fw-bold text-dark fs-14">{{ $song->title }}</div>
-                                                                <div class="text-muted fs-12">{{ $song->artist_name ?: 'NCS Artist' }}</div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge bg-light text-secondary border px-2.5 py-1 fw-normal">
-                                                            {{ $song->category->name ?? 'Vault' }}
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <span class="fw-black text-dark fs-14">{{ number_format($song->view_count) }}</span>
-                                                        <span class="text-muted fs-11 ms-1">views</span>
-                                                    </td>
-                                                    <td class="text-end pe-3">
-                                                        <a href="{{ route('admin.music.edit', $song->id) }}" class="btn btn-sm btn-outline-secondary rounded-3 px-3 py-1 fw-bold fs-11">
-                                                            Manage
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="5" class="text-center py-5 text-muted">No music tracks loaded in the vault yet.</td>
-                                                </tr>
-                                            @endforelse
+                                        <tbody id="table-views-body">
+                                            {{-- Rendered dynamically --}}
                                         </tbody>
                                     </table>
                                 </div>
@@ -403,49 +481,8 @@
                                                 <th class="text-end pe-3">Action</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            @forelse($topLikedSongs as $index => $song)
-                                                <tr>
-                                                    <td class="ps-3">
-                                                        <span class="rank-number rank-{{ $index + 1 <= 3 ? $index + 1 : 'other' }}">
-                                                            #{{ $index + 1 }}
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center gap-3">
-                                                            @if($song->featured_image)
-                                                                <img src="{{ $song->featured_image }}" alt="" class="music-thumb">
-                                                            @else
-                                                                <div class="music-thumb bg-light border d-flex align-items-center justify-content-center text-muted">
-                                                                    <iconify-icon icon="mdi:music"></iconify-icon>
-                                                                </div>
-                                                            @endif
-                                                            <div>
-                                                                <div class="fw-bold text-dark fs-14">{{ $song->title }}</div>
-                                                                <div class="text-muted fs-12">{{ $song->artist_name ?: 'NCS Artist' }}</div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge bg-light text-secondary border px-2.5 py-1 fw-normal">
-                                                            {{ $song->category->name ?? 'Vault' }}
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <span class="fw-black text-danger fs-14">{{ number_format($song->like_count) }}</span>
-                                                        <span class="text-muted fs-11 ms-1">likes</span>
-                                                    </td>
-                                                    <td class="text-end pe-3">
-                                                        <a href="{{ route('admin.music.edit', $song->id) }}" class="btn btn-sm btn-outline-secondary rounded-3 px-3 py-1 fw-bold fs-11">
-                                                            Manage
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="5" class="text-center py-5 text-muted">No liked tracks on the website yet.</td>
-                                                </tr>
-                                            @endforelse
+                                        <tbody id="table-likes-body">
+                                            {{-- Rendered dynamically --}}
                                         </tbody>
                                     </table>
                                 </div>
@@ -459,53 +496,13 @@
                                             <tr>
                                                 <th class="ps-3" style="width: 70px;">Rank</th>
                                                 <th>Music Stem Info</th>
-                                                <th>BPM & Key</th>
+                                                <th>Category</th>
                                                 <th>Metric count</th>
                                                 <th class="text-end pe-3">Action</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            @forelse($topDownloadedSongs as $index => $song)
-                                                <tr>
-                                                    <td class="ps-3">
-                                                        <span class="rank-number rank-{{ $index + 1 <= 3 ? $index + 1 : 'other' }}">
-                                                            #{{ $index + 1 }}
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center gap-3">
-                                                            @if($song->featured_image)
-                                                                <img src="{{ $song->featured_image }}" alt="" class="music-thumb">
-                                                            @else
-                                                                <div class="music-thumb bg-light border d-flex align-items-center justify-content-center text-muted">
-                                                                    <iconify-icon icon="mdi:music"></iconify-icon>
-                                                                </div>
-                                                            @endif
-                                                            <div>
-                                                                <div class="fw-bold text-dark fs-14">{{ $song->title }}</div>
-                                                                <div class="text-muted fs-12">{{ $song->artist_name ?: 'NCS Artist' }}</div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="fs-13 fw-bold text-dark">{{ $song->bpm ?? '--' }} BPM</div>
-                                                        <div class="fs-11 text-primary fw-medium">{{ $song->music_key ?? '--' }}</div>
-                                                    </td>
-                                                    <td>
-                                                        <span class="fw-black text-success fs-14">{{ number_format($song->download_count) }}</span>
-                                                        <span class="text-muted fs-11 ms-1">downloads</span>
-                                                    </td>
-                                                    <td class="text-end pe-3">
-                                                        <a href="{{ route('admin.music.edit', $song->id) }}" class="btn btn-sm btn-outline-secondary rounded-3 px-3 py-1 fw-bold fs-11">
-                                                            Manage
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="5" class="text-center py-5 text-muted">No downloaded stems yet.</td>
-                                                </tr>
-                                            @endforelse
+                                        <tbody id="table-downloads-body">
+                                            {{-- Rendered dynamically --}}
                                         </tbody>
                                     </table>
                                 </div>
@@ -519,8 +516,8 @@
                     <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100">
                         <div class="d-flex justify-content-between align-items-start mb-4">
                             <div>
-                                <h4 class="fw-bold text-dark mb-0">Platform Interaction Feed</h4>
-                                <p class="text-muted fs-12 mb-0">Chronological telemetry of guest and authenticated user operations.</p>
+                                <h4 class="fw-bold text-dark mb-0 font-brand uppercase tracking-tight">Interaction Feed</h4>
+                                <p class="text-muted fs-12 mb-0">Recent events log.</p>
                             </div>
                             <a href="{{ route('admin.interactions.history') }}" class="btn btn-sm btn-outline-secondary rounded-3 px-3 py-1 fw-bold fs-11 text-nowrap">
                                 View 1 Day History
@@ -584,34 +581,153 @@
     @push('scripts')
     <script>
         $(document).ready(function() {
-            let chartInstance = null;
+            // Chart instances pointers
+            let trendChart = null;
+            let categoryChart = null;
+            let topMusicChart = null;
 
-            function loadChartData(days) {
+            // Load analytics data for a specific timeframe
+            function loadDashboardData(timeframe) {
+                // Show loading states
+                $('.chart-loading-overlay').addClass('active');
+
                 $.ajax({
-                    url: "{{ route('admin.dashboard.stats') }}",
+                    url: "{{ route('admin.dashboard.analytics') }}",
                     method: 'GET',
-                    data: { days: days },
-                    success: function(data) {
-                        renderChart(data);
+                    data: { timeframe: timeframe },
+                    success: function(response) {
+                        updateMetrics(response.metrics);
+                        renderTrendChart(response.trend_chart, timeframe);
+                        renderCategoryChart(response.category_chart);
+                        renderTopMusicChart(response.top_music_chart);
+                        updateLeaderboardTables(response.tables);
                     },
                     error: function(xhr) {
-                        console.error('Failed to load chart data:', xhr);
+                        console.error('Failed to retrieve analytics data:', xhr);
+                        toastr.error('Failed to load telemetry statistics.');
+                    },
+                    complete: function() {
+                        // Hide loading states
+                        $('.chart-loading-overlay').removeClass('active');
                     }
                 });
             }
 
-            function renderChart(data) {
-                const ctx = document.getElementById('telemetryChart').getContext('2d');
+            // Update KPI metric counter numbers & trend styles
+            function updateMetrics(metrics) {
+                // Animate count-ups or just swap HTML
+                animateValue("views-count", metrics.views.count);
+                animateValue("downloads-count", metrics.downloads.count);
+                animateValue("likes-count", metrics.likes.count);
+                animateValue("unique-count", metrics.unique.count);
 
-                if (chartInstance) {
-                    chartInstance.destroy();
+                // Update trend badges
+                updateTrendIndicator("views-trend", metrics.views);
+                updateTrendIndicator("downloads-trend", metrics.downloads);
+                updateTrendIndicator("likes-trend", metrics.likes);
+                updateTrendIndicator("unique-trend", metrics.unique);
+            }
+
+            function animateValue(id, targetVal) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const start = parseInt(el.innerText.replace(/,/g, '')) || 0;
+                const duration = 600;
+                let startTimestamp = null;
+                
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const currentVal = Math.floor(progress * (targetVal - start) + start);
+                    el.innerText = new Intl.NumberFormat().format(currentVal);
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        el.innerText = new Intl.NumberFormat().format(targetVal);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+
+            function updateTrendIndicator(prefix, data) {
+                const $badge = $('#' + prefix + '-badge');
+                const $val = $('#' + prefix + '-val');
+                
+                // Clear classes
+                $badge.removeClass('badge-trend-up badge-trend-down bg-light text-muted');
+                
+                let sign = data.change >= 0 ? '+' : '';
+                $val.text(sign + data.change + '%');
+                
+                if (data.change > 0) {
+                    $badge.addClass('badge-trend-up');
+                    $badge.find('iconify-icon').attr('icon', 'mdi:trending-up');
+                } else if (data.change < 0) {
+                    $badge.addClass('badge-trend-down');
+                    $badge.find('iconify-icon').attr('icon', 'mdi:trending-down');
+                } else {
+                    $badge.addClass('bg-light text-muted border px-2 py-0.5 rounded-pill');
+                    $badge.find('iconify-icon').attr('icon', 'mdi:trending-neutral');
                 }
+            }
 
-                chartInstance = new Chart(ctx, {
-                    type: 'bar',
+            // Chart 1: Activity Trend Area Line Chart
+            function renderTrendChart(data, timeframe) {
+                const ctx = document.getElementById('trendChart').getContext('2d');
+                if (trendChart) trendChart.destroy();
+
+                // Define gradients
+                const viewGrad = ctx.createLinearGradient(0, 0, 0, 300);
+                viewGrad.addColorStop(0, 'rgba(13, 202, 240, 0.4)');
+                viewGrad.addColorStop(1, 'rgba(13, 202, 240, 0.0)');
+
+                const dlGrad = ctx.createLinearGradient(0, 0, 0, 300);
+                dlGrad.addColorStop(0, 'rgba(25, 135, 84, 0.4)');
+                dlGrad.addColorStop(1, 'rgba(25, 135, 84, 0.0)');
+
+                const likeGrad = ctx.createLinearGradient(0, 0, 0, 300);
+                likeGrad.addColorStop(0, 'rgba(220, 53, 69, 0.4)');
+                likeGrad.addColorStop(1, 'rgba(220, 53, 69, 0.0)');
+
+                trendChart = new Chart(ctx, {
+                    type: 'line',
                     data: {
                         labels: data.labels,
-                        datasets: data.datasets
+                        datasets: [
+                            {
+                                label: 'Views',
+                                data: data.views,
+                                backgroundColor: viewGrad,
+                                borderColor: '#0dcaf0',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.35,
+                                pointRadius: 2,
+                                pointHoverRadius: 6
+                            },
+                            {
+                                label: 'Downloads',
+                                data: data.downloads,
+                                backgroundColor: dlGrad,
+                                borderColor: '#198754',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.35,
+                                pointRadius: 2,
+                                pointHoverRadius: 6
+                            },
+                            {
+                                label: 'Likes',
+                                data: data.likes,
+                                backgroundColor: likeGrad,
+                                borderColor: '#dc3545',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.35,
+                                pointRadius: 2,
+                                pointHoverRadius: 6
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
@@ -620,67 +736,208 @@
                             legend: {
                                 position: 'top',
                                 labels: {
-                                    font: {
-                                        weight: 'bold',
-                                        family: 'system-ui, -apple-system, sans-serif'
-                                    },
+                                    font: { weight: '700', family: 'system-ui' },
                                     usePointStyle: true,
                                     pointStyle: 'circle',
-                                    padding: 20
+                                    padding: 15
                                 }
                             },
                             tooltip: {
-                                backgroundColor: '#1f0f0a',
-                                titleFont: {
-                                    weight: 'bold',
-                                    family: 'system-ui'
-                                },
-                                bodyFont: {
-                                    family: 'system-ui'
-                                },
+                                backgroundColor: '#111',
                                 padding: 12,
                                 cornerRadius: 8,
-                                displayColors: true
+                                bodySpacing: 6,
+                                titleFont: { weight: 'bold', family: 'system-ui' }
                             }
                         },
                         scales: {
-                            x: {
-                                grid: {
-                                    display: false
-                                },
-                                ticks: {
-                                    font: {
-                                        family: 'system-ui'
-                                    }
-                                }
-                            },
+                            x: { grid: { display: false } },
                             y: {
                                 beginAtZero: true,
-                                grid: {
-                                    color: '#f3f3f5'
-                                },
-                                ticks: {
-                                    precision: 0,
-                                    font: {
-                                        family: 'system-ui'
-                                    }
-                                }
+                                grid: { color: '#f3f3f5' },
+                                ticks: { precision: 0 }
                             }
                         }
                     }
                 });
             }
 
-            // Initial load
-            loadChartData(7);
+            // Chart 2: Category Distribution Doughnut
+            function renderCategoryChart(data) {
+                const ctx = document.getElementById('categoryChart').getContext('2d');
+                if (categoryChart) categoryChart.destroy();
 
-            // Filter button handler
-            $('.stats-filter-btn').on('click', function() {
-                $('.stats-filter-btn').removeClass('active');
+                categoryChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.data,
+                            backgroundColor: [
+                                '#a52a2a', // Brown (Brand primary)
+                                '#0dcaf0', // Cyan
+                                '#198754', // Green
+                                '#ffc107', // Gold
+                                '#6f42c1', // Purple
+                                '#fd7e14'  // Orange
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    font: { weight: '600', family: 'system-ui', size: 10 },
+                                    padding: 10
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        let val = context.raw;
+                                        let pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                                        return ` ${context.label}: ${val} (${pct}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '65%'
+                    }
+                });
+            }
+
+            // Chart 3: Top Music Stems Side-by-Side Horizontal Bar Chart
+            function renderTopMusicChart(data) {
+                const ctx = document.getElementById('topMusicChart').getContext('2d');
+                if (topMusicChart) topMusicChart.destroy();
+
+                topMusicChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [
+                            {
+                                label: 'Views',
+                                data: data.views,
+                                backgroundColor: 'rgba(13, 202, 240, 0.85)',
+                                borderColor: '#0dcaf0',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Downloads',
+                                data: data.downloads,
+                                backgroundColor: 'rgba(25, 135, 84, 0.85)',
+                                borderColor: '#198754',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Likes',
+                                data: data.likes,
+                                backgroundColor: 'rgba(220, 53, 69, 0.85)',
+                                borderColor: '#dc3545',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y', // Makes it horizontal!
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    font: { weight: '700', family: 'system-ui' }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: '#f3f3f5' },
+                                ticks: { precision: 0 }
+                            },
+                            y: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Helper to generate dynamic table rows
+            function updateLeaderboardTables(tables) {
+                renderTableRows($('#table-views-body'), tables.views, 'views', 'views');
+                renderTableRows($('#table-likes-body'), tables.likes, 'likes', 'likes');
+                renderTableRows($('#table-downloads-body'), tables.downloads, 'downloads', 'downloads');
+            }
+
+            function renderTableRows($tbody, data, metricName, unitText) {
+                $tbody.empty();
+                if (!data || data.length === 0) {
+                    $tbody.html(`<tr><td colspan="5" class="text-center py-5 text-muted">No interactions detected in this period.</td></tr>`);
+                    return;
+                }
+                
+                data.forEach((song, index) => {
+                    let imageHtml = song.featured_image 
+                        ? `<img src="${song.featured_image}" alt="" class="music-thumb">`
+                        : `<div class="music-thumb bg-light border d-flex align-items-center justify-content-center text-muted"><iconify-icon icon="mdi:music"></iconify-icon></div>`;
+                        
+                    let rankClass = (index + 1 <= 3) ? `rank-${index + 1}` : 'rank-other';
+                    let countColorClass = metricName === 'likes' ? 'text-danger' : (metricName === 'downloads' ? 'text-success' : 'text-dark');
+                    
+                    let rowHtml = `
+                        <tr>
+                            <td class="ps-3">
+                                <span class="rank-number ${rankClass}">#${index + 1}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    ${imageHtml}
+                                    <div>
+                                        <div class="fw-bold text-dark fs-14">${song.title}</div>
+                                        <div class="text-muted fs-12">${song.artist_name}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-secondary border px-2.5 py-1 fw-normal">
+                                    ${song.category_name}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="fw-black ${countColorClass} fs-14">${new Intl.NumberFormat().format(song.count)}</span>
+                                <span class="text-muted fs-11 ms-1">${unitText}</span>
+                            </td>
+                            <td class="text-end pe-3">
+                                <a href="/admin/music/${song.id}/edit" class="btn btn-sm btn-outline-secondary rounded-3 px-3 py-1 fw-bold fs-11">
+                                    Manage
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                    $tbody.append(rowHtml);
+                });
+            }
+
+            // Click listener for timeframe toggle
+            $('.dashboard-filter-btn').on('click', function() {
+                $('.dashboard-filter-btn').removeClass('active');
                 $(this).addClass('active');
-                const days = $(this).data('days');
-                loadChartData(days);
+                
+                const timeframe = $(this).data('timeframe');
+                loadDashboardData(timeframe);
             });
+
+            // Initial auto-trigger to load Weekly Analytics on boot
+            loadDashboardData('weekly');
         });
     </script>
     @endpush
