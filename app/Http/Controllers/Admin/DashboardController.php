@@ -243,7 +243,7 @@ class DashboardController extends Controller
             $hours = [];
             for ($i = 0; $i < 24; $i++) {
                 $hours[$i] = [
-                    'label' => Carbon\Carbon::createFromTime($i)->format('g A'),
+                    'label' => Carbon::createFromTime($i)->format('g A'),
                     'views' => 0,
                     'downloads' => 0,
                     'likes' => 0,
