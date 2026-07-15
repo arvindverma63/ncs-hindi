@@ -51,28 +51,42 @@
     }
 
     .topbar-custom {
-        background: brown !important;
+        background: #ffffff !important;
+        border-bottom: 1px solid #f0f0f2 !important;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
     }
 
     .logo-box {
-        background: saddlebrown !important;
+        background: #4b2c20 !important; /* Premium brand chocolate */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .sidebar-menu {
-        background: aliceblue !important;
+        background: #ffffff !important;
+        border-right: 1px solid #f0f0f2;
     }
 
     .topbar-custom .topnav-menu .topbar-button {
-        background: brown;
-        color: white !important;
+        background: transparent !important;
+        color: #495057 !important;
+        transition: color 0.15s ease-in-out;
+    }
+
+    .topbar-custom .topnav-menu .topbar-button:hover {
+        color: #4b2c20 !important;
+    }
+
+    .topbar-custom .button-toggle-menu {
+        background: transparent !important;
+        border: none !important;
     }
 
     .dropdown-toggle::after {
         display: none !important;
     }
     .btn-primary {
-        background: brown !important;
-        border: brown;
+        background: #4b2c20 !important;
+        border: #4b2c20;
     }
     .table-card{
         padding: 0px !important;
