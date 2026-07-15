@@ -86,13 +86,17 @@
         color: #ffffff !important;
     }
 
-    /* Clean outlines and align elements vertically to center */
-    .topbar-custom .button-toggle-menu,
-    .topbar-custom .topbar-dropdown .nav-link {
+    /* Reset backgrounds, borders, and shadows on topbar buttons/links outside dropdown menus */
+    .topbar-custom :not(.dropdown-menu):not(.dropdown-menu *) {
         background: transparent !important;
+        background-color: transparent !important;
         border: none !important;
         box-shadow: none !important;
-        border-radius: 0px !important;
+    }
+
+    /* Align elements vertically to center */
+    .topbar-custom .button-toggle-menu,
+    .topbar-custom .topnav-menu .nav-link:not(.nav-user) {
         margin-top: 24px !important;
         height: auto !important;
         line-height: normal !important;
@@ -100,10 +104,6 @@
     }
 
     .topbar-custom .nav-user {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        border-radius: 0px !important;
         margin-top: 18px !important;
         height: auto !important;
         line-height: normal !important;
