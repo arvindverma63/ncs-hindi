@@ -55,16 +55,17 @@
     }
 
     .topbar-custom {
-        background: #f8f9fa !important; /* Soft off-white */
+        background: #1f0f0a !important; /* Rich obsidian dark */
         border-top: none !important;
-        border-bottom: 1px solid #e9ecef !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
     .logo-box {
-        background: #1f0f0a !important; /* Obsidian brand dark */
+        background: #1f0f0a !important; /* Seamless obsidian integration */
         border-top: none !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .sidebar-menu {
@@ -72,25 +73,41 @@
         border-right: 1px solid #f0f0f2;
     }
 
-    .topbar-custom .topnav-menu .topbar-button {
-        background: transparent !important;
-        color: #495057 !important;
+    /* Force light colors on icons and text for dark header */
+    .topbar-custom .topbar-button,
+    .topbar-custom iconify-icon,
+    .topbar-custom .text-dark {
+        color: #e9ecef !important;
         transition: color 0.15s ease-in-out;
     }
 
-    .topbar-custom .topnav-menu .topbar-button:hover {
-        color: #4b2c20 !important;
+    .topbar-custom .topbar-button:hover,
+    .topbar-custom iconify-icon:hover {
+        color: #ffffff !important;
     }
 
+    /* Clean outlines and align elements vertically to center */
     .topbar-custom .button-toggle-menu,
-    .topbar-custom .nav-link,
-    .topbar-custom .topnav-menu button,
-    .topbar-custom .topnav-menu a.dropdown-toggle {
+    .topbar-custom .topbar-dropdown .nav-link {
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
         border-radius: 0px !important;
-        margin-top: 8px !important;
+        margin-top: 24px !important;
+        height: auto !important;
+        line-height: normal !important;
+        padding: 0 !important;
+    }
+
+    .topbar-custom .nav-user {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0px !important;
+        margin-top: 18px !important;
+        height: auto !important;
+        line-height: normal !important;
+        padding: 0 !important;
     }
 
     .dropdown-toggle::after {
