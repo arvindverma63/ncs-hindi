@@ -55,10 +55,10 @@
     }
 
     .topbar-custom {
-        background: #ffffff !important;
+        background: #f8f9fa !important; /* Soft off-white */
         border-top: none !important;
-        border-bottom: 1px solid #f0f0f2 !important;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.015);
+        border-bottom: 1px solid #e9ecef !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
     }
 
     .logo-box {
@@ -82,12 +82,15 @@
         color: #4b2c20 !important;
     }
 
+    .topbar-custom .button-toggle-menu,
     .topbar-custom .nav-link,
-    .topbar-custom .button-toggle-menu {
+    .topbar-custom .topnav-menu button,
+    .topbar-custom .topnav-menu a.dropdown-toggle {
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
         border-radius: 0px !important;
+        margin-top: 8px !important;
     }
 
     .dropdown-toggle::after {
