@@ -1,8 +1,5 @@
 <x-app-layout title="Dashboard | NCS Hindi Admin">
-    @push('heads')
-        <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    @endpush
+
 
     <style>
         .stat-card {
@@ -579,6 +576,7 @@
     </div>
 
     @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         $(document).ready(function() {
             // Chart instances pointers
