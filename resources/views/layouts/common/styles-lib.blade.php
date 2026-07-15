@@ -50,14 +50,20 @@
         opacity: 1 !important;
     }
 
+    body {
+        border-top: none !important;
+    }
+
     .topbar-custom {
         background: #ffffff !important;
+        border-top: none !important;
         border-bottom: 1px solid #f0f0f2 !important;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.015);
     }
 
     .logo-box {
-        background: #4b2c20 !important; /* Premium brand chocolate */
+        background: #1f0f0a !important; /* Obsidian brand dark */
+        border-top: none !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
@@ -76,9 +82,12 @@
         color: #4b2c20 !important;
     }
 
+    .topbar-custom .nav-link,
     .topbar-custom .button-toggle-menu {
         background: transparent !important;
         border: none !important;
+        box-shadow: none !important;
+        border-radius: 0px !important;
     }
 
     .dropdown-toggle::after {
