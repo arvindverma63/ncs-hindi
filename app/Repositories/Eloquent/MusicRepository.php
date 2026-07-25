@@ -117,6 +117,14 @@ class MusicRepository implements MusicRepositoryInterface
                 $imageUrl = $this->imgBB->upload($data['featured_image']);
             }
 
+            $audioFilePath = null;
+            if (isset($data['audio_file']) && $data['audio_file'] instanceof \Illuminate\Http\UploadedFile) {
+                $audioFilePath = $data['audio_file']->store('music_files', 'public');
+            }
+
+            $megaLink = !empty($data['mega_link']) ? $data['mega_link'] : null;
+            $filePath = $audioFilePath ?: ($megaLink ?: ($data['music_file'] ?? 'Direct Audio Upload'));
+
             $music = Music::create([
                 'id'               => (string) Str::uuid(), // Ensure UUID is generated if not in boot
                 'category_id'      => $categoryId,
@@ -127,13 +135,15 @@ class MusicRepository implements MusicRepositoryInterface
                 'description'      => $data['description'] ?? null,
                 'license_text'     => $data['license_text'] ?? null,
                 'tags_keywords'    => $data['tags_keywords'] ?? null,
-                'file_name'        => 'External Link',
-                'file_path'        => $audioPath, // This saves the Mega Link
+                'file_name'        => $audioFilePath ? 'Uploaded Audio' : 'External Link',
+                'file_path'        => $filePath,
+                'audio_file'       => $audioFilePath,
+                'can_play_on_website' => isset($data['can_play_on_website']) ? (bool) $data['can_play_on_website'] : ($audioFilePath ? true : false),
                 'featured_image'   => $imageUrl,
-                'file_size'        => '0 KB', // URL doesn't have a local file size
+                'file_size'        => '0 KB',
                 'bpm'              => $data['bpm'] ?? null,
                 'music_key'        => $data['music_key'] ?? null,
-                'mega_link'        => $data['mega_link'] ?? $audioPath,
+                'mega_link'        => $megaLink,
                 'youtube_link'     => $data['youtube_link'] ?? null,
                 'seo_title'        => $data['seo_title'] ?? $data['title'],
                 'seo_description'  => $data['seo_description'] ?? Str::limit($data['description'] ?? '', 150),
@@ -160,10 +170,9 @@ class MusicRepository implements MusicRepositoryInterface
             $music = Music::findOrFail($musicId);
             $wasPublic = (bool) $music->is_public;
 
-            // Update Audio path if a new link/string is provided
-            if (isset($data['music_file'])) {
-                $music->file_path = $data['music_file'];
-                $music->mega_link = $data['mega_link'] ?? $data['music_file'];
+            if (!empty($data['mega_link'])) {
+                $music->mega_link = $data['mega_link'];
+                $music->file_path = $data['mega_link'];
             }
 
             if (isset($data['featured_image']) && $data['featured_image'] instanceof \Illuminate\Http\UploadedFile) {
@@ -171,6 +180,13 @@ class MusicRepository implements MusicRepositoryInterface
                 if ($imageUrl) {
                     $music->featured_image = $imageUrl;
                 }
+            }
+
+            if (isset($data['audio_file']) && $data['audio_file'] instanceof \Illuminate\Http\UploadedFile) {
+                if ($music->audio_file && !filter_var($music->audio_file, FILTER_VALIDATE_URL)) {
+                    Storage::disk('public')->delete($music->audio_file);
+                }
+                $music->audio_file = $data['audio_file']->store('music_files', 'public');
             }
 
             $music->update([
@@ -184,6 +200,7 @@ class MusicRepository implements MusicRepositoryInterface
                 'tags_keywords'    => $data['tags_keywords'] ?? $music->tags_keywords,
                 'music_key'        => $data['music_key'] ?? $music->music_key,
                 'youtube_link'     => $data['youtube_link'] ?? $music->youtube_link,
+                'can_play_on_website' => isset($data['can_play_on_website']) ? (bool) $data['can_play_on_website'] : $music->can_play_on_website,
                 'seo_title'        => $data['seo_title'] ?? $music->seo_title,
                 'seo_description'  => $data['seo_description'] ?? $music->seo_description,
                 'is_public'        => isset($data['is_public']) ? (bool)$data['is_public'] : $music->is_public,

@@ -100,26 +100,108 @@
                             </div>
                         </div>
 
-                        <div class="card border-0 shadow-sm rounded-4 mb-4">
-                            <div class="card-header bg-white border-bottom py-3">
-                                <h5 class="card-title mb-0 fw-bold text-dark">
-                                    <iconify-icon icon="mdi:cloud-link" class="me-2 text-primary"></iconify-icon>Storage
-                                    Link
-                                </h5>
-                            </div>
-                            <div class="card-body p-4">
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold small text-uppercase text-secondary">Mega.nz Link <span
-                                            class="text-danger">*</span></label>
-                                    <input type="url" name="mega_link" id="mega_link"
-                                        class="form-control bg-light border-0" placeholder="https://mega.nz/file/..."
-                                        required>
+                        <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                            <div class="card-header bg-white border-bottom py-3.5 px-4 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="p-2 rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                        <iconify-icon icon="mdi:folder-music-outline" class="fs-4"></iconify-icon>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-0 fw-bold text-dark fs-6">Music Source & Audio Setup</h5>
+                                        <span class="text-muted extra-small">Configure audio file storage & website streaming availability</span>
+                                    </div>
                                 </div>
+                                <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill font-monospace text-uppercase" style="font-size: 10px;">Config</span>
+                            </div>
+                            
+                            <div class="card-body p-4">
+                                {{-- Segmented Source Mode Selector --}}
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold small text-uppercase text-secondary mb-2 d-block">
+                                        Select Music Source Mode <span class="text-danger">*</span>
+                                    </label>
+                                    
+                                    <div class="p-1.5 rounded-4 d-flex gap-2" style="background-color: #f1f5f9; border: 1px solid #e2e8f0;">
+                                        <button type="button" id="btn_source_upload" class="btn btn-primary w-50 py-2.5 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 transition-all shadow-sm">
+                                            <iconify-icon icon="mdi:cloud-upload" class="fs-5"></iconify-icon>
+                                            <span>Direct Audio Upload</span>
+                                            <span class="badge bg-white text-primary ms-1 px-2 py-1 rounded-pill" style="font-size: 10px;">Web Stream</span>
+                                        </button>
+                                        
+                                        <button type="button" id="btn_source_mega" class="btn btn-light text-secondary w-50 py-2.5 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 transition-all border-0">
+                                            <iconify-icon icon="mdi:cloud-link" class="fs-5"></iconify-icon>
+                                            <span>Mega.nz Link Only</span>
+                                            <span class="badge bg-secondary-subtle text-secondary ms-1 px-2 py-1 rounded-pill" style="font-size: 10px;">External Link</span>
+                                        </button>
+                                    </div>
+                                    
+                                    <input type="hidden" name="source_type" id="source_type_input" value="file">
+                                </div>
+
+                                {{-- Direct File Upload Field --}}
+                                <div id="file_upload_field_group" class="mb-4">
+                                    <div class="alert alert-info border-0 bg-primary-subtle text-primary-emphasis rounded-3 py-2.5 px-3 small d-flex align-items-center gap-2 mb-3">
+                                        <iconify-icon icon="mdi:information-outline" class="fs-5"></iconify-icon>
+                                        <div>Uploading an audio file enables website visitors to stream and listen to this track in the web player.</div>
+                                    </div>
+                                    <div class="p-4 rounded-4 border-2 border-dashed bg-light text-center position-relative transition-all" style="border-color: #cbd5e1;">
+                                        <div class="mb-2">
+                                            <iconify-icon icon="mdi:file-music-outline" class="text-primary display-6"></iconify-icon>
+                                        </div>
+                                        <h6 class="fw-bold text-dark mb-1">Choose Audio File to Upload</h6>
+                                        <p class="text-muted extra-small mb-3">Supported formats: <strong class="text-dark">MP3, WAV, OGG, M4A, AAC, FLAC</strong> (Max: 50MB)</p>
+                                        <div class="d-inline-block">
+                                            <input type="file" name="audio_file" id="audio_file" class="form-control form-control-sm bg-white border shadow-sm px-3 py-2 rounded-3" accept="audio/*">
+                                        </div>
+                                        <div id="selected_audio_filename" class="mt-2 font-monospace text-primary fw-bold small d-none"></div>
+                                    </div>
+                                </div>
+
+                                {{-- Mega Link Field --}}
+                                <div id="mega_link_field_group" class="mb-4 d-none">
+                                    <div class="alert alert-warning border-0 bg-warning-subtle text-warning-emphasis rounded-3 py-2.5 px-3 small d-flex align-items-center gap-2 mb-3">
+                                        <iconify-icon icon="mdi:alert-circle-outline" class="fs-5"></iconify-icon>
+                                        <div>Mega link mode is for external cloud downloads. Website streaming player will be disabled for this track.</div>
+                                    </div>
+                                    <label class="form-label fw-bold small text-uppercase text-secondary mb-1">
+                                        Mega.nz Storage Link <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0 rounded-start-3 text-secondary">
+                                            <iconify-icon icon="mdi:link-variant" class="fs-5"></iconify-icon>
+                                        </span>
+                                        <input type="url" name="mega_link" id="mega_link" class="form-control bg-light border-start-0 py-2.5 rounded-end-3" placeholder="https://mega.nz/file/...">
+                                    </div>
+                                    <small class="text-muted extra-small mt-1 d-block">Paste your public Mega.nz file or folder download link here.</small>
+                                </div>
+
+                                {{-- Website Playable Toggle Card --}}
+                                <div class="rounded-4 bg-light border d-flex align-items-center justify-content-between mb-4" style="padding: 1rem 1.25rem !important;">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-3 bg-white border text-warning d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                            <iconify-icon icon="mdi:play-circle" class="fs-4 text-warning"></iconify-icon>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark mb-0">Enable Web Audio Player</div>
+                                            <div class="text-muted extra-small">Allow website visitors to listen & stream this track live on NCS Hindi.</div>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch m-0 flex-shrink-0">
+                                        <input class="form-check-input cursor-pointer ms-0" type="checkbox" name="can_play_on_website" id="can_play_on_website" value="1" checked style="width: 2.75em; height: 1.4em;">
+                                    </div>
+                                </div>
+
+                                {{-- YouTube Link --}}
                                 <div>
-                                    <label class="form-label fw-bold small text-uppercase text-secondary">YouTube Link <span
-                                            class="text-muted">(Optional)</span></label>
-                                    <input type="url" name="youtube_link" id="youtube_link"
-                                        class="form-control bg-light border-0" placeholder="https://youtube.com/watch?v=...">
+                                    <label class="form-label fw-bold small text-uppercase text-secondary mb-1">
+                                        YouTube Video Link <span class="text-muted fw-normal">(Optional)</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0 rounded-start-3 text-danger">
+                                            <iconify-icon icon="mdi:youtube" class="fs-5"></iconify-icon>
+                                        </span>
+                                        <input type="url" name="youtube_link" id="youtube_link" class="form-control bg-light border-start-0 py-2.5 rounded-end-3" placeholder="https://youtube.com/watch?v=...">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -179,22 +261,77 @@
                     }
                 });
 
-                $('#language_options').on('change', 'input[type="checkbox"]', syncLanguageField);
+                // Segmented Music Source Mode Toggle
+                function setMusicSourceMode(mode) {
+                    if (mode === 'file') {
+                        $('#source_type_input').val('file');
+                        $('#btn_source_upload')
+                            .removeClass('btn-light text-secondary border-0')
+                            .addClass('btn-primary shadow-sm')
+                            .find('.badge').removeClass('bg-secondary-subtle text-secondary').addClass('bg-white text-primary');
+
+                        $('#btn_source_mega')
+                            .removeClass('btn-primary shadow-sm')
+                            .addClass('btn-light text-secondary border-0')
+                            .find('.badge').removeClass('bg-white text-primary').addClass('bg-secondary-subtle text-secondary');
+
+                        $('#file_upload_field_group').removeClass('d-none').show();
+                        $('#mega_link_field_group').addClass('d-none').hide();
+                        $('#can_play_on_website').prop('checked', true);
+                    } else {
+                        $('#source_type_input').val('mega');
+                        $('#btn_source_mega')
+                            .removeClass('btn-light text-secondary border-0')
+                            .addClass('btn-primary shadow-sm')
+                            .find('.badge').removeClass('bg-secondary-subtle text-secondary').addClass('bg-white text-primary');
+
+                        $('#btn_source_upload')
+                            .removeClass('btn-primary shadow-sm')
+                            .addClass('btn-light text-secondary border-0')
+                            .find('.badge').removeClass('bg-white text-primary').addClass('bg-secondary-subtle text-secondary');
+
+                        $('#file_upload_field_group').addClass('d-none').hide();
+                        $('#mega_link_field_group').removeClass('d-none').show();
+                        $('#can_play_on_website').prop('checked', false);
+                    }
+                }
+
+                $('#btn_source_upload').on('click', function() { setMusicSourceMode('file'); });
+                $('#btn_source_mega').on('click', function() { setMusicSourceMode('mega'); });
+
+                $('#audio_file').on('change', function() {
+                    if (this.files && this.files[0]) {
+                        $('#selected_audio_filename').text('Selected File: ' + this.files[0].name).removeClass('d-none');
+                    } else {
+                        $('#selected_audio_filename').addClass('d-none');
+                    }
+                });
 
                 $form.on('submit', function(e) {
                     e.preventDefault();
                     syncLanguageField();
 
+                    const mode = $('#source_type_input').val();
                     const megaLink = $('#mega_link').val();
-                    if (!megaLink) {
-                        toastr.error('Mega Link is required.');
+                    const audioFileInput = $('#audio_file')[0];
+
+                    if (mode === 'mega' && !megaLink) {
+                        toastr.error('Mega Link is required when selecting Mega.nz link mode.');
+                        return false;
+                    }
+
+                    if (mode === 'file' && (!audioFileInput.files || !audioFileInput.files.length)) {
+                        toastr.error('Please select an audio file to upload.');
                         return false;
                     }
 
                     let formData = new FormData(this);
 
-                    // This ensures the backend 'music_file' validation/field receives the URL
-                    formData.append('music_file', megaLink);
+                    if (megaLink) {
+                        formData.append('music_file', megaLink);
+                    } else {
+                        formData.append('music_file', 'Direct Audio Upload');
+                    }
 
                     $btn.prop('disabled', true).html(
                         '<iconify-icon icon="line-md:loading-twotone-loop" class="me-2"></iconify-icon> Publishing...'

@@ -611,6 +611,187 @@
     });
 
     console.log('NCS Hindi WebApp Initialized');
+
+    /* ==========================================================================
+       GLOBAL NCS MUSIC PLAYER SYSTEM
+       ========================================================================== */
+    (function() {
+        const audio = document.getElementById('globalNcsAudio');
+        const playerBar = document.getElementById('ncsGlobalPlayer');
+        if (!audio || !playerBar) return;
+
+        const playPauseBtn = document.getElementById('playerPlayPauseBtn');
+        const playIcon = document.getElementById('playerPlayIcon');
+        const coverImg = document.getElementById('playerCoverImg');
+        const coverFallback = document.getElementById('playerCoverFallback');
+        const playingIndicator = document.getElementById('playerPlayingIndicator');
+        const titleEl = document.getElementById('playerTrackTitle');
+        const artistEl = document.getElementById('playerTrackArtist');
+        const currentTimeEl = document.getElementById('playerCurrentTime');
+        const durationEl = document.getElementById('playerDuration');
+        const progressBar = document.getElementById('playerProgress');
+        const volumeBar = document.getElementById('playerVolume');
+        const muteBtn = document.getElementById('playerMuteBtn');
+        const volumeIcon = document.getElementById('playerVolumeIcon');
+        const closeBtn = document.getElementById('playerCloseBtn');
+        const rewindBtn = document.getElementById('playerRewindBtn');
+        const forwardBtn = document.getElementById('playerForwardBtn');
+
+        let currentActiveBtn = null;
+
+        function formatTime(secs) {
+            if (isNaN(secs) || secs < 0) return '0:00';
+            const m = Math.floor(secs / 60);
+            const s = Math.floor(secs % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function showPlayer() {
+            playerBar.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
+            playerBar.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+        }
+
+        function hidePlayer() {
+            audio.pause();
+            playerBar.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
+            playerBar.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+            updatePlayButtonsState(false);
+        }
+
+        function updatePlayButtonsState(isPlaying) {
+            playIcon.className = isPlaying ? 'fa-solid fa-pause text-base sm:text-lg' : 'fa-solid fa-play text-base sm:text-lg ml-0.5';
+            if (playingIndicator) {
+                playingIndicator.style.display = isPlaying ? 'flex' : 'none';
+            }
+
+            // Sync page trigger buttons
+            $('[data-play-audio]').each(function() {
+                const $b = $(this);
+                const icon = $b.find('.js-play-icon');
+                const label = $b.find('.js-play-label');
+                if (currentActiveBtn && $b[0] === currentActiveBtn[0]) {
+                    if (isPlaying) {
+                        icon.removeClass('fa-play').addClass('fa-pause');
+                        if (label.length) label.text('Pause Track');
+                    } else {
+                        icon.removeClass('fa-pause').addClass('fa-play');
+                        if (label.length) label.text('Play Track');
+                    }
+                } else {
+                    icon.removeClass('fa-pause').addClass('fa-play');
+                    if (label.length) label.text('Play Track');
+                }
+            });
+        }
+
+        function playTrack(src, title, artist, cover, $triggerBtn) {
+            if (!src) return;
+
+            if (audio.src === src && !audio.paused) {
+                audio.pause();
+                return;
+            }
+
+            if (audio.src !== src) {
+                audio.src = src;
+                titleEl.textContent = title || 'Unknown Title';
+                artistEl.textContent = artist || 'NCS Artist';
+
+                if (cover) {
+                    coverImg.src = cover;
+                    coverImg.classList.remove('hidden');
+                    coverFallback.classList.add('hidden');
+                } else {
+                    coverImg.classList.add('hidden');
+                    coverFallback.classList.remove('hidden');
+                }
+            }
+
+            currentActiveBtn = $triggerBtn || null;
+            showPlayer();
+            audio.play().then(() => {
+                updatePlayButtonsState(true);
+            }).catch(err => {
+                console.warn('Playback error:', err);
+                if (window.toastr) toastr.error('Unable to play audio track.');
+            });
+        }
+
+        // Global Play Trigger Event
+        $(document).on('click', '[data-play-audio]', function(e) {
+            e.preventDefault();
+            const $btn = $(this);
+            const src = $btn.data('audio-src');
+            const title = $btn.data('audio-title');
+            const artist = $btn.data('audio-artist');
+            const cover = $btn.data('audio-cover');
+
+            if (!src) {
+                if (window.toastr) toastr.warning('Audio track is not available for web stream.');
+                return;
+            }
+
+            playTrack(src, title, artist, cover, $btn);
+        });
+
+        // Controls Event Listeners
+        playPauseBtn.addEventListener('click', function() {
+            if (audio.paused) {
+                audio.play();
+            } else {
+                audio.pause();
+            }
+        });
+
+        audio.addEventListener('play', () => updatePlayButtonsState(true));
+        audio.addEventListener('pause', () => updatePlayButtonsState(false));
+        audio.addEventListener('timeupdate', () => {
+            if (!audio.duration) return;
+            const pct = (audio.currentTime / audio.duration) * 100;
+            progressBar.value = pct;
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+            durationEl.textContent = formatTime(audio.duration);
+        });
+
+        progressBar.addEventListener('input', () => {
+            if (audio.duration) {
+                audio.currentTime = (progressBar.value / 100) * audio.duration;
+            }
+        });
+
+        volumeBar.addEventListener('input', () => {
+            audio.volume = volumeBar.value;
+            audio.muted = (volumeBar.value == 0);
+            updateVolumeIcon();
+        });
+
+        muteBtn.addEventListener('click', () => {
+            audio.muted = !audio.muted;
+            updateVolumeIcon();
+        });
+
+        function updateVolumeIcon() {
+            if (audio.muted || audio.volume == 0) {
+                volumeIcon.className = 'fa-solid fa-volume-xmark';
+            } else if (audio.volume < 0.5) {
+                volumeIcon.className = 'fa-solid fa-volume-low';
+            } else {
+                volumeIcon.className = 'fa-solid fa-volume-high';
+            }
+        }
+
+        rewindBtn.addEventListener('click', () => {
+            audio.currentTime = Math.max(0, audio.currentTime - 10);
+        });
+
+        forwardBtn.addEventListener('click', () => {
+            if (audio.duration) {
+                audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+            }
+        });
+
+        closeBtn.addEventListener('click', hidePlayer);
+    })();
 </script>
 
 

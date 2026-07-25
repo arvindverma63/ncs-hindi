@@ -15,6 +15,7 @@
         </main>
     </div>
 
+    @include('layouts.partials.webapp.player')
     @include('layouts.partials.webapp.footer')
     @include('layouts.partials.webapp.script')
 </body>

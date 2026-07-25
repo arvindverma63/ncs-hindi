@@ -97,9 +97,21 @@
                                 <i class="fa-solid fa-download text-amber-500/80"></i> {{ number_format($song->download_count) }}
                             </span>
                         </div>
-                        <a href="{{ route('webapp.music.show', $song->slug) }}" class="px-4 py-2 bg-white hover:bg-amber-500 text-black hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition duration-300">
-                            Listen
-                        </a>
+                        @if ($song->is_playable)
+                            <button type="button"
+                                data-play-audio
+                                data-audio-src="{{ $song->audio_url }}"
+                                data-audio-title="{{ $song->title }}"
+                                data-audio-artist="{{ $song->artist_name ?: 'NCS Artist' }}"
+                                data-audio-cover="{{ $song->featured_image ?: '' }}"
+                                class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition duration-300 hover:from-amber-400 hover:to-amber-500 flex items-center gap-1.5 shadow-md shadow-amber-500/20">
+                                <i class="fa-solid fa-play js-play-icon"></i> <span class="js-play-label">Listen</span>
+                            </button>
+                        @else
+                            <a href="{{ route('webapp.music.show', $song->slug) }}" class="px-4 py-2 bg-white hover:bg-amber-500 text-black hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition duration-300">
+                                Listen
+                            </a>
+                        @endif
                     </div>
                 </div>
             @empty

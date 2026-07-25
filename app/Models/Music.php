@@ -36,7 +36,9 @@ class Music extends Model
         'slug',
         'is_public',
         'mega_link',
-        'youtube_link'
+        'youtube_link',
+        'audio_file',
+        'can_play_on_website',
     ];
 
     /**
@@ -44,6 +46,7 @@ class Music extends Model
      */
     protected $casts = [
         'is_public' => 'boolean',
+        'can_play_on_website' => 'boolean',
         'download_count' => 'integer',
         'like_count' => 'integer',
         'view_count' => 'integer',
@@ -103,6 +106,28 @@ class Music extends Model
 
         $timestamp = $this->updated_at ? $this->updated_at->timestamp : time();
         return str_contains($url, '?') ? $url . '&v=' . $timestamp : $url . '?v=' . $timestamp;
+    }
+
+    public function getAudioUrlAttribute()
+    {
+        if ($this->audio_file) {
+            if (filter_var($this->audio_file, FILTER_VALIDATE_URL)) {
+                return $this->audio_file;
+            }
+            return asset('storage/' . ltrim($this->audio_file, '/'));
+        }
+
+        // Fallback: check if file_path is an audio file URL or audio path
+        if ($this->file_path && (filter_var($this->file_path, FILTER_VALIDATE_URL) && preg_match('/\.(mp3|wav|ogg|m4a|aac|flac)(\?.*)?$/i', $this->file_path))) {
+            return $this->file_path;
+        }
+
+        return null;
+    }
+
+    public function getIsPlayableAttribute(): bool
+    {
+        return (bool) ($this->can_play_on_website && !empty($this->audio_url));
     }
 
     // --- Relationships ---

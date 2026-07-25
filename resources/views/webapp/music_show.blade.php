@@ -194,6 +194,19 @@
                 </p>
 
                 <div class="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                    {{-- Play Web Music Button --}}
+                    @if ($music->is_playable)
+                        <button type="button"
+                            data-play-audio
+                            data-audio-src="{{ $music->audio_url }}"
+                            data-audio-title="{{ $music->title }}"
+                            data-audio-artist="{{ $music->artist_name ?: 'NCS Artist' }}"
+                            data-audio-cover="{{ $music->featured_image ?: '' }}"
+                            class="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-amber-600 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:from-amber-400 hover:to-amber-500 transition-all duration-300 shadow-xl shadow-amber-500/20 active:scale-95">
+                            <i class="fa-solid fa-play text-lg js-play-icon"></i> <span class="js-play-label">Play Track</span>
+                        </button>
+                    @endif
+
                     {{-- Primary Action: Download --}}
                     @if ($music->mega_link)
                         <a href="{{ route('webapp.music.download', $music->id) }}" target="_blank" rel="noopener noreferrer"

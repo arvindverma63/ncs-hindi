@@ -169,6 +169,25 @@
                                                 class="text-warning small fw-bold d-flex align-items-center"><iconify-icon
                                                     icon="mdi:clock" class="me-1"></iconify-icon> DRAFT</span>
                                         @endif
+                                        @if ($item->is_playable)
+                                            <div class="mt-1">
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill small d-inline-flex align-items-center gap-1" style="font-size: 10px;">
+                                                    <iconify-icon icon="mdi:play-circle"></iconify-icon> Playable
+                                                </span>
+                                            </div>
+                                        @elseif($item->can_play_on_website)
+                                            <div class="mt-1">
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill small d-inline-flex align-items-center gap-1" style="font-size: 10px;" title="Enabled but audio file is missing">
+                                                    <iconify-icon icon="mdi:alert-circle-outline"></iconify-icon> Audio Missing
+                                                </span>
+                                            </div>
+                                        @else
+                                            <div class="mt-1">
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill small d-inline-flex align-items-center gap-1" style="font-size: 10px;">
+                                                    <iconify-icon icon="mdi:play-off"></iconify-icon> Play Disabled
+                                                </span>
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2">

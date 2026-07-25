@@ -94,9 +94,21 @@
                     Get ready to feel the unstoppable energy with the official track "{{ $featuredStem->title }}" from {{ $featuredStem->artist_name ?: 'the creator' }}.
                 </p>
                 <div class="flex items-center gap-3 pt-2">
-                    <a href="{{ route('webapp.music.show', $featuredStem->slug) }}" class="btn-vault px-8 py-3 rounded-full text-[10px] font-black tracking-[0.2em] uppercase">
-                        Play Now
-                    </a>
+                    @if($featuredStem->is_playable)
+                        <button type="button"
+                            data-play-audio
+                            data-audio-src="{{ $featuredStem->audio_url }}"
+                            data-audio-title="{{ $featuredStem->title }}"
+                            data-audio-artist="{{ $featuredStem->artist_name ?: 'NCS Artist' }}"
+                            data-audio-cover="{{ $featuredStem->featured_image ?: '' }}"
+                            class="btn-vault px-8 py-3 rounded-full text-[10px] font-black tracking-[0.2em] uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-play js-play-icon"></i> <span class="js-play-label">Play Now</span>
+                        </button>
+                    @else
+                        <a href="{{ route('webapp.music.show', $featuredStem->slug) }}" class="btn-vault px-8 py-3 rounded-full text-[10px] font-black tracking-[0.2em] uppercase">
+                            Play Now
+                        </a>
+                    @endif
                     @if(Auth::check())
                         <button type="button"
                             data-music-like-btn
@@ -275,9 +287,22 @@
 
                             {{-- Actions --}}
                             <div class="flex items-center justify-end gap-2 col-start-2 md:col-start-auto row-start-1 md:row-start-auto self-start md:self-auto">
-                                <a href="{{ route('webapp.music.show', $music->slug) }}" class="w-8 h-8 md:w-9 md:h-9 rounded-full soft-border flex items-center justify-center text-zinc-300 hover:text-white hover:bg-white/10 hover:border-white/20 transition">
-                                    <i class="fa-solid fa-play text-[10px] ml-0.5"></i>
-                                </a>
+                                @if ($music->is_playable)
+                                    <button type="button"
+                                        data-play-audio
+                                        data-audio-src="{{ $music->audio_url }}"
+                                        data-audio-title="{{ $music->title }}"
+                                        data-audio-artist="{{ $music->artist_name ?: 'NCS Artist' }}"
+                                        data-audio-cover="{{ $heroImage }}"
+                                        title="Listen / Play Track"
+                                        class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 hover:text-white hover:bg-amber-500 transition">
+                                        <i class="fa-solid fa-play text-[10px] ml-0.5 js-play-icon"></i>
+                                    </button>
+                                @else
+                                    <a href="{{ route('webapp.music.show', $music->slug) }}" class="w-8 h-8 md:w-9 md:h-9 rounded-full soft-border flex items-center justify-center text-zinc-300 hover:text-white hover:bg-white/10 hover:border-white/20 transition" title="View Track Details">
+                                        <i class="fa-solid fa-play text-[10px] ml-0.5"></i>
+                                    </a>
+                                @endif
                                 <button type="button"
                                     data-music-share-btn
                                     data-share-title="{{ $music->title }}"
