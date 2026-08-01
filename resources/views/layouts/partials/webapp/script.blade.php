@@ -615,10 +615,13 @@
     /* ==========================================================================
        GLOBAL SPOTIFY-GRADE DUAL ENGINE MUSIC PLAYER SYSTEM
        ========================================================================== */
-    (function() {
+    document.addEventListener('DOMContentLoaded', function() {
         const audio = document.getElementById('globalNcsAudio');
         const playerBar = document.getElementById('ncsGlobalPlayer');
-        if (!audio || !playerBar) return;
+        if (!audio || !playerBar) {
+            console.warn('NCS Global Audio Player elements missing from DOM.');
+            return;
+        }
 
         const playPauseBtn = document.getElementById('playerPlayPauseBtn');
         const playIcon = document.getElementById('playerPlayIcon');
@@ -680,35 +683,39 @@
             if (activeMode === 'html5') {
                 return !audio.paused;
             } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
-                return ytPlayer.getPlayerState() === 1; // 1 = YT.PlayerState.PLAYING
+                return ytPlayer.getPlayerState() === 1;
             }
             return false;
         }
 
         function updatePlayButtonsState(isPlaying) {
-            playIcon.className = isPlaying ? 'fa-solid fa-pause text-base sm:text-lg' : 'fa-solid fa-play text-base sm:text-lg ml-0.5';
+            if (playIcon) {
+                playIcon.className = isPlaying ? 'fa-solid fa-pause text-base sm:text-lg' : 'fa-solid fa-play text-base sm:text-lg ml-0.5';
+            }
             if (playingIndicator) {
                 playingIndicator.style.display = isPlaying ? 'flex' : 'none';
             }
 
             // Sync all trigger buttons on the current page
-            $('[data-play-audio]').each(function() {
-                const $b = $(this);
-                const icon = $b.find('.js-play-icon');
-                const label = $b.find('.js-play-label');
-                if (currentActiveBtn && $b[0] === currentActiveBtn[0]) {
-                    if (isPlaying) {
-                        icon.removeClass('fa-play').addClass('fa-pause');
-                        if (label.length) label.text('Pause Track');
+            if (typeof $ !== 'undefined') {
+                $('[data-play-audio]').each(function() {
+                    const $b = $(this);
+                    const icon = $b.find('.js-play-icon');
+                    const label = $b.find('.js-play-label');
+                    if (currentActiveBtn && $b[0] === currentActiveBtn[0]) {
+                        if (isPlaying) {
+                            icon.removeClass('fa-play').addClass('fa-pause');
+                            if (label.length) label.text('Pause Track');
+                        } else {
+                            icon.removeClass('fa-pause').addClass('fa-play');
+                            if (label.length) label.text('Play Track');
+                        }
                     } else {
                         icon.removeClass('fa-pause').addClass('fa-play');
                         if (label.length) label.text('Play Track');
                     }
-                } else {
-                    icon.removeClass('fa-pause').addClass('fa-play');
-                    if (label.length) label.text('Play Track');
-                }
-            });
+                });
+            }
         }
 
         function startYtProgressTimer() {
@@ -719,9 +726,9 @@
                     const dur = ytPlayer.getDuration() || 0;
                     if (dur > 0) {
                         const pct = (cur / dur) * 100;
-                        progressBar.value = pct;
-                        currentTimeEl.textContent = formatTime(cur);
-                        durationEl.textContent = formatTime(dur);
+                        if (progressBar) progressBar.value = pct;
+                        if (currentTimeEl) currentTimeEl.textContent = formatTime(cur);
+                        if (durationEl) durationEl.textContent = formatTime(dur);
                     }
                 }
             }, 500);
@@ -733,7 +740,6 @@
                 return;
             }
 
-            // Dynamically load YouTube IFrame API
             if (!document.getElementById('ytIframeApi')) {
                 const tag = document.createElement('script');
                 tag.id = 'ytIframeApi';
@@ -765,7 +771,7 @@
                     },
                     events: {
                         'onReady': function(event) {
-                            event.target.setVolume(parseFloat(volumeBar.value) * 100);
+                            if (volumeBar) event.target.setVolume(parseFloat(volumeBar.value) * 100);
                             event.target.playVideo();
                             if (callback) callback();
                         },
@@ -808,22 +814,24 @@
             currentSrc = src;
             currentActiveBtn = $triggerBtn || null;
 
-            titleEl.textContent = title || 'Unknown Title';
-            artistEl.textContent = artist || 'NCS Artist';
+            if (titleEl) titleEl.textContent = title || 'Unknown Title';
+            if (artistEl) artistEl.textContent = artist || 'NCS Artist';
 
             if (cover) {
-                coverImg.src = cover;
-                coverImg.classList.remove('hidden');
-                coverFallback.classList.add('hidden');
+                if (coverImg) {
+                    coverImg.src = cover;
+                    coverImg.classList.remove('hidden');
+                }
+                if (coverFallback) coverFallback.classList.add('hidden');
             } else {
-                coverImg.classList.add('hidden');
-                coverFallback.classList.remove('hidden');
+                if (coverImg) coverImg.classList.add('hidden');
+                if (coverFallback) coverFallback.classList.remove('hidden');
             }
 
             showPlayer();
 
             const musicId = $triggerBtn ? ($triggerBtn.data('music-id') || $triggerBtn.attr('data-music-id')) : null;
-            if (musicId) {
+            if (musicId && typeof $ !== 'undefined') {
                 $.post('/music/' + musicId + '/increment-view').catch(() => {});
             }
 
@@ -835,7 +843,7 @@
             } else {
                 activeMode = 'html5';
                 audio.src = src;
-                audio.volume = parseFloat(volumeBar.value);
+                if (volumeBar) audio.volume = parseFloat(volumeBar.value);
                 audio.play().then(() => {
                     updatePlayButtonsState(true);
                 }).catch(err => {
@@ -855,72 +863,83 @@
             }
         }
 
-        // Global Play Trigger Event
-        $(document).on('click', '[data-play-audio]', function(e) {
+        // Global Click Event for Play Buttons
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-play-audio]');
+            if (!btn) return;
             e.preventDefault();
-            const $btn = $(this);
-            const src = $btn.data('audio-src') || $btn.attr('data-audio-src');
-            const title = $btn.data('audio-title') || $btn.attr('data-audio-title');
-            const artist = $btn.data('audio-artist') || $btn.attr('data-audio-artist');
-            const cover = $btn.data('audio-cover') || $btn.attr('data-audio-cover');
+            const $btn = typeof $ !== 'undefined' ? $(btn) : null;
+            const src = btn.getAttribute('data-audio-src');
+            const title = btn.getAttribute('data-audio-title');
+            const artist = btn.getAttribute('data-audio-artist');
+            const cover = btn.getAttribute('data-audio-cover');
 
             playTrack(src, title, artist, cover, $btn);
         });
 
         // Controls Event Listeners
-        playPauseBtn.addEventListener('click', function() {
-            if (isCurrentlyPlaying()) {
-                if (activeMode === 'html5') audio.pause();
-                else if (activeMode === 'youtube' && ytPlayer) ytPlayer.pauseVideo();
-            } else {
-                if (activeMode === 'html5') audio.play();
-                else if (activeMode === 'youtube' && ytPlayer) ytPlayer.playVideo();
-            }
-        });
+        if (playPauseBtn) {
+            playPauseBtn.addEventListener('click', function() {
+                if (isCurrentlyPlaying()) {
+                    if (activeMode === 'html5') audio.pause();
+                    else if (activeMode === 'youtube' && ytPlayer) ytPlayer.pauseVideo();
+                } else {
+                    if (activeMode === 'html5') audio.play();
+                    else if (activeMode === 'youtube' && ytPlayer) ytPlayer.playVideo();
+                }
+            });
+        }
 
         audio.addEventListener('play', () => { if (activeMode === 'html5') updatePlayButtonsState(true); });
         audio.addEventListener('pause', () => { if (activeMode === 'html5') updatePlayButtonsState(false); });
         audio.addEventListener('timeupdate', () => {
             if (activeMode === 'html5' && audio.duration) {
                 const pct = (audio.currentTime / audio.duration) * 100;
-                progressBar.value = pct;
-                currentTimeEl.textContent = formatTime(audio.currentTime);
-                durationEl.textContent = formatTime(audio.duration);
+                if (progressBar) progressBar.value = pct;
+                if (currentTimeEl) currentTimeEl.textContent = formatTime(audio.currentTime);
+                if (durationEl) durationEl.textContent = formatTime(audio.duration);
             }
         });
 
-        progressBar.addEventListener('input', () => {
-            const pct = progressBar.value / 100;
-            if (activeMode === 'html5' && audio.duration) {
-                audio.currentTime = pct * audio.duration;
-            } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getDuration === 'function') {
-                const dur = ytPlayer.getDuration();
-                if (dur) ytPlayer.seekTo(pct * dur, true);
-            }
-        });
+        if (progressBar) {
+            progressBar.addEventListener('input', () => {
+                const pct = progressBar.value / 100;
+                if (activeMode === 'html5' && audio.duration) {
+                    audio.currentTime = pct * audio.duration;
+                } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getDuration === 'function') {
+                    const dur = ytPlayer.getDuration();
+                    if (dur) ytPlayer.seekTo(pct * dur, true);
+                }
+            });
+        }
 
-        volumeBar.addEventListener('input', () => {
-            const val = parseFloat(volumeBar.value);
-            if (activeMode === 'html5') {
-                audio.volume = val;
-                audio.muted = (val === 0);
-            } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.setVolume === 'function') {
-                ytPlayer.setVolume(val * 100);
-            }
-            updateVolumeIcon();
-        });
+        if (volumeBar) {
+            volumeBar.addEventListener('input', () => {
+                const val = parseFloat(volumeBar.value);
+                if (activeMode === 'html5') {
+                    audio.volume = val;
+                    audio.muted = (val === 0);
+                } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.setVolume === 'function') {
+                    ytPlayer.setVolume(val * 100);
+                }
+                updateVolumeIcon();
+            });
+        }
 
-        muteBtn.addEventListener('click', () => {
-            if (activeMode === 'html5') {
-                audio.muted = !audio.muted;
-            } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.isMuted === 'function') {
-                if (ytPlayer.isMuted()) ytPlayer.unMute();
-                else ytPlayer.mute();
-            }
-            updateVolumeIcon();
-        });
+        if (muteBtn) {
+            muteBtn.addEventListener('click', () => {
+                if (activeMode === 'html5') {
+                    audio.muted = !audio.muted;
+                } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.isMuted === 'function') {
+                    if (ytPlayer.isMuted()) ytPlayer.unMute();
+                    else ytPlayer.mute();
+                }
+                updateVolumeIcon();
+            });
+        }
 
         function updateVolumeIcon() {
+            if (!volumeBar || !volumeIcon) return;
             const val = parseFloat(volumeBar.value);
             if (val === 0) {
                 volumeIcon.className = 'fa-solid fa-volume-xmark';
@@ -931,24 +950,30 @@
             }
         }
 
-        rewindBtn.addEventListener('click', () => {
-            if (activeMode === 'html5') {
-                audio.currentTime = Math.max(0, audio.currentTime - 10);
-            } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
-                ytPlayer.seekTo(Math.max(0, ytPlayer.getCurrentTime() - 10), true);
-            }
-        });
+        if (rewindBtn) {
+            rewindBtn.addEventListener('click', () => {
+                if (activeMode === 'html5') {
+                    audio.currentTime = Math.max(0, audio.currentTime - 10);
+                } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+                    ytPlayer.seekTo(Math.max(0, ytPlayer.getCurrentTime() - 10), true);
+                }
+            });
+        }
 
-        forwardBtn.addEventListener('click', () => {
-            if (activeMode === 'html5' && audio.duration) {
-                audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
-            } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
-                ytPlayer.seekTo(ytPlayer.getCurrentTime() + 10, true);
-            }
-        });
+        if (forwardBtn) {
+            forwardBtn.addEventListener('click', () => {
+                if (activeMode === 'html5' && audio.duration) {
+                    audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+                } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+                    ytPlayer.seekTo(ytPlayer.getCurrentTime() + 10, true);
+                }
+            });
+        }
 
-        closeBtn.addEventListener('click', hidePlayer);
-    })();
+        if (closeBtn) {
+            closeBtn.addEventListener('click', hidePlayer);
+        }
+    });
 </script>
 
 
