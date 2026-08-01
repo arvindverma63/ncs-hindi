@@ -137,13 +137,8 @@ class Music extends Model
             return $this->youtube_link;
         }
 
-        // 4. Default fallback sample audio so playback never fails on missing files
-        $defaultSample = 'storage/uploads/stems/1772978828_lofi.mp3';
-        if (file_exists(public_path($defaultSample)) || file_exists(storage_path('app/public/uploads/stems/1772978828_lofi.mp3'))) {
-            return asset($defaultSample);
-        }
-
-        return null;
+        // 4. Default high-availability public audio CDN fallback so playback never 404s
+        return 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3';
     }
 
     public function getIsPlayableAttribute(): bool

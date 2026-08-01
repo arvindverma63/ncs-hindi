@@ -936,7 +936,7 @@
                         updatePlayButtonsState(true);
                     }).catch(err => {
                         console.warn('HTML5 Playback error:', err);
-                        const fallbackAudio = '/storage/uploads/stems/1772978828_lofi.mp3';
+                        const fallbackAudio = 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3';
                         if (src !== fallbackAudio) {
                             audio.src = fallbackAudio;
                             audio.play().then(() => {
