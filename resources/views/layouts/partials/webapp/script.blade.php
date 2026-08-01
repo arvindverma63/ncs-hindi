@@ -840,7 +840,17 @@
                     updatePlayButtonsState(true);
                 }).catch(err => {
                     console.warn('HTML5 Playback error:', err);
-                    if (window.toastr) toastr.error('Unable to play audio track.');
+                    const fallbackAudio = '/storage/uploads/stems/1772978828_lofi.mp3';
+                    if (src !== fallbackAudio) {
+                        audio.src = fallbackAudio;
+                        audio.play().then(() => {
+                            updatePlayButtonsState(true);
+                        }).catch(() => {
+                            if (window.toastr) toastr.error('Unable to play audio track.');
+                        });
+                    } else {
+                        if (window.toastr) toastr.error('Unable to play audio track.');
+                    }
                 });
             }
         }
