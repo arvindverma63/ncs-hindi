@@ -613,38 +613,120 @@
     console.log('NCS Hindi WebApp Initialized');
 
     /* ==========================================================================
-       GLOBAL SPOTIFY-GRADE DUAL ENGINE MUSIC PLAYER SYSTEM
+       GLOBAL SPOTIFY-GRADE DUAL ENGINE MUSIC PLAYER SYSTEM (SELF-HEALING)
        ========================================================================== */
-    document.addEventListener('DOMContentLoaded', function() {
-        const audio = document.getElementById('globalNcsAudio');
-        const playerBar = document.getElementById('ncsGlobalPlayer');
-        if (!audio || !playerBar) {
-            console.warn('NCS Global Audio Player elements missing from DOM.');
-            return;
-        }
-
-        const playPauseBtn = document.getElementById('playerPlayPauseBtn');
-        const playIcon = document.getElementById('playerPlayIcon');
-        const coverImg = document.getElementById('playerCoverImg');
-        const coverFallback = document.getElementById('playerCoverFallback');
-        const playingIndicator = document.getElementById('playerPlayingIndicator');
-        const titleEl = document.getElementById('playerTrackTitle');
-        const artistEl = document.getElementById('playerTrackArtist');
-        const currentTimeEl = document.getElementById('playerCurrentTime');
-        const durationEl = document.getElementById('playerDuration');
-        const progressBar = document.getElementById('playerProgress');
-        const volumeBar = document.getElementById('playerVolume');
-        const muteBtn = document.getElementById('playerMuteBtn');
-        const volumeIcon = document.getElementById('playerVolumeIcon');
-        const closeBtn = document.getElementById('playerCloseBtn');
-        const rewindBtn = document.getElementById('playerRewindBtn');
-        const forwardBtn = document.getElementById('playerForwardBtn');
+    (function() {
+        let audio, playerBar, playPauseBtn, playIcon, coverImg, coverFallback, playingIndicator;
+        let titleEl, artistEl, currentTimeEl, durationEl, progressBar, volumeBar, muteBtn, volumeIcon, closeBtn, rewindBtn, forwardBtn;
 
         let currentActiveBtn = null;
         let activeMode = 'html5'; // 'html5' or 'youtube'
         let ytPlayer = null;
         let ytTimer = null;
         let currentSrc = null;
+
+        function ensurePlayerElements() {
+            playerBar = document.getElementById('ncsGlobalPlayer');
+            audio = document.getElementById('globalNcsAudio');
+
+            if (!playerBar) {
+                const playerHtml = `
+                <div id="ncsGlobalPlayer" class="fixed bottom-16 lg:bottom-0 left-0 right-0 z-[160] transform translate-y-full opacity-0 pointer-events-none transition-all duration-500 ease-out">
+                    <div class="max-w-7xl mx-auto px-3 sm:px-6 pb-2 sm:pb-4">
+                        <div class="relative bg-zinc-950/95 border border-zinc-800/90 backdrop-blur-2xl rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-2xl shadow-black/90 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-6 pointer-events-auto">
+                            <div class="flex items-center gap-3.5 w-full md:w-1/4 shrink-0">
+                                <div class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 shrink-0">
+                                    <img id="playerCoverImg" src="" class="w-full h-full object-cover hidden" alt="Track Cover">
+                                    <div id="playerCoverFallback" class="w-full h-full flex items-center justify-center text-amber-500">
+                                        <i class="fa-solid fa-music text-lg"></i>
+                                    </div>
+                                    <div id="playerPlayingIndicator" class="absolute inset-0 bg-black/50 backdrop-blur-[1px] hidden items-center justify-center gap-0.5">
+                                        <span class="w-1 bg-amber-500 rounded-full animate-[bounce_1s_infinite_100ms] h-4"></span>
+                                        <span class="w-1 bg-amber-500 rounded-full animate-[bounce_1s_infinite_300ms] h-6"></span>
+                                        <span class="w-1 bg-amber-500 rounded-full animate-[bounce_1s_infinite_200ms] h-3"></span>
+                                    </div>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 text-[8px] font-black uppercase tracking-wider border border-amber-500/20">Now Playing</span>
+                                    </div>
+                                    <h5 id="playerTrackTitle" class="text-xs sm:text-sm font-black text-white uppercase tracking-tight truncate mt-0.5">Track Title</h5>
+                                    <p id="playerTrackArtist" class="text-[10px] sm:text-xs text-zinc-400 font-semibold truncate">Artist Name</p>
+                                </div>
+                            </div>
+                            <div class="flex-1 w-full max-w-2xl flex flex-col items-center gap-1.5">
+                                <div class="flex items-center gap-5">
+                                    <button type="button" id="playerRewindBtn" class="text-zinc-400 hover:text-white transition text-xs sm:text-sm" title="Rewind 10s">
+                                        <i class="fa-solid fa-rotate-left"></i>
+                                    </button>
+                                    <button type="button" id="playerPlayPauseBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/25 transition transform active:scale-95">
+                                        <i id="playerPlayIcon" class="fa-solid fa-play text-base sm:text-lg ml-0.5"></i>
+                                    </button>
+                                    <button type="button" id="playerForwardBtn" class="text-zinc-400 hover:text-white transition text-xs sm:text-sm" title="Forward 10s">
+                                        <i class="fa-solid fa-rotate-right"></i>
+                                    </button>
+                                </div>
+                                <div class="w-full flex items-center gap-3">
+                                    <span id="playerCurrentTime" class="text-[10px] font-mono font-bold text-zinc-400 min-w-[32px] text-right">0:00</span>
+                                    <div class="relative flex-1 group cursor-pointer">
+                                        <input type="range" id="playerProgress" min="0" max="100" value="0" step="0.1" class="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500 group-hover:h-2 transition-all">
+                                    </div>
+                                    <span id="playerDuration" class="text-[10px] font-mono font-bold text-zinc-400 min-w-[32px]">0:00</span>
+                                </div>
+                            </div>
+                            <div class="hidden md:flex items-center justify-end gap-3 w-1/4">
+                                <div class="flex items-center gap-2 bg-zinc-900/80 px-3 py-1.5 rounded-xl border border-zinc-800">
+                                    <button type="button" id="playerMuteBtn" class="text-zinc-400 hover:text-amber-400 transition text-xs">
+                                        <i id="playerVolumeIcon" class="fa-solid fa-volume-high"></i>
+                                    </button>
+                                    <input type="range" id="playerVolume" min="0" max="1" step="0.05" value="0.8" class="w-16 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                                </div>
+                                <button type="button" id="playerCloseBtn" class="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 transition flex items-center justify-center">
+                                    <i class="fa-solid fa-xmark text-sm"></i>
+                                </button>
+                            </div>
+                            <audio id="globalNcsAudio" preload="auto" class="hidden"></audio>
+                            <div id="youtubeAudioHost" class="hidden"></div>
+                        </div>
+                    </div>
+                </div>`;
+                document.body.insertAdjacentHTML('beforeend', playerHtml);
+                playerBar = document.getElementById('ncsGlobalPlayer');
+                audio = document.getElementById('globalNcsAudio');
+            } else if (!audio) {
+                audio = document.createElement('audio');
+                audio.id = 'globalNcsAudio';
+                audio.className = 'hidden';
+                audio.preload = 'auto';
+                document.body.appendChild(audio);
+            }
+
+            if (!document.getElementById('youtubeAudioHost')) {
+                const host = document.createElement('div');
+                host.id = 'youtubeAudioHost';
+                host.className = 'hidden';
+                document.body.appendChild(host);
+            }
+
+            playPauseBtn = document.getElementById('playerPlayPauseBtn');
+            playIcon = document.getElementById('playerPlayIcon');
+            coverImg = document.getElementById('playerCoverImg');
+            coverFallback = document.getElementById('playerCoverFallback');
+            playingIndicator = document.getElementById('playerPlayingIndicator');
+            titleEl = document.getElementById('playerTrackTitle');
+            artistEl = document.getElementById('playerTrackArtist');
+            currentTimeEl = document.getElementById('playerCurrentTime');
+            durationEl = document.getElementById('playerDuration');
+            progressBar = document.getElementById('playerProgress');
+            volumeBar = document.getElementById('playerVolume');
+            muteBtn = document.getElementById('playerMuteBtn');
+            volumeIcon = document.getElementById('playerVolumeIcon');
+            closeBtn = document.getElementById('playerCloseBtn');
+            rewindBtn = document.getElementById('playerRewindBtn');
+            forwardBtn = document.getElementById('playerForwardBtn');
+
+            bindEvents();
+        }
 
         function extractYoutubeId(url) {
             if (!url) return null;
@@ -660,14 +742,18 @@
         }
 
         function showPlayer() {
-            playerBar.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
-            playerBar.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+            if (playerBar) {
+                playerBar.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
+                playerBar.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+            }
         }
 
         function hidePlayer() {
             pauseAll();
-            playerBar.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
-            playerBar.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+            if (playerBar) {
+                playerBar.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
+                playerBar.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+            }
             updatePlayButtonsState(false);
         }
 
@@ -681,7 +767,7 @@
 
         function isCurrentlyPlaying() {
             if (activeMode === 'html5') {
-                return !audio.paused;
+                return audio && !audio.paused;
             } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
                 return ytPlayer.getPlayerState() === 1;
             }
@@ -696,7 +782,6 @@
                 playingIndicator.style.display = isPlaying ? 'flex' : 'none';
             }
 
-            // Sync all trigger buttons on the current page
             if (typeof $ !== 'undefined') {
                 $('[data-play-audio]').each(function() {
                     const $b = $(this);
@@ -790,6 +875,8 @@
         }
 
         function playTrack(src, title, artist, cover, $triggerBtn) {
+            ensurePlayerElements();
+
             if (!src) {
                 if (window.toastr) toastr.warning('Audio stream is not available for this track.');
                 return;
@@ -799,11 +886,11 @@
 
             if (currentSrc === src) {
                 if (isCurrentlyPlaying()) {
-                    if (activeMode === 'html5') audio.pause();
+                    if (activeMode === 'html5' && audio) audio.pause();
                     else if (activeMode === 'youtube' && ytPlayer) ytPlayer.pauseVideo();
                     updatePlayButtonsState(false);
                 } else {
-                    if (activeMode === 'html5') audio.play();
+                    if (activeMode === 'html5' && audio) audio.play();
                     else if (activeMode === 'youtube' && ytPlayer) ytPlayer.playVideo();
                     updatePlayButtonsState(true);
                 }
@@ -842,100 +929,119 @@
                 });
             } else {
                 activeMode = 'html5';
-                audio.src = src;
-                if (volumeBar) audio.volume = parseFloat(volumeBar.value);
-                audio.play().then(() => {
-                    updatePlayButtonsState(true);
-                }).catch(err => {
-                    console.warn('HTML5 Playback error:', err);
-                    const fallbackAudio = '/storage/uploads/stems/1772978828_lofi.mp3';
-                    if (src !== fallbackAudio) {
-                        audio.src = fallbackAudio;
-                        audio.play().then(() => {
-                            updatePlayButtonsState(true);
-                        }).catch(() => {
+                if (audio) {
+                    audio.src = src;
+                    if (volumeBar) audio.volume = parseFloat(volumeBar.value);
+                    audio.play().then(() => {
+                        updatePlayButtonsState(true);
+                    }).catch(err => {
+                        console.warn('HTML5 Playback error:', err);
+                        const fallbackAudio = '/storage/uploads/stems/1772978828_lofi.mp3';
+                        if (src !== fallbackAudio) {
+                            audio.src = fallbackAudio;
+                            audio.play().then(() => {
+                                updatePlayButtonsState(true);
+                            }).catch(() => {
+                                if (window.toastr) toastr.error('Unable to play audio track.');
+                            });
+                        } else {
                             if (window.toastr) toastr.error('Unable to play audio track.');
-                        });
+                        }
+                    });
+                }
+            }
+        }
+
+        let isBound = false;
+        function bindEvents() {
+            if (isBound) return;
+            isBound = true;
+
+            if (playPauseBtn) {
+                playPauseBtn.addEventListener('click', function() {
+                    if (isCurrentlyPlaying()) {
+                        if (activeMode === 'html5' && audio) audio.pause();
+                        else if (activeMode === 'youtube' && ytPlayer) ytPlayer.pauseVideo();
                     } else {
-                        if (window.toastr) toastr.error('Unable to play audio track.');
+                        if (activeMode === 'html5' && audio) audio.play();
+                        else if (activeMode === 'youtube' && ytPlayer) ytPlayer.playVideo();
                     }
                 });
             }
-        }
 
-        // Global Click Event for Play Buttons
-        document.addEventListener('click', function(e) {
-            const btn = e.target.closest('[data-play-audio]');
-            if (!btn) return;
-            e.preventDefault();
-            const $btn = typeof $ !== 'undefined' ? $(btn) : null;
-            const src = btn.getAttribute('data-audio-src');
-            const title = btn.getAttribute('data-audio-title');
-            const artist = btn.getAttribute('data-audio-artist');
-            const cover = btn.getAttribute('data-audio-cover');
-
-            playTrack(src, title, artist, cover, $btn);
-        });
-
-        // Controls Event Listeners
-        if (playPauseBtn) {
-            playPauseBtn.addEventListener('click', function() {
-                if (isCurrentlyPlaying()) {
-                    if (activeMode === 'html5') audio.pause();
-                    else if (activeMode === 'youtube' && ytPlayer) ytPlayer.pauseVideo();
-                } else {
-                    if (activeMode === 'html5') audio.play();
-                    else if (activeMode === 'youtube' && ytPlayer) ytPlayer.playVideo();
-                }
-            });
-        }
-
-        audio.addEventListener('play', () => { if (activeMode === 'html5') updatePlayButtonsState(true); });
-        audio.addEventListener('pause', () => { if (activeMode === 'html5') updatePlayButtonsState(false); });
-        audio.addEventListener('timeupdate', () => {
-            if (activeMode === 'html5' && audio.duration) {
-                const pct = (audio.currentTime / audio.duration) * 100;
-                if (progressBar) progressBar.value = pct;
-                if (currentTimeEl) currentTimeEl.textContent = formatTime(audio.currentTime);
-                if (durationEl) durationEl.textContent = formatTime(audio.duration);
+            if (audio) {
+                audio.addEventListener('play', () => { if (activeMode === 'html5') updatePlayButtonsState(true); });
+                audio.addEventListener('pause', () => { if (activeMode === 'html5') updatePlayButtonsState(false); });
+                audio.addEventListener('timeupdate', () => {
+                    if (activeMode === 'html5' && audio.duration) {
+                        const pct = (audio.currentTime / audio.duration) * 100;
+                        if (progressBar) progressBar.value = pct;
+                        if (currentTimeEl) currentTimeEl.textContent = formatTime(audio.currentTime);
+                        if (durationEl) durationEl.textContent = formatTime(audio.duration);
+                    }
+                });
             }
-        });
 
-        if (progressBar) {
-            progressBar.addEventListener('input', () => {
-                const pct = progressBar.value / 100;
-                if (activeMode === 'html5' && audio.duration) {
-                    audio.currentTime = pct * audio.duration;
-                } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getDuration === 'function') {
-                    const dur = ytPlayer.getDuration();
-                    if (dur) ytPlayer.seekTo(pct * dur, true);
-                }
-            });
-        }
+            if (progressBar) {
+                progressBar.addEventListener('input', () => {
+                    const pct = progressBar.value / 100;
+                    if (activeMode === 'html5' && audio && audio.duration) {
+                        audio.currentTime = pct * audio.duration;
+                    } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getDuration === 'function') {
+                        const dur = ytPlayer.getDuration();
+                        if (dur) ytPlayer.seekTo(pct * dur, true);
+                    }
+                });
+            }
 
-        if (volumeBar) {
-            volumeBar.addEventListener('input', () => {
-                const val = parseFloat(volumeBar.value);
-                if (activeMode === 'html5') {
-                    audio.volume = val;
-                    audio.muted = (val === 0);
-                } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.setVolume === 'function') {
-                    ytPlayer.setVolume(val * 100);
-                }
-                updateVolumeIcon();
-            });
-        }
+            if (volumeBar) {
+                volumeBar.addEventListener('input', () => {
+                    const val = parseFloat(volumeBar.value);
+                    if (activeMode === 'html5' && audio) {
+                        audio.volume = val;
+                        audio.muted = (val === 0);
+                    } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.setVolume === 'function') {
+                        ytPlayer.setVolume(val * 100);
+                    }
+                    updateVolumeIcon();
+                });
+            }
 
-        if (muteBtn) {
-            muteBtn.addEventListener('click', () => {
-                if (activeMode === 'html5') {
-                    audio.muted = !audio.muted;
-                } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.isMuted === 'function') {
-                    if (ytPlayer.isMuted()) ytPlayer.unMute();
-                    else ytPlayer.mute();
-                }
-                updateVolumeIcon();
-            });
+            if (muteBtn) {
+                muteBtn.addEventListener('click', () => {
+                    if (activeMode === 'html5' && audio) {
+                        audio.muted = !audio.muted;
+                    } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.isMuted === 'function') {
+                        if (ytPlayer.isMuted()) ytPlayer.unMute();
+                        else ytPlayer.mute();
+                    }
+                    updateVolumeIcon();
+                });
+            }
+
+            if (rewindBtn) {
+                rewindBtn.addEventListener('click', () => {
+                    if (activeMode === 'html5' && audio) {
+                        audio.currentTime = Math.max(0, audio.currentTime - 10);
+                    } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+                        ytPlayer.seekTo(Math.max(0, ytPlayer.getCurrentTime() - 10), true);
+                    }
+                });
+            }
+
+            if (forwardBtn) {
+                forwardBtn.addEventListener('click', () => {
+                    if (activeMode === 'html5' && audio && audio.duration) {
+                        audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+                    } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+                        ytPlayer.seekTo(ytPlayer.getCurrentTime() + 10, true);
+                    }
+                });
+            }
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', hidePlayer);
+            }
         }
 
         function updateVolumeIcon() {
@@ -950,30 +1056,27 @@
             }
         }
 
-        if (rewindBtn) {
-            rewindBtn.addEventListener('click', () => {
-                if (activeMode === 'html5') {
-                    audio.currentTime = Math.max(0, audio.currentTime - 10);
-                } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
-                    ytPlayer.seekTo(Math.max(0, ytPlayer.getCurrentTime() - 10), true);
-                }
-            });
-        }
+        // Global Event listener for all Play buttons
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-play-audio]');
+            if (!btn) return;
+            e.preventDefault();
+            const $btn = typeof $ !== 'undefined' ? $(btn) : null;
+            const src = btn.getAttribute('data-audio-src');
+            const title = btn.getAttribute('data-audio-title');
+            const artist = btn.getAttribute('data-audio-artist');
+            const cover = btn.getAttribute('data-audio-cover');
 
-        if (forwardBtn) {
-            forwardBtn.addEventListener('click', () => {
-                if (activeMode === 'html5' && audio.duration) {
-                    audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
-                } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
-                    ytPlayer.seekTo(ytPlayer.getCurrentTime() + 10, true);
-                }
-            });
-        }
+            playTrack(src, title, artist, cover, $btn);
+        });
 
-        if (closeBtn) {
-            closeBtn.addEventListener('click', hidePlayer);
+        // Initialize immediately or on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', ensurePlayerElements);
+        } else {
+            ensurePlayerElements();
         }
-    });
+    })();
 </script>
 
 
