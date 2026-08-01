@@ -63,7 +63,7 @@
                         {{-- Artwork --}}
                         <div class="relative w-20 h-20 rounded-2xl overflow-hidden bg-zinc-800 shrink-0">
                             @if ($song->featured_image)
-                                <img src="{{ $song->featured_image }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="{{ $song->title }}">
+                                <img src="{{ $song->featured_image }}" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="{{ $song->title }}">
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
                                     <i class="fa-solid fa-music text-xl text-zinc-600"></i>
@@ -100,6 +100,7 @@
                         @if ($song->is_playable)
                             <button type="button"
                                 data-play-audio
+                                data-music-id="{{ $song->id }}"
                                 data-audio-src="{{ $song->audio_url }}"
                                 data-audio-title="{{ $song->title }}"
                                 data-audio-artist="{{ $song->artist_name ?: 'NCS Artist' }}"
@@ -157,7 +158,7 @@
                                     $authorAvatar = $post->author->profile_image ?? $post->author->avatar;
                                     $defaultAvatar = 'https://ui-avatars.com/api/?name='.urlencode($post->author->name).'&background=18181b&color=f59e0b&bold=true';
                                 @endphp
-                                <img src="{{ $authorAvatar ?? $defaultAvatar }}" class="w-full h-full object-cover" alt="{{ $post->author->name }}">
+                                <img src="{{ $authorAvatar ?? $defaultAvatar }}" loading="lazy" decoding="async" class="w-full h-full object-cover" alt="{{ $post->author->name }}">
                             </div>
                             @if ($post->is_verified)
                                 <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-amber-600 rounded-lg flex items-center justify-center border-[3px] border-[#09090b]">

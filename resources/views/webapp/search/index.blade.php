@@ -50,7 +50,7 @@
                         <div class="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl flex items-center gap-4 hover:bg-zinc-800/50 transition">
                             <div class="w-16 h-16 bg-zinc-800 rounded-lg flex-shrink-0 overflow-hidden">
                                 @if($song->featured_image)
-                                    <img src="{{ asset('storage/' . $song->featured_image) }}" class="w-full h-full object-cover">
+                                    <img src="{{ $song->featured_image }}" loading="lazy" decoding="async" class="w-full h-full object-cover" alt="{{ $song->title }}">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-zinc-700">
                                         <i class="fa-solid fa-music text-xl"></i>

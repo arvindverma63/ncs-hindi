@@ -69,8 +69,9 @@
                 </button>
             </div>
 
-            {{-- Hidden HTML5 Audio Element --}}
+            {{-- Hidden Audio Elements --}}
             <audio id="globalNcsAudio" preload="auto" class="hidden"></audio>
+            <div id="youtubeAudioHost" class="hidden"></div>
         </div>
     </div>
 </div>

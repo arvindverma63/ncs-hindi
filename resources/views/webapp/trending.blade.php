@@ -64,7 +64,7 @@
             
             {{-- Left Image --}}
             <div class="relative w-full sm:w-64 aspect-square shrink-0 rounded-[16px] overflow-hidden shadow-2xl z-10">
-                <img src="{{ $featuredImage }}" alt="{{ $featuredStem->title }}" class="absolute inset-0 w-full h-full object-cover">
+                <img src="{{ $featuredImage }}" alt="{{ $featuredStem->title }}" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover">
             </div>
 
             {{-- Center Content --}}
@@ -97,6 +97,7 @@
                     @if($featuredStem->is_playable)
                         <button type="button"
                             data-play-audio
+                            data-music-id="{{ $featuredStem->id }}"
                             data-audio-src="{{ $featuredStem->audio_url }}"
                             data-audio-title="{{ $featuredStem->title }}"
                             data-audio-artist="{{ $featuredStem->artist_name ?: 'NCS Artist' }}"
@@ -234,7 +235,7 @@
                             {{-- Song Details --}}
                             <div class="flex items-center gap-3 md:gap-4 min-w-0 col-span-2 md:col-span-1">
                                 <div class="relative w-12 h-12 md:w-14 md:h-14 rounded-[10px] overflow-hidden shrink-0 shadow-lg">
-                                    <img src="{{ $heroImage }}" alt="{{ $music->title }}" class="w-full h-full object-cover">
+                                    <img src="{{ $heroImage }}" alt="{{ $music->title }}" loading="lazy" decoding="async" class="w-full h-full object-cover">
                                     <div class="absolute top-0 left-0 bg-black/80 text-white text-[8px] font-black px-1.5 py-0.5 rounded-br-[6px] md:hidden">
                                         {{ ($trendingStems->firstItem() ?? 1) + $loop->index }}
                                     </div>
@@ -290,6 +291,7 @@
                                 @if ($music->is_playable)
                                     <button type="button"
                                         data-play-audio
+                                        data-music-id="{{ $music->id }}"
                                         data-audio-src="{{ $music->audio_url }}"
                                         data-audio-title="{{ $music->title }}"
                                         data-audio-artist="{{ $music->artist_name ?: 'NCS Artist' }}"

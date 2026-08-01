@@ -152,6 +152,7 @@
                 <div class="absolute -inset-4 bg-amber-500/20 blur-3xl rounded-full opacity-50"></div>
                 @if ($music->featured_image)
                     <img src="{{ $music->featured_image }}"
+                        loading="eager" fetchpriority="high" decoding="async"
                         class="relative w-full h-full object-cover rounded-2xl md:rounded-3xl border border-zinc-700 shadow-2xl transition-transform duration-500 hover:scale-105"
                         alt="{{ $music->title }}">
                 @else
@@ -198,6 +199,7 @@
                     @if ($music->is_playable)
                         <button type="button"
                             data-play-audio
+                            data-music-id="{{ $music->id }}"
                             data-audio-src="{{ $music->audio_url }}"
                             data-audio-title="{{ $music->title }}"
                             data-audio-artist="{{ $music->artist_name ?: 'NCS Artist' }}"
@@ -416,7 +418,7 @@
                             ? auth()->user()->profile_image
                             : 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=18181b&color=f59e0b&bold=true&size=64';
                     @endphp
-                    <img src="{{ $ava }}" alt="You" class="w-10 h-10 rounded-xl object-cover border border-zinc-700 shrink-0">
+                    <img src="{{ $ava }}" alt="You" loading="lazy" decoding="async" class="w-10 h-10 rounded-xl object-cover border border-zinc-700 shrink-0">
                     <span class="text-sm font-bold text-zinc-300">{{ auth()->user()->name }}</span>
                 @else
                     <div class="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">

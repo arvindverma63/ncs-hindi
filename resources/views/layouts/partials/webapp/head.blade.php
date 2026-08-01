@@ -156,7 +156,11 @@
     </script>
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/images/favicon.ico') }}">
 
-    {{-- Preconnect & DNS prefetch for critical CDNs --}}
+    {{-- Preconnect & DNS prefetch for critical CDNs & Image Hosts --}}
+    <link rel="dns-prefetch" href="//i.ibb.co">
+    <link rel="dns-prefetch" href="//images.unsplash.com">
+    <link rel="dns-prefetch" href="//ui-avatars.com">
+    <link rel="preconnect" href="https://i.ibb.co" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.tailwindcss.com">

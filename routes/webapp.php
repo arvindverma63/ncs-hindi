@@ -160,6 +160,7 @@ Route::prefix('music')->name('webapp.')->group(function () {
     Route::get('/{id}/download', [MusicController::class, 'download'])->name('music.download');
     Route::get('/{slug}', [MusicController::class, 'show'])->name('music.show');
     Route::post('/{id}/increment-download', [MusicController::class, 'incrementDownload'])->name('music.increment-download');
+    Route::post('/{id}/increment-view', [MusicController::class, 'incrementView'])->name('music.increment-view');
     Route::post('/{id}/like', [MusicController::class, 'toggleLike'])->name('music.like');
     // Comment routes
     Route::post('/{id}/comments', [MusicCommentController::class, 'store'])->name('music.comments.store');

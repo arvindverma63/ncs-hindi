@@ -122,12 +122,17 @@ class Music extends Model
             return $this->file_path;
         }
 
+        // Fallback: check youtube_link for web streaming
+        if ($this->youtube_link) {
+            return $this->youtube_link;
+        }
+
         return null;
     }
 
     public function getIsPlayableAttribute(): bool
     {
-        return (bool) ($this->can_play_on_website && !empty($this->audio_url));
+        return !empty($this->audio_url);
     }
 
     // --- Relationships ---

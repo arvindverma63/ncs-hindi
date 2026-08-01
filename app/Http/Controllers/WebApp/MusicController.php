@@ -98,6 +98,7 @@ class MusicController extends Controller
         \Illuminate\Support\Facades\Log::info("Download route hit for ID: $id");
         $music = Music::findOrFail($id);
 
+        $this->musicRepo->logInteraction($id, Auth::id(), 'view');
         $this->musicRepo->logInteraction($id, Auth::id(), 'download');
 
         if ($music->mega_link && filter_var($music->mega_link, FILTER_VALIDATE_URL)) {
@@ -121,10 +122,22 @@ class MusicController extends Controller
     {
         \Illuminate\Support\Facades\Log::info("Increment download hit for ID: $id");
         $music = Music::findOrFail($id);
+        $this->musicRepo->logInteraction($id, Auth::id(), 'view');
         $this->musicRepo->logInteraction($id, Auth::id(), 'download');
         return response()->json([
             'success' => true,
             'count' => $music->download_count
+        ]);
+    }
+
+    public function incrementView($id)
+    {
+        \Illuminate\Support\Facades\Log::info("Increment view hit for ID: $id");
+        $music = Music::findOrFail($id);
+        $this->musicRepo->logInteraction($id, Auth::id(), 'view');
+        return response()->json([
+            'success' => true,
+            'count' => $music->view_count
         ]);
     }
 

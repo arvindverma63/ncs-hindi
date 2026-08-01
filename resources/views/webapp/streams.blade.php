@@ -61,6 +61,7 @@
                 <div class="relative aspect-square m-3 overflow-hidden rounded-[24px] bg-zinc-800">
                     @if ($item->featured_image)
                         <img src="{{ $item->featured_image }}"
+                            loading="lazy" decoding="async"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                             alt="{{ $item->title }}">
                     @else
