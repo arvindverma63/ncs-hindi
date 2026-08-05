@@ -110,25 +110,26 @@ class Music extends Model
 
     public function getAudioUrlAttribute()
     {
-        // 1. Check audio_file
+        // 1. Check audio_file column first (Uploaded MP3 / Audio file)
         if (!empty($this->audio_file)) {
             if (filter_var($this->audio_file, FILTER_VALIDATE_URL)) {
                 return $this->audio_file;
             }
-            $cleanPath = ltrim($this->audio_file, '/');
-            if (file_exists(public_path('storage/' . $cleanPath)) || file_exists(public_path($cleanPath)) || file_exists(storage_path('app/public/' . $cleanPath))) {
-                return asset(str_starts_with($cleanPath, 'storage/') ? $cleanPath : 'storage/' . $cleanPath);
-            }
+            $cleanPath = ltrim(preg_replace('/^storage\//i', '', $this->audio_file), '/');
+            return asset('storage/' . $cleanPath);
         }
 
-        // 2. Check file_path for direct audio file
+        // 2. Check file_path for direct audio file URL or relative MP3 path
         if (!empty($this->file_path)) {
-            if (filter_var($this->file_path, FILTER_VALIDATE_URL) && preg_match('/\.(mp3|wav|ogg|m4a|aac|flac)(\?.*)?$/i', $this->file_path)) {
-                return $this->file_path;
-            }
-            $cleanPath = ltrim($this->file_path, '/');
-            if (file_exists(public_path('storage/' . $cleanPath)) || file_exists(public_path($cleanPath)) || file_exists(storage_path('app/public/' . $cleanPath))) {
-                return asset(str_starts_with($cleanPath, 'storage/') ? $cleanPath : 'storage/' . $cleanPath);
+            if (filter_var($this->file_path, FILTER_VALIDATE_URL)) {
+                if (preg_match('/\.(mp3|wav|ogg|m4a|aac|flac)(\?.*)?$/i', $this->file_path)) {
+                    return $this->file_path;
+                }
+            } else {
+                $cleanPath = ltrim(preg_replace('/^storage\//i', '', $this->file_path), '/');
+                if (preg_match('/\.(mp3|wav|ogg|m4a|aac|flac)$/i', $cleanPath)) {
+                    return asset('storage/' . $cleanPath);
+                }
             }
         }
 

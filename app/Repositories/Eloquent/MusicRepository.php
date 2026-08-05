@@ -119,7 +119,16 @@ class MusicRepository implements MusicRepositoryInterface
 
             $audioFilePath = null;
             if (isset($data['audio_file']) && $data['audio_file'] instanceof \Illuminate\Http\UploadedFile) {
-                $audioFilePath = $data['audio_file']->store('music_files', 'public');
+                $filename = time() . '_' . Str::slug(pathinfo($data['audio_file']->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $data['audio_file']->getClientOriginalExtension();
+                $data['audio_file']->storeAs('uploads/stems', $filename, 'public');
+                
+                $publicTargetDir = public_path('storage/uploads/stems');
+                if (!file_exists($publicTargetDir)) {
+                    @mkdir($publicTargetDir, 0777, true);
+                }
+                @copy(storage_path('app/public/uploads/stems/' . $filename), $publicTargetDir . '/' . $filename);
+
+                $audioFilePath = 'uploads/stems/' . $filename;
             }
 
             $megaLink = !empty($data['mega_link']) ? $data['mega_link'] : null;
@@ -184,9 +193,21 @@ class MusicRepository implements MusicRepositoryInterface
 
             if (isset($data['audio_file']) && $data['audio_file'] instanceof \Illuminate\Http\UploadedFile) {
                 if ($music->audio_file && !filter_var($music->audio_file, FILTER_VALIDATE_URL)) {
-                    Storage::disk('public')->delete($music->audio_file);
+                    $oldClean = ltrim(preg_replace('/^storage\//i', '', $music->audio_file), '/');
+                    Storage::disk('public')->delete($oldClean);
+                    @unlink(public_path('storage/' . $oldClean));
                 }
-                $music->audio_file = $data['audio_file']->store('music_files', 'public');
+
+                $filename = time() . '_' . Str::slug(pathinfo($data['audio_file']->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $data['audio_file']->getClientOriginalExtension();
+                $data['audio_file']->storeAs('uploads/stems', $filename, 'public');
+                
+                $publicTargetDir = public_path('storage/uploads/stems');
+                if (!file_exists($publicTargetDir)) {
+                    @mkdir($publicTargetDir, 0777, true);
+                }
+                @copy(storage_path('app/public/uploads/stems/' . $filename), $publicTargetDir . '/' . $filename);
+
+                $music->audio_file = 'uploads/stems/' . $filename;
             }
 
             $music->update([
