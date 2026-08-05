@@ -775,6 +775,9 @@
         }
 
         function updatePlayButtonsState(isPlaying) {
+            if (typeof isPlaying === 'undefined') {
+                isPlaying = isCurrentlyPlaying();
+            }
             if (playIcon) {
                 playIcon.className = isPlaying ? 'fa-solid fa-pause text-base sm:text-lg' : 'fa-solid fa-play text-base sm:text-lg ml-0.5';
             }
@@ -785,9 +788,10 @@
             if (typeof $ !== 'undefined') {
                 $('[data-play-audio]').each(function() {
                     const $b = $(this);
+                    const src = $b.attr('data-audio-src') || $b.data('audio-src');
                     const icon = $b.find('.js-play-icon');
                     const label = $b.find('.js-play-label');
-                    if (currentActiveBtn && $b[0] === currentActiveBtn[0]) {
+                    if (currentSrc && src === currentSrc) {
                         if (isPlaying) {
                             icon.removeClass('fa-play').addClass('fa-pause');
                             if (label.length) label.text('Pause Track');
@@ -802,6 +806,70 @@
                 });
             }
         }
+        window.ncsUpdatePlayButtonsState = updatePlayButtonsState;
+
+        function savePlayerState() {
+            if (!currentSrc) return;
+            try {
+                const state = {
+                    src: currentSrc,
+                    title: titleEl ? titleEl.textContent : '',
+                    artist: artistEl ? artistEl.textContent : '',
+                    cover: coverImg && !coverImg.classList.contains('hidden') ? coverImg.src : '',
+                    currentTime: activeMode === 'html5' ? (audio ? audio.currentTime : 0) : (ytPlayer && typeof ytPlayer.getCurrentTime === 'function' ? ytPlayer.getCurrentTime() : 0),
+                    mode: activeMode,
+                    isPlaying: isCurrentlyPlaying(),
+                    volume: volumeBar ? volumeBar.value : 0.8
+                };
+                sessionStorage.setItem('ncs_player_state', JSON.stringify(state));
+            } catch (e) {}
+        }
+
+        function restorePlayerState() {
+            try {
+                const saved = sessionStorage.getItem('ncs_player_state');
+                if (!saved) return;
+                const state = JSON.parse(saved);
+                if (!state || !state.src) return;
+
+                currentSrc = state.src;
+                activeMode = state.mode || 'html5';
+
+                if (titleEl) titleEl.textContent = state.title || 'Unknown Title';
+                if (artistEl) artistEl.textContent = state.artist || 'NCS Artist';
+
+                if (state.cover) {
+                    if (coverImg) {
+                        coverImg.src = state.cover;
+                        coverImg.classList.remove('hidden');
+                    }
+                    if (coverFallback) coverFallback.classList.add('hidden');
+                }
+
+                if (volumeBar && state.volume) {
+                    volumeBar.value = state.volume;
+                }
+
+                showPlayer();
+
+                if (activeMode === 'html5' && audio) {
+                    audio.src = state.src;
+                    if (volumeBar) audio.volume = parseFloat(volumeBar.value);
+                    if (state.currentTime) {
+                        audio.currentTime = state.currentTime;
+                    }
+                    if (state.isPlaying) {
+                        audio.play().then(() => {
+                            updatePlayButtonsState(true);
+                        }).catch(() => {
+                            updatePlayButtonsState(false);
+                        });
+                    } else {
+                        updatePlayButtonsState(false);
+                    }
+                }
+            } catch(e) {}
+        }
 
         function startYtProgressTimer() {
             if (ytTimer) clearInterval(ytTimer);
@@ -814,6 +882,7 @@
                         if (progressBar) progressBar.value = pct;
                         if (currentTimeEl) currentTimeEl.textContent = formatTime(cur);
                         if (durationEl) durationEl.textContent = formatTime(dur);
+                        savePlayerState();
                     }
                 }
             }, 500);
@@ -864,9 +933,11 @@
                             if (event.data === YT.PlayerState.PLAYING) {
                                 updatePlayButtonsState(true);
                                 startYtProgressTimer();
+                                savePlayerState();
                             } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
                                 updatePlayButtonsState(false);
                                 if (ytTimer) clearInterval(ytTimer);
+                                savePlayerState();
                             }
                         }
                     }
@@ -894,6 +965,7 @@
                     else if (activeMode === 'youtube' && ytPlayer) ytPlayer.playVideo();
                     updatePlayButtonsState(true);
                 }
+                savePlayerState();
                 return;
             }
 
@@ -926,6 +998,7 @@
                 activeMode = 'youtube';
                 initYoutubePlayer(ytId, function() {
                     updatePlayButtonsState(true);
+                    savePlayerState();
                 });
             } else {
                 activeMode = 'html5';
@@ -934,6 +1007,7 @@
                     if (volumeBar) audio.volume = parseFloat(volumeBar.value);
                     audio.play().then(() => {
                         updatePlayButtonsState(true);
+                        savePlayerState();
                     }).catch(err => {
                         console.warn('HTML5 Playback error:', err);
                         const fallbackAudio = 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3';
@@ -941,6 +1015,7 @@
                             audio.src = fallbackAudio;
                             audio.play().then(() => {
                                 updatePlayButtonsState(true);
+                                savePlayerState();
                             }).catch(() => {
                                 if (window.toastr) toastr.error('Unable to play audio track.');
                             });
@@ -966,18 +1041,20 @@
                         if (activeMode === 'html5' && audio) audio.play();
                         else if (activeMode === 'youtube' && ytPlayer) ytPlayer.playVideo();
                     }
+                    savePlayerState();
                 });
             }
 
             if (audio) {
-                audio.addEventListener('play', () => { if (activeMode === 'html5') updatePlayButtonsState(true); });
-                audio.addEventListener('pause', () => { if (activeMode === 'html5') updatePlayButtonsState(false); });
+                audio.addEventListener('play', () => { if (activeMode === 'html5') { updatePlayButtonsState(true); savePlayerState(); } });
+                audio.addEventListener('pause', () => { if (activeMode === 'html5') { updatePlayButtonsState(false); savePlayerState(); } });
                 audio.addEventListener('timeupdate', () => {
                     if (activeMode === 'html5' && audio.duration) {
                         const pct = (audio.currentTime / audio.duration) * 100;
                         if (progressBar) progressBar.value = pct;
                         if (currentTimeEl) currentTimeEl.textContent = formatTime(audio.currentTime);
                         if (durationEl) durationEl.textContent = formatTime(audio.duration);
+                        savePlayerState();
                     }
                 });
             }
@@ -991,6 +1068,7 @@
                         const dur = ytPlayer.getDuration();
                         if (dur) ytPlayer.seekTo(pct * dur, true);
                     }
+                    savePlayerState();
                 });
             }
 
@@ -1004,6 +1082,7 @@
                         ytPlayer.setVolume(val * 100);
                     }
                     updateVolumeIcon();
+                    savePlayerState();
                 });
             }
 
@@ -1016,6 +1095,7 @@
                         else ytPlayer.mute();
                     }
                     updateVolumeIcon();
+                    savePlayerState();
                 });
             }
 
@@ -1026,6 +1106,7 @@
                     } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
                         ytPlayer.seekTo(Math.max(0, ytPlayer.getCurrentTime() - 10), true);
                     }
+                    savePlayerState();
                 });
             }
 
@@ -1036,12 +1117,15 @@
                     } else if (activeMode === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
                         ytPlayer.seekTo(ytPlayer.getCurrentTime() + 10, true);
                     }
+                    savePlayerState();
                 });
             }
 
             if (closeBtn) {
                 closeBtn.addEventListener('click', hidePlayer);
             }
+
+            restorePlayerState();
         }
 
         function updateVolumeIcon() {
@@ -1075,6 +1159,135 @@
             document.addEventListener('DOMContentLoaded', ensurePlayerElements);
         } else {
             ensurePlayerElements();
+        }
+    })();
+
+    /* ==========================================================================
+       SEAMLESS PJAX PAGE SWITCHING (KEEPS AUDIO PLAYING CONTINUOUSLY)
+       ========================================================================== */
+    (function() {
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a');
+            if (!link) return;
+
+            const href = link.getAttribute('href');
+            if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+            if (link.getAttribute('target') === '_blank') return;
+            if (link.hasAttribute('download') || link.dataset.noPjax !== undefined) return;
+            if (link.dataset.notificationGate !== undefined && link.dataset.musicAction === 'download') return;
+
+            let url;
+            try {
+                url = new URL(href, window.location.origin);
+            } catch (err) {
+                return;
+            }
+
+            if (url.origin !== window.location.origin) return;
+
+            const pathname = url.pathname;
+            if (pathname.startsWith('/admin') ||
+                pathname.startsWith('/logout') ||
+                pathname.startsWith('/auth') ||
+                pathname.endsWith('/download') ||
+                pathname.startsWith('/game') ||
+                pathname.includes('/game/') ||
+                pathname.startsWith('/firebase-messaging-sw.js')) {
+                return;
+            }
+
+            e.preventDefault();
+            if (url.href === window.location.href) return;
+
+            loadPage(url.href, true);
+        });
+
+        window.addEventListener('popstate', function() {
+            loadPage(window.location.href, false);
+        });
+
+        async function loadPage(url, pushToHistory) {
+            const mainEl = document.getElementById('appMainContent') || document.querySelector('main');
+            if (!mainEl) {
+                window.location.href = url;
+                return;
+            }
+
+            mainEl.style.opacity = '0.55';
+            mainEl.style.transition = 'opacity 0.15s ease';
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-PJAX': 'true'
+                    }
+                });
+
+                if (!response.ok) {
+                    window.location.href = url;
+                    return;
+                }
+
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                if (doc.title) {
+                    document.title = doc.title;
+                }
+
+                const newMain = doc.getElementById('appMainContent') || doc.querySelector('main');
+                if (newMain) {
+                    mainEl.innerHTML = newMain.innerHTML;
+                    mainEl.scrollTop = 0;
+                } else {
+                    window.location.href = url;
+                    return;
+                }
+
+                if (pushToHistory) {
+                    history.pushState(null, '', url);
+                }
+
+                updateActiveNavLinks(url);
+
+                const scripts = mainEl.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+
+                if (window.ncsUpdatePlayButtonsState) {
+                    window.ncsUpdatePlayButtonsState();
+                }
+
+                document.dispatchEvent(new CustomEvent('pjax:loaded', { detail: { url } }));
+
+            } catch (err) {
+                console.error('[NCS PJAX] Navigation failed:', err);
+                window.location.href = url;
+            } finally {
+                mainEl.style.opacity = '1';
+            }
+        }
+
+        function updateActiveNavLinks(currentUrl) {
+            const path = new URL(currentUrl, window.location.origin).pathname;
+            document.querySelectorAll('a[href]').forEach(a => {
+                const href = a.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                try {
+                    const aPath = new URL(href, window.location.origin).pathname;
+                    if (aPath === path) {
+                        a.classList.add('text-amber-500');
+                    } else if (aPath !== '/') {
+                        a.classList.remove('text-amber-500');
+                    }
+                } catch (e) {}
+            });
         }
     })();
 </script>

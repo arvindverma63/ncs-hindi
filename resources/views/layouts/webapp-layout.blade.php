@@ -10,7 +10,7 @@
     <div class="flex-1 flex flex-col overflow-hidden bg-black">
        @include('layouts.partials.webapp.header')
 
-        <main class="flex-1 overflow-y-auto p-6 lg:p-10 no-scrollbar space-y-12 pb-32">
+        <main id="appMainContent" class="flex-1 overflow-y-auto p-6 lg:p-10 no-scrollbar space-y-12 pb-32">
             {{ $slot }}
         </main>
     </div>

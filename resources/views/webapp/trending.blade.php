@@ -63,9 +63,9 @@
             <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_rgba(245,158,11,0.2),_transparent_40%),radial-gradient(circle_at_bottom_left,_rgba(153,27,27,0.2),_transparent_40%)]"></div>
             
             {{-- Left Image --}}
-            <div class="relative w-full sm:w-64 aspect-square shrink-0 rounded-[16px] overflow-hidden shadow-2xl z-10">
-                <img src="{{ $featuredImage }}" alt="{{ $featuredStem->title }}" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover">
-            </div>
+            <a href="{{ route('webapp.music.show', $featuredStem->slug) }}" class="relative w-full sm:w-64 aspect-square shrink-0 rounded-[16px] overflow-hidden shadow-2xl z-10 block group">
+                <img src="{{ $featuredImage }}" alt="{{ $featuredStem->title }}" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            </a>
 
             {{-- Center Content --}}
             <div class="flex-1 space-y-4 z-10 w-full">
@@ -73,7 +73,9 @@
                     Now Trending
                 </span>
                 <h2 class="font-brand text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tighter text-white leading-none">
-                    {{ $featuredStem->title }}
+                    <a href="{{ route('webapp.music.show', $featuredStem->slug) }}" class="hover:text-amber-400 transition">
+                        {{ $featuredStem->title }}
+                    </a>
                 </h2>
                 <p class="text-zinc-300 text-sm md:text-base font-medium">
                     {{ $featuredStem->artist_name ?: '' }}
@@ -93,7 +95,7 @@
                 <p class="text-zinc-400 text-xs sm:text-sm max-w-lg leading-relaxed">
                     Get ready to feel the unstoppable energy with the official track "{{ $featuredStem->title }}" from {{ $featuredStem->artist_name ?: 'the creator' }}.
                 </p>
-                <div class="flex items-center gap-3 pt-2">
+                <div class="flex flex-wrap items-center gap-3 pt-2">
                     @if($featuredStem->is_playable)
                         <button type="button"
                             data-play-audio
@@ -105,11 +107,10 @@
                             class="btn-vault px-8 py-3 rounded-full text-[10px] font-black tracking-[0.2em] uppercase flex items-center gap-2">
                             <i class="fa-solid fa-play js-play-icon"></i> <span class="js-play-label">Play Now</span>
                         </button>
-                    @else
-                        <a href="{{ route('webapp.music.show', $featuredStem->slug) }}" class="btn-vault px-8 py-3 rounded-full text-[10px] font-black tracking-[0.2em] uppercase">
-                            Play Now
-                        </a>
                     @endif
+                    <a href="{{ route('webapp.music.show', $featuredStem->slug) }}" class="px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 soft-border text-white text-[10px] font-black tracking-[0.2em] uppercase transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i> View Details
+                    </a>
                     @if(Auth::check())
                         <button type="button"
                             data-music-like-btn
@@ -234,15 +235,17 @@
                             
                             {{-- Song Details --}}
                             <div class="flex items-center gap-3 md:gap-4 min-w-0 col-span-2 md:col-span-1">
-                                <div class="relative w-12 h-12 md:w-14 md:h-14 rounded-[10px] overflow-hidden shrink-0 shadow-lg">
-                                    <img src="{{ $heroImage }}" alt="{{ $music->title }}" loading="lazy" decoding="async" class="w-full h-full object-cover">
+                                <a href="{{ route('webapp.music.show', $music->slug) }}" class="relative w-12 h-12 md:w-14 md:h-14 rounded-[10px] overflow-hidden shrink-0 shadow-lg block group/img">
+                                    <img src="{{ $heroImage }}" alt="{{ $music->title }}" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover/img:scale-105 transition-transform">
                                     <div class="absolute top-0 left-0 bg-black/80 text-white text-[8px] font-black px-1.5 py-0.5 rounded-br-[6px] md:hidden">
                                         {{ ($trendingStems->firstItem() ?? 1) + $loop->index }}
                                     </div>
-                                </div>
+                                </a>
                                 <div class="min-w-0">
-                                    <h4 class="font-brand text-sm md:text-base font-black uppercase tracking-tight text-white truncate group-hover:text-amber-400 transition">
-                                        {{ $music->title }}
+                                    <h4 class="font-brand text-sm md:text-base font-black uppercase tracking-tight text-white truncate transition">
+                                        <a href="{{ route('webapp.music.show', $music->slug) }}" class="hover:text-amber-400 transition">
+                                            {{ $music->title }}
+                                        </a>
                                         @if($loop->first && $trendingStems->onFirstPage())
                                             <span class="inline-block ml-2 px-1.5 py-0.5 rounded bg-amber-500 text-black text-[7px] font-black uppercase tracking-widest align-middle relative -top-0.5">New</span>
                                         @endif
@@ -300,11 +303,12 @@
                                         class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 hover:text-white hover:bg-amber-500 transition">
                                         <i class="fa-solid fa-play text-[10px] ml-0.5 js-play-icon"></i>
                                     </button>
-                                @else
-                                    <a href="{{ route('webapp.music.show', $music->slug) }}" class="w-8 h-8 md:w-9 md:h-9 rounded-full soft-border flex items-center justify-center text-zinc-300 hover:text-white hover:bg-white/10 hover:border-white/20 transition" title="View Track Details">
-                                        <i class="fa-solid fa-play text-[10px] ml-0.5"></i>
-                                    </a>
                                 @endif
+                                <a href="{{ route('webapp.music.show', $music->slug) }}"
+                                    title="View Track Details"
+                                    class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300 hover:text-white hover:bg-white/15 hover:border-amber-500/50 transition">
+                                    <i class="fa-solid fa-eye text-[10px]"></i>
+                                </a>
                                 <button type="button"
                                     data-music-share-btn
                                     data-share-title="{{ $music->title }}"
