@@ -774,19 +774,45 @@
             return false;
         }
 
-        function updatePlayButtonsState(isPlaying) {
-            if (typeof isPlaying === 'undefined') {
+        let isAudioLoadingState = false;
+
+        function updatePlayButtonsState(state) {
+            let isPlaying = false;
+            let isLoading = false;
+
+            if (state === 'loading') {
+                isLoading = true;
+                isAudioLoadingState = true;
+            } else if (state === true || state === 'playing') {
+                isPlaying = true;
+                isLoading = false;
+                isAudioLoadingState = false;
+            } else if (state === false || state === 'paused') {
+                isPlaying = false;
+                isLoading = false;
+                isAudioLoadingState = false;
+            } else {
                 isPlaying = isCurrentlyPlaying();
+                isLoading = isAudioLoadingState;
             }
+
+            const playClass = 'fa-solid fa-play text-xs sm:text-lg ml-0.5';
+            const pauseClass = 'fa-solid fa-pause text-xs sm:text-lg';
+            const spinClass = 'fa-solid fa-spinner fa-spin text-xs sm:text-lg';
+
+            const desktopPlayClass = 'fa-solid fa-play text-base sm:text-lg ml-0.5';
+            const desktopPauseClass = 'fa-solid fa-pause text-base sm:text-lg';
+            const desktopSpinClass = 'fa-solid fa-spinner fa-spin text-base sm:text-lg';
+
             if (playIcon) {
-                playIcon.className = isPlaying ? 'fa-solid fa-pause text-xs sm:text-lg' : 'fa-solid fa-play text-xs sm:text-lg ml-0.5';
+                playIcon.className = isLoading ? spinClass : (isPlaying ? pauseClass : playClass);
             }
             const playIconDesktop = document.getElementById('playerPlayIconDesktop');
             if (playIconDesktop) {
-                playIconDesktop.className = isPlaying ? 'fa-solid fa-pause text-base sm:text-lg' : 'fa-solid fa-play text-base sm:text-lg ml-0.5';
+                playIconDesktop.className = isLoading ? desktopSpinClass : (isPlaying ? desktopPauseClass : desktopPlayClass);
             }
             if (playingIndicator) {
-                playingIndicator.style.display = isPlaying ? 'flex' : 'none';
+                playingIndicator.style.display = (isPlaying || isLoading) ? 'flex' : 'none';
             }
 
             if (typeof $ !== 'undefined') {
@@ -796,15 +822,18 @@
                     const icon = $b.find('.js-play-icon');
                     const label = $b.find('.js-play-label');
                     if (currentSrc && src === currentSrc) {
-                        if (isPlaying) {
-                            icon.removeClass('fa-play').addClass('fa-pause');
+                        if (isLoading) {
+                            icon.removeClass('fa-play fa-pause').addClass('fa-spinner fa-spin');
+                            if (label.length) label.text('Loading...');
+                        } else if (isPlaying) {
+                            icon.removeClass('fa-play fa-spinner fa-spin').addClass('fa-pause');
                             if (label.length) label.text('Pause Track');
                         } else {
-                            icon.removeClass('fa-pause').addClass('fa-play');
+                            icon.removeClass('fa-pause fa-spinner fa-spin').addClass('fa-play');
                             if (label.length) label.text('Play Track');
                         }
                     } else {
-                        icon.removeClass('fa-pause').addClass('fa-play');
+                        icon.removeClass('fa-pause fa-spinner fa-spin').addClass('fa-play');
                         if (label.length) label.text('Play Track');
                     }
                 });
@@ -938,6 +967,8 @@
                                 updatePlayButtonsState(true);
                                 startYtProgressTimer();
                                 savePlayerState();
+                            } else if (event.data === YT.PlayerState.BUFFERING) {
+                                updatePlayButtonsState('loading');
                             } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
                                 updatePlayButtonsState(false);
                                 if (ytTimer) clearInterval(ytTimer);
@@ -965,9 +996,9 @@
                     else if (activeMode === 'youtube' && ytPlayer) ytPlayer.pauseVideo();
                     updatePlayButtonsState(false);
                 } else {
-                    if (activeMode === 'html5' && audio) audio.play();
+                    updatePlayButtonsState('loading');
+                    if (activeMode === 'html5' && audio) audio.play().catch(() => updatePlayButtonsState(false));
                     else if (activeMode === 'youtube' && ytPlayer) ytPlayer.playVideo();
-                    updatePlayButtonsState(true);
                 }
                 savePlayerState();
                 return;
@@ -992,6 +1023,7 @@
             }
 
             showPlayer();
+            updatePlayButtonsState('loading');
 
             const musicId = $triggerBtn ? ($triggerBtn.data('music-id') || $triggerBtn.attr('data-music-id')) : null;
             if (musicId && typeof $ !== 'undefined') {
@@ -1001,7 +1033,7 @@
             if (ytId) {
                 activeMode = 'youtube';
                 initYoutubePlayer(ytId, function() {
-                    updatePlayButtonsState(true);
+                    updatePlayButtonsState('loading');
                     savePlayerState();
                 });
             } else {
@@ -1021,9 +1053,11 @@
                                 updatePlayButtonsState(true);
                                 savePlayerState();
                             }).catch(() => {
+                                updatePlayButtonsState(false);
                                 if (window.toastr) toastr.error('Unable to play audio track.');
                             });
                         } else {
+                            updatePlayButtonsState(false);
                             if (window.toastr) toastr.error('Unable to play audio track.');
                         }
                     });
@@ -1041,8 +1075,10 @@
                     if (isCurrentlyPlaying()) {
                         if (activeMode === 'html5' && audio) audio.pause();
                         else if (activeMode === 'youtube' && ytPlayer) ytPlayer.pauseVideo();
+                        updatePlayButtonsState(false);
                     } else {
-                        if (activeMode === 'html5' && audio) audio.play();
+                        updatePlayButtonsState('loading');
+                        if (activeMode === 'html5' && audio) audio.play().catch(() => updatePlayButtonsState(false));
                         else if (activeMode === 'youtube' && ytPlayer) ytPlayer.playVideo();
                     }
                     savePlayerState();
@@ -1050,8 +1086,12 @@
             }
 
             if (audio) {
-                audio.addEventListener('play', () => { if (activeMode === 'html5') { updatePlayButtonsState(true); savePlayerState(); } });
+                audio.addEventListener('loadstart', () => { if (activeMode === 'html5') { updatePlayButtonsState('loading'); } });
+                audio.addEventListener('waiting', () => { if (activeMode === 'html5') { updatePlayButtonsState('loading'); } });
+                audio.addEventListener('playing', () => { if (activeMode === 'html5') { updatePlayButtonsState(true); savePlayerState(); } });
                 audio.addEventListener('pause', () => { if (activeMode === 'html5') { updatePlayButtonsState(false); savePlayerState(); } });
+                audio.addEventListener('ended', () => { if (activeMode === 'html5') { updatePlayButtonsState(false); savePlayerState(); } });
+                audio.addEventListener('error', () => { if (activeMode === 'html5') { updatePlayButtonsState(false); savePlayerState(); } });
                 audio.addEventListener('timeupdate', () => {
                     if (activeMode === 'html5' && audio.duration) {
                         const pct = (audio.currentTime / audio.duration) * 100;
