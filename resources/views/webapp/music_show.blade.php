@@ -130,7 +130,7 @@
     @endphp
 
     {{-- Image Uploading Overlay --}}
-    <div id="img-uploading-overlay">
+    <div id="img-uploading-overlay" class="hidden" style="display: none !important;">
         <div class="text-center text-white">
             <svg class="animate-spin w-10 h-10 mx-auto mb-3 text-amber-500" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -521,7 +521,11 @@
                 input.onchange = async () => {
                     const file = input.files[0];
                     if (!file) return;
-                    document.getElementById('img-uploading-overlay').classList.add('show');
+                    const overlay = document.getElementById('img-uploading-overlay');
+                    if (overlay) {
+                        overlay.classList.remove('hidden');
+                        overlay.style.setProperty('display', 'flex', 'important');
+                    }
                     const fd = new FormData();
                     fd.append('file', file);
                     fd.append('_token', CSRF_TOKEN);
@@ -538,7 +542,10 @@
                     } catch (e) {
                         showAlert('Image upload failed. Try again.');
                     } finally {
-                        document.getElementById('img-uploading-overlay').classList.remove('show');
+                        if (overlay) {
+                            overlay.classList.add('hidden');
+                            overlay.style.setProperty('display', 'none', 'important');
+                        }
                     }
                 };
             };

@@ -779,7 +779,11 @@
                 isPlaying = isCurrentlyPlaying();
             }
             if (playIcon) {
-                playIcon.className = isPlaying ? 'fa-solid fa-pause text-base sm:text-lg' : 'fa-solid fa-play text-base sm:text-lg ml-0.5';
+                playIcon.className = isPlaying ? 'fa-solid fa-pause text-xs sm:text-lg' : 'fa-solid fa-play text-xs sm:text-lg ml-0.5';
+            }
+            const playIconDesktop = document.getElementById('playerPlayIconDesktop');
+            if (playIconDesktop) {
+                playIconDesktop.className = isPlaying ? 'fa-solid fa-pause text-base sm:text-lg' : 'fa-solid fa-play text-base sm:text-lg ml-0.5';
             }
             if (playingIndicator) {
                 playingIndicator.style.display = isPlaying ? 'flex' : 'none';
