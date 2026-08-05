@@ -1,8 +1,7 @@
 {{-- Global Web Audio Player Bar --}}
 <style>
-    /* Absolute Max Specificity Rules for Dark Player Bar in both Light & Dark Mode */
-    html body #ncsGlobalPlayer .player-card,
-    html.light body #ncsGlobalPlayer .player-card {
+    /* Default / Dark Mode Player Bar Styles */
+    html body #ncsGlobalPlayer .player-card {
         background-color: rgba(9, 9, 11, 0.96) !important;
         border-color: rgba(39, 39, 42, 0.9) !important;
         color: #ffffff !important;
@@ -10,70 +9,111 @@
     }
 
     html body #ncsGlobalPlayer h5,
-    html body #ncsGlobalPlayer #playerTrackTitle,
-    html.light body #ncsGlobalPlayer h5,
-    html.light body #ncsGlobalPlayer #playerTrackTitle {
+    html body #ncsGlobalPlayer #playerTrackTitle {
         color: #ffffff !important;
     }
 
     html body #ncsGlobalPlayer p,
-    html body #ncsGlobalPlayer #playerTrackArtist,
-    html.light body #ncsGlobalPlayer p,
-    html.light body #ncsGlobalPlayer #playerTrackArtist {
+    html body #ncsGlobalPlayer #playerTrackArtist {
         color: #cbd5e1 !important;
     }
 
     html body #ncsGlobalPlayer #playerRewindBtn,
     html body #ncsGlobalPlayer #playerForwardBtn,
-    html body #ncsGlobalPlayer #playerMuteBtn,
-    html.light body #ncsGlobalPlayer #playerRewindBtn,
-    html.light body #ncsGlobalPlayer #playerForwardBtn,
-    html.light body #ncsGlobalPlayer #playerMuteBtn {
+    html body #ncsGlobalPlayer #playerMuteBtn {
         color: #cbd5e1 !important;
         background: transparent !important;
     }
 
     html body #ncsGlobalPlayer #playerRewindBtn:hover,
     html body #ncsGlobalPlayer #playerForwardBtn:hover,
-    html body #ncsGlobalPlayer #playerMuteBtn:hover,
-    html.light body #ncsGlobalPlayer #playerRewindBtn:hover,
-    html.light body #ncsGlobalPlayer #playerForwardBtn:hover,
-    html.light body #ncsGlobalPlayer #playerMuteBtn:hover {
+    html body #ncsGlobalPlayer #playerMuteBtn:hover {
         color: #f59e0b !important;
     }
 
     html body #ncsGlobalPlayer #playerCurrentTime,
-    html body #ncsGlobalPlayer #playerDuration,
-    html.light body #ncsGlobalPlayer #playerCurrentTime,
-    html.light body #ncsGlobalPlayer #playerDuration {
+    html body #ncsGlobalPlayer #playerDuration {
         color: #cbd5e1 !important;
     }
 
-    html body #ncsGlobalPlayer #playerCloseBtn,
-    html.light body #ncsGlobalPlayer #playerCloseBtn {
+    html body #ncsGlobalPlayer #playerCloseBtn {
         background-color: rgba(24, 24, 27, 0.9) !important;
         border-color: rgba(39, 39, 42, 0.9) !important;
         color: #cbd5e1 !important;
     }
 
-    html body #ncsGlobalPlayer #playerCloseBtn:hover,
-    html.light body #ncsGlobalPlayer #playerCloseBtn:hover {
+    html body #ncsGlobalPlayer #playerCloseBtn:hover {
         background-color: rgba(39, 39, 42, 1) !important;
         color: #ffffff !important;
     }
 
-    html body #ncsGlobalPlayer .player-subpanel,
-    html.light body #ncsGlobalPlayer .player-subpanel {
+    html body #ncsGlobalPlayer .player-subpanel {
         background-color: rgba(24, 24, 27, 0.9) !important;
         border-color: rgba(39, 39, 42, 0.9) !important;
     }
 
     html body #ncsGlobalPlayer #playerProgress,
-    html.light body #ncsGlobalPlayer #playerProgress,
-    html body #ncsGlobalPlayer #playerVolume,
-    html.light body #ncsGlobalPlayer #playerVolume {
+    html body #ncsGlobalPlayer #playerVolume {
         accent-color: #f59e0b !important;
         background-color: #27272a !important;
+    }
+
+    /* Light Mode Adaptive Player Bar Styles */
+    html.light body #ncsGlobalPlayer .player-card {
+        background-color: rgba(255, 255, 255, 0.96) !important;
+        border-color: rgba(226, 232, 240, 0.9) !important;
+        color: #0f172a !important;
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.12) !important;
+    }
+
+    html.light body #ncsGlobalPlayer h5,
+    html.light body #ncsGlobalPlayer #playerTrackTitle {
+        color: #0f172a !important;
+    }
+
+    html.light body #ncsGlobalPlayer p,
+    html.light body #ncsGlobalPlayer #playerTrackArtist {
+        color: #475569 !important;
+    }
+
+    html.light body #ncsGlobalPlayer #playerRewindBtn,
+    html.light body #ncsGlobalPlayer #playerForwardBtn,
+    html.light body #ncsGlobalPlayer #playerMuteBtn {
+        color: #475569 !important;
+        background: transparent !important;
+    }
+
+    html.light body #ncsGlobalPlayer #playerRewindBtn:hover,
+    html.light body #ncsGlobalPlayer #playerForwardBtn:hover,
+    html.light body #ncsGlobalPlayer #playerMuteBtn:hover {
+        color: #d97706 !important;
+    }
+
+    html.light body #ncsGlobalPlayer #playerCurrentTime,
+    html.light body #ncsGlobalPlayer #playerDuration {
+        color: #475569 !important;
+    }
+
+    html.light body #ncsGlobalPlayer #playerCloseBtn {
+        background-color: #f1f5f9 !important;
+        border-color: #e2e8f0 !important;
+        color: #475569 !important;
+    }
+
+    html.light body #ncsGlobalPlayer #playerCloseBtn:hover {
+        background-color: #e2e8f0 !important;
+        color: #0f172a !important;
+    }
+
+    html.light body #ncsGlobalPlayer .player-subpanel {
+        background-color: #f1f5f9 !important;
+        border-color: #e2e8f0 !important;
+    }
+
+    html.light body #ncsGlobalPlayer #playerProgress,
+    html.light body #ncsGlobalPlayer #playerVolume {
+        accent-color: #f59e0b !important;
+        background-color: #cbd5e1 !important;
     }
 </style>
 
@@ -97,10 +137,10 @@
                 </div>
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[8px] font-black uppercase tracking-wider border border-amber-500/30">Now Playing</span>
+                        <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase tracking-wider border border-amber-500/30">Now Playing</span>
                     </div>
-                    <h5 id="playerTrackTitle" class="text-xs sm:text-sm font-black uppercase tracking-tight truncate mt-0.5" style="color: #ffffff !important;">Track Title</h5>
-                    <p id="playerTrackArtist" class="text-[10px] sm:text-xs font-semibold truncate" style="color: #cbd5e1 !important;">Artist Name</p>
+                    <h5 id="playerTrackTitle" class="text-xs sm:text-sm font-black uppercase tracking-tight truncate mt-0.5">Track Title</h5>
+                    <p id="playerTrackArtist" class="text-[10px] sm:text-xs font-semibold truncate">Artist Name</p>
                 </div>
             </div>
 
@@ -125,11 +165,11 @@
 
                 {{-- Time Slider --}}
                 <div class="w-full flex items-center gap-3">
-                    <span id="playerCurrentTime" class="text-[10px] font-mono font-bold min-w-[36px] text-right" style="color: #cbd5e1 !important;">0:00</span>
+                    <span id="playerCurrentTime" class="text-[10px] font-mono font-bold min-w-[36px] text-right">0:00</span>
                     <div class="relative flex-1 group cursor-pointer">
                         <input type="range" id="playerProgress" min="0" max="100" value="0" step="0.1" class="w-full h-1.5 rounded-lg appearance-none cursor-pointer group-hover:h-2 transition-all">
                     </div>
-                    <span id="playerDuration" class="text-[10px] font-mono font-bold min-w-[36px]" style="color: #cbd5e1 !important;">0:00</span>
+                    <span id="playerDuration" class="text-[10px] font-mono font-bold min-w-[36px]">0:00</span>
                 </div>
             </div>
 
