@@ -1237,6 +1237,24 @@
                     document.title = doc.title;
                 }
 
+                // Sync sidebar DOM if present in fetched page
+                const newAside = doc.querySelector('aside');
+                const oldAside = document.querySelector('aside');
+                if (newAside && oldAside) {
+                    oldAside.innerHTML = newAside.innerHTML;
+                }
+
+                // Sync header title if present
+                const newHeader = doc.querySelector('header');
+                const oldHeader = document.querySelector('header');
+                if (newHeader && oldHeader) {
+                    const newTitle = newHeader.querySelector('h2');
+                    const oldTitle = oldHeader.querySelector('h2');
+                    if (newTitle && oldTitle) {
+                        oldTitle.innerHTML = newTitle.innerHTML;
+                    }
+                }
+
                 const newMain = doc.getElementById('appMainContent') || doc.querySelector('main');
                 if (newMain) {
                     mainEl.innerHTML = newMain.innerHTML;
@@ -1276,15 +1294,27 @@
 
         function updateActiveNavLinks(currentUrl) {
             const path = new URL(currentUrl, window.location.origin).pathname;
-            document.querySelectorAll('a[href]').forEach(a => {
+            document.querySelectorAll('aside nav a[href], nav a[href]').forEach(a => {
                 const href = a.getAttribute('href');
                 if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
                 try {
                     const aPath = new URL(href, window.location.origin).pathname;
-                    if (aPath === path) {
-                        a.classList.add('text-amber-500');
-                    } else if (aPath !== '/') {
-                        a.classList.remove('text-amber-500');
+                    const isSame = (aPath === path) || (aPath !== '/' && path.startsWith(aPath));
+                    const activeClasses = ['bg-gradient-to-r', 'from-amber-600/10', 'to-transparent', 'text-amber-500', 'font-bold', 'border-l-2', 'border-amber-600'];
+                    const iconEl = a.querySelector('i');
+                    
+                    if (isSame) {
+                        activeClasses.forEach(cls => a.classList.add(cls));
+                        a.classList.remove('text-zinc-400');
+                        if (iconEl && !iconEl.classList.contains('text-amber-500')) {
+                            iconEl.classList.add('text-amber-500');
+                        }
+                    } else {
+                        activeClasses.forEach(cls => a.classList.remove(cls));
+                        a.classList.add('text-zinc-400');
+                        if (iconEl && iconEl.classList.contains('text-amber-500') && !a.closest('.group:hover')) {
+                            iconEl.classList.remove('text-amber-500');
+                        }
                     }
                 } catch (e) {}
             });
