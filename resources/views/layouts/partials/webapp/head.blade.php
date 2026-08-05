@@ -523,55 +523,55 @@
         --header-border: rgba(0, 0, 0, 0.1) !important;
     }
 
-    html.light .text-white,
-    html.light .text-zinc-100,
-    html.light .text-zinc-200,
-    html.light .text-zinc-300 {
+    html.light .text-white:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .text-zinc-100:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .text-zinc-200:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .text-zinc-300:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer) {
         color: #09090b !important; /* Solid Obsidian Black */
     }
     
-    html.light .text-zinc-400 {
+    html.light .text-zinc-400:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer) {
         color: #374151 !important; /* Highly Legible Slate Gray */
     }
     
-    html.light .text-zinc-500 {
+    html.light .text-zinc-500:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer) {
         color: #1f2937 !important; /* Dark Obsidian-Gray */
     }
 
-    html.light .text-zinc-600 {
+    html.light .text-zinc-600:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer) {
         color: #09090b !important; /* Deep contrast body */
     }
     
-    html.light .text-zinc-700 {
+    html.light .text-zinc-700:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer) {
         color: #09090b !important;
     }
 
-    html.light .text-zinc-800 {
+    html.light .text-zinc-800:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer) {
         color: #000000 !important;
     }
 
     /* Absolute background overrides to contrast nicely against bg-slate */
-    html.light .bg-zinc-950,
-    html.light .bg-zinc-950\/80,
-    html.light .bg-zinc-950\/85,
-    html.light .bg-zinc-950\/90,
-    html.light .bg-zinc-900\/30,
-    html.light .bg-zinc-900\/50,
-    html.light .bg-black\/40 {
+    html.light .bg-zinc-950:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-zinc-950\/80:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-zinc-950\/85:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-zinc-950\/90:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-zinc-900\/30:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-zinc-900\/50:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-black\/40:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer) {
         background-color: var(--panel) !important;
         border-color: var(--border) !important;
     }
 
-    html.light .bg-zinc-900,
-    html.light .bg-zinc-900\/20,
-    html.light .bg-zinc-900\/40,
-    html.light .bg-black\/50,
-    html.light .bg-\[\#0a0a0c\],
-    html.light .bg-\[\#0a0a0c\]\/90,
-    html.light .bg-\[\#0a0a0c\]\/80,
-    html.light .bg-\[\#050505\],
-    html.light .bg-\[\#000\],
-    html.light .bg-\[\#000000\],
+    html.light .bg-zinc-900:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-zinc-900\/20:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-zinc-900\/40:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-black\/50:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-\[\#0a0a0c\]:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-\[\#0a0a0c\]\/90:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-\[\#0a0a0c\]\/80:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-\[\#050505\]:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-\[\#000\]:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
+    html.light .bg-\[\#000000\]:not(#ncsGlobalPlayer *):not(#ncsGlobalPlayer),
     html.light .forum-card {
         background-color: var(--card) !important;
         background: var(--card) !important;
