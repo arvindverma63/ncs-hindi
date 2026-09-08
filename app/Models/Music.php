@@ -108,7 +108,7 @@ class Music extends Model
         return str_contains($url, '?') ? $url . '&v=' . $timestamp : $url . '?v=' . $timestamp;
     }
 
-    public function getAudioUrlAttribute()
+    public function getAudioUrlAttribute(): ?string
     {
         // 1. Check audio_file column first (Uploaded MP3 / Audio file)
         if (!empty($this->audio_file)) {
@@ -133,21 +133,25 @@ class Music extends Model
             }
         }
 
-        // 3. Fallback: check youtube_link for web streaming
+        // 3. Check youtube_link for web streaming
         if (!empty($this->youtube_link)) {
             return $this->youtube_link;
         }
 
-        // 4. Default high-availability public audio CDN fallback so playback never 404s
-        return 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3';
+        return null;
     }
 
     public function getIsPlayableAttribute(): bool
     {
-        return !empty($this->audio_url);
+        return (bool) ($this->can_play_on_website ?? true) && !empty($this->audio_url);
     }
 
     // --- Relationships ---
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'category_music', 'music_id', 'category_id');
+    }
 
     public function category()
     {

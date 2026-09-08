@@ -25,7 +25,7 @@ class MusicRepository implements MusicRepositoryInterface
 
     private function buildTrendingQuery(array $filters = []): Builder
     {
-        $query = Music::with('category')->where('is_public', true);
+        $query = Music::with(['categories', 'category'])->where('is_public', true);
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
@@ -39,13 +39,20 @@ class MusicRepository implements MusicRepositoryInterface
 
         if (!empty($filters['category_id'])) {
             $catVal = $filters['category_id'];
-            if (\Illuminate\Support\Str::isUuid($catVal)) {
-                $query->where('category_id', $catVal);
-            } else {
-                $query->whereHas('category', function ($q) use ($catVal) {
-                    $q->where('slug', $catVal);
-                });
-            }
+            $query->where(function ($q) use ($catVal) {
+                if (\Illuminate\Support\Str::isUuid($catVal)) {
+                    $q->where('category_id', $catVal)
+                        ->orWhereHas('categories', function ($cq) use ($catVal) {
+                            $cq->where('categories.id', $catVal);
+                        });
+                } else {
+                    $q->whereHas('category', function ($cq) use ($catVal) {
+                        $cq->where('slug', $catVal);
+                    })->orWhereHas('categories', function ($cq) use ($catVal) {
+                        $cq->where('slug', $catVal);
+                    });
+                }
+            });
         }
 
         return $query;
@@ -109,8 +116,9 @@ class MusicRepository implements MusicRepositoryInterface
     public function uploadMusic($categoryId, array $data)
     {
         try {
-            // Since jQuery sends the Mega Link as a string in 'stem_file'
             $audioPath = $data['music_file'];
+            $categoryIds = array_values(array_filter((array) ($data['category_ids'] ?? $data['category_id'] ?? $categoryId)));
+            $primaryCategoryId = $categoryIds[0] ?? (is_string($categoryId) ? $categoryId : null);
 
             $imageUrl = null;
             if (isset($data['featured_image']) && $data['featured_image'] instanceof \Illuminate\Http\UploadedFile) {
@@ -135,8 +143,8 @@ class MusicRepository implements MusicRepositoryInterface
             $filePath = $audioFilePath ?: ($megaLink ?: ($data['music_file'] ?? 'Direct Audio Upload'));
 
             $music = Music::create([
-                'id'               => (string) Str::uuid(), // Ensure UUID is generated if not in boot
-                'category_id'      => $categoryId,
+                'id'               => (string) Str::uuid(),
+                'category_id'      => $primaryCategoryId,
                 'title'            => $data['title'],
                 'artist_name'      => $data['artist_name'] ?? null,
                 'album_movie_name' => $data['album_movie_name'] ?? null,
@@ -159,6 +167,10 @@ class MusicRepository implements MusicRepositoryInterface
                 'is_public'        => $data['is_public'] ?? true,
                 'slug'             => Music::uniqueSlug($data['title']),
             ]);
+
+            if (!empty($categoryIds)) {
+                $music->categories()->sync($categoryIds);
+            }
 
             Log::info("music uploaded successfully", ['id' => $music->id]);
 
@@ -210,8 +222,8 @@ class MusicRepository implements MusicRepositoryInterface
                 $music->audio_file = 'uploads/stems/' . $filename;
             }
 
-            $music->update([
-                'category_id'      => $data['category_id'] ?? $music->category_id,
+            $categoryIds = array_values(array_filter((array) ($data['category_ids'] ?? $data['category_id'] ?? [])));
+            $updateData = [
                 'title'            => $data['title'] ?? $music->title,
                 'artist_name'      => $data['artist_name'] ?? $music->artist_name,
                 'album_movie_name' => $data['album_movie_name'] ?? $music->album_movie_name,
@@ -226,7 +238,14 @@ class MusicRepository implements MusicRepositoryInterface
                 'seo_description'  => $data['seo_description'] ?? $music->seo_description,
                 'is_public'        => isset($data['is_public']) ? (bool)$data['is_public'] : $music->is_public,
                 'slug'             => isset($data['title']) ? Music::uniqueSlug($data['title'], $music->id) : $music->slug,
-            ]);
+            ];
+
+            if (!empty($categoryIds)) {
+                $updateData['category_id'] = $categoryIds[0];
+                $music->categories()->sync($categoryIds);
+            }
+
+            $music->update($updateData);
 
             Log::info("music updated successfully", ['id' => $music->id]);
 
@@ -246,7 +265,7 @@ class MusicRepository implements MusicRepositoryInterface
     }
     public function getLibraryMusic($filters = [])
     {
-        $query = Music::with('category')->where('is_public', true);
+        $query = Music::with(['categories', 'category'])->where('is_public', true);
 
         if (!empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
@@ -257,13 +276,20 @@ class MusicRepository implements MusicRepositoryInterface
 
         if (!empty($filters['category_id'])) {
             $catVal = $filters['category_id'];
-            if (\Illuminate\Support\Str::isUuid($catVal)) {
-                $query->where('category_id', $catVal);
-            } else {
-                $query->whereHas('category', function ($q) use ($catVal) {
-                    $q->where('slug', $catVal);
-                });
-            }
+            $query->where(function ($q) use ($catVal) {
+                if (\Illuminate\Support\Str::isUuid($catVal)) {
+                    $q->where('category_id', $catVal)
+                        ->orWhereHas('categories', function ($cq) use ($catVal) {
+                            $cq->where('categories.id', $catVal);
+                        });
+                } else {
+                    $q->whereHas('category', function ($cq) use ($catVal) {
+                        $cq->where('slug', $catVal);
+                    })->orWhereHas('categories', function ($cq) use ($catVal) {
+                        $cq->where('slug', $catVal);
+                    });
+                }
+            });
         }
 
         if (($filters['sort'] ?? '') === 'popular') {

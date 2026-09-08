@@ -80,12 +80,15 @@
                 <p class="text-zinc-300 text-sm md:text-base font-medium">
                     {{ $featuredStem->artist_name ?: '' }}
                 </p>
-                <div class="flex items-center gap-2">
-                    @if ($featuredStem->category)
+                <div class="flex flex-wrap items-center gap-2">
+                    @php
+                        $featCategories = $featuredStem->categories->isNotEmpty() ? $featuredStem->categories : collect([$featuredStem->category])->filter();
+                    @endphp
+                    @foreach($featCategories as $cat)
                         <span class="px-2.5 py-1 rounded bg-white/5 soft-border text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                            {{ $featuredStem->category->name }}
+                            {{ $cat->name }}
                         </span>
-                    @endif
+                    @endforeach
                     @if ($featuredStem->language)
                         <span class="px-2.5 py-1 rounded bg-white/5 soft-border text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">
                             {{ Str::before($featuredStem->language, ',') }}
@@ -251,9 +254,14 @@
                                         @endif
                                     </h4>
                                     <div class="flex flex-wrap items-center gap-1.5 mt-1 hidden md:flex">
-                                        <span class="px-1.5 py-0.5 rounded bg-white/5 soft-border text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                                            {{ $music->category->name ?? 'Music' }}
-                                        </span>
+                                        @php
+                                            $itemCats = $music->categories->isNotEmpty() ? $music->categories : collect([$music->category])->filter();
+                                        @endphp
+                                        @foreach($itemCats as $cat)
+                                            <span class="px-1.5 py-0.5 rounded bg-white/5 soft-border text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                                                {{ $cat->name }}
+                                            </span>
+                                        @endforeach
                                         @if ($stemLanguages->isNotEmpty())
                                             <span class="px-1.5 py-0.5 rounded bg-white/5 soft-border text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500">
                                                 {{ $stemLanguages->first() }}

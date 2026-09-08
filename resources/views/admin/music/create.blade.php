@@ -72,15 +72,22 @@
                                         <input type="hidden" name="language" id="language">
                                         <small class="text-muted mt-2 d-block">Pick one or more languages; we’ll store them in the release metadata.</small>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold small text-uppercase text-secondary">Category
-                                            <span class="text-danger">*</span></label>
-                                        <select name="category_id" class="form-select bg-light border-0" required>
-                                            <option value="">Select Category</option>
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold small text-uppercase text-secondary">Categories
+                                            <span class="text-muted">(multi-select)</span> <span class="text-danger">*</span></label>
+                                        <div id="category_options" class="d-flex flex-wrap gap-2">
                                             @foreach ($categories as $category)
-                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                                <input type="checkbox" class="btn-check"
+                                                    id="cat_{{ \Illuminate\Support\Str::slug($category->id) }}"
+                                                    name="category_ids[]"
+                                                    value="{{ $category->id }}" autocomplete="off">
+                                                <label for="cat_{{ \Illuminate\Support\Str::slug($category->id) }}"
+                                                    class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold small text-nowrap">
+                                                    {{ $category->name }}
+                                                </label>
                                             @endforeach
-                                        </select>
+                                        </div>
+                                        <small class="text-muted mt-2 d-block">Pick one or more categories for this release.</small>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold small text-uppercase text-secondary">Music
@@ -310,6 +317,12 @@
                 $form.on('submit', function(e) {
                     e.preventDefault();
                     syncLanguageField();
+
+                    const selectedCategoryCount = $('#category_options input[type="checkbox"]:checked').length;
+                    if (!selectedCategoryCount) {
+                        toastr.error('Please select at least one category.');
+                        return false;
+                    }
 
                     const mode = $('#source_type_input').val();
                     const megaLink = $('#mega_link').val();

@@ -87,6 +87,18 @@
 
                 {{-- Content --}}
                 <div class="p-5 pt-1">
+                    @php
+                        $itemCategories = $item->categories->isNotEmpty() ? $item->categories : collect([$item->category])->filter();
+                    @endphp
+                    @if($itemCategories->isNotEmpty())
+                        <div class="flex flex-wrap gap-1 mb-2">
+                            @foreach($itemCategories as $cat)
+                                <span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500 text-[8px] font-black uppercase tracking-wider border border-amber-500/20">
+                                    {{ $cat->name }}
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
                     <div class="mb-4">
                         <div class="flex justify-between items-start gap-2">
                             <h4 class="font-brand text-lg font-bold text-white uppercase tracking-tighter truncate">

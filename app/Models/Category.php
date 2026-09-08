@@ -36,7 +36,7 @@ class Category extends Model
 
     public function music()
     {
-        return $this->hasMany(Music::class);
+        return $this->belongsToMany(Music::class, 'category_music', 'category_id', 'music_id');
     }
 }
 

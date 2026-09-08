@@ -22,7 +22,7 @@ class MusicController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Music::with(['category']);
+            $query = Music::with(['categories', 'category']);
 
             if ($request->filled('search')) {
                 $search = $request->search;
@@ -34,7 +34,13 @@ class MusicController extends Controller
             }
 
             if ($request->filled('category')) {
-                $query->where('category_id', $request->category);
+                $catVal = $request->category;
+                $query->where(function ($q) use ($catVal) {
+                    $q->where('category_id', $catVal)
+                        ->orWhereHas('categories', function ($cq) use ($catVal) {
+                            $cq->where('categories.id', $catVal);
+                        });
+                });
             }
 
             $music = $query->latest()->paginate(15)->withQueryString();
@@ -57,7 +63,9 @@ class MusicController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'category_id'      => 'required|exists:categories,id',
+            'category_ids'     => 'nullable|array',
+            'category_ids.*'   => 'exists:categories,id',
+            'category_id'      => 'nullable|exists:categories,id',
             'title'            => 'required|string|max:255',
             'artist_name'      => 'nullable|string|max:255',
             'album_movie_name' => 'nullable|string|max:255',
@@ -76,12 +84,21 @@ class MusicController extends Controller
             'is_public'        => 'boolean',
             'seo_title'        => 'nullable|string|max:70',
             'seo_description'  => 'nullable|string|max:160',
-            // bpm removed from validation as it's hidden/removed from UI
         ]);
 
+        $categoryIds = array_values(array_filter((array) ($request->category_ids ?? ($request->category_id ? [$request->category_id] : []))));
+        if (empty($categoryIds)) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Please select at least one category.'], 422);
+            }
+            return back()->withInput()->with('error', 'Please select at least one category.');
+        }
+
+        $data['category_ids'] = $categoryIds;
+        $data['category_id'] = $categoryIds[0];
+
         try {
-            // The Repository should handle saving the string URL into the file path column
-            $this->musicRepo->uploadMusic($data['category_id'], $data);
+            $this->musicRepo->uploadMusic($categoryIds, $data);
 
             if ($request->ajax()) {
                 return response()->json(['success' => true, 'message' => 'Published successfully.']);
@@ -100,7 +117,7 @@ class MusicController extends Controller
     public function edit($id)
     {
         try {
-            $music = Music::findOrFail($id);
+            $music = Music::with('categories')->findOrFail($id);
             $categories = Category::where('is_active', 1)->get();
             $languages = Language::where('is_active', 1)->orderBy('name')->pluck('name')->toArray();
             return view('admin.music.edit', compact('music', 'categories', 'languages'));
@@ -112,7 +129,9 @@ class MusicController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'category_id'      => 'required|exists:categories,id',
+            'category_ids'     => 'nullable|array',
+            'category_ids.*'   => 'exists:categories,id',
+            'category_id'      => 'nullable|exists:categories,id',
             'title'            => 'required|string|max:255',
             'artist_name'      => 'nullable|string|max:255',
             'album_movie_name' => 'nullable|string|max:255',
@@ -120,7 +139,6 @@ class MusicController extends Controller
             'description'      => 'nullable|string',
             'license_text'     => 'nullable|string',
             'tags_keywords'    => 'nullable|string',
-            // UPDATED: stem_file is now an optional string/url for updates
             'music_file'        => 'nullable|string',
             'mega_link'        => 'nullable|url',
             'youtube_link'     => 'nullable|string|max:255',
@@ -131,8 +149,13 @@ class MusicController extends Controller
             'is_public'        => 'boolean',
             'seo_title'        => 'nullable|string|max:70',
             'seo_description'  => 'nullable|string|max:160',
-            // bpm removed
         ]);
+
+        $categoryIds = array_values(array_filter((array) ($request->category_ids ?? ($request->category_id ? [$request->category_id] : []))));
+        if (!empty($categoryIds)) {
+            $data['category_ids'] = $categoryIds;
+            $data['category_id'] = $categoryIds[0];
+        }
 
         try {
             $this->musicRepo->updateMusic($id, $data);

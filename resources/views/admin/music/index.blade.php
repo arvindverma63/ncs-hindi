@@ -141,9 +141,17 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-light text-dark border fw-normal px-2 py-1">
-                                            {{ $item->category->name ?? 'N/A' }}
-                                        </span>
+                                        @if($item->categories->isNotEmpty())
+                                            @foreach($item->categories as $cat)
+                                                <span class="badge bg-light text-dark border fw-normal px-2 py-1 me-1 mb-1">
+                                                    {{ $cat->name }}
+                                                </span>
+                                            @endforeach
+                                        @else
+                                            <span class="badge bg-light text-dark border fw-normal px-2 py-1">
+                                                {{ $item->category->name ?? 'N/A' }}
+                                            </span>
+                                        @endif
                                     </td>
                                     <td>
                                         <div class="small fw-bold">{{ $item->bpm ?? '--' }} <span

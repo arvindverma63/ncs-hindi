@@ -73,9 +73,16 @@
 
                         {{-- Metadata --}}
                         <div class="min-w-0 flex-1">
-                            <span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500 text-[8px] font-black uppercase tracking-wider border border-amber-500/20">
-                                {{ $song->category->name ?? 'Release' }}
-                            </span>
+                            @php
+                                $songCategories = $song->categories->isNotEmpty() ? $song->categories : collect([$song->category])->filter();
+                            @endphp
+                            <div class="flex flex-wrap gap-1">
+                                @foreach($songCategories as $cat)
+                                    <span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500 text-[8px] font-black uppercase tracking-wider border border-amber-500/20">
+                                        {{ $cat->name }}
+                                    </span>
+                                @endforeach
+                            </div>
                             <h4 class="font-brand text-base font-bold text-white uppercase tracking-tighter truncate mt-1.5 group-hover:text-amber-500 transition-colors">
                                 <a href="{{ route('webapp.music.show', $song->slug) }}">
                                     {{ $song->title }}

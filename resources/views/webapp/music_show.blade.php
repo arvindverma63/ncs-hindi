@@ -166,10 +166,15 @@
             {{-- Metadata Content --}}
             <div class="flex-1 text-center md:text-left z-10 w-full min-w-0">
                 <div class="flex flex-wrap justify-center md:justify-start items-center gap-2 mb-3">
-                    <span
-                        class="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase tracking-widest border border-amber-500/20">
-                        {{ $music->category->name ?? 'Music Release' }}
-                    </span>
+                    @php
+                        $displayCategories = $music->categories->isNotEmpty() ? $music->categories : collect([$music->category])->filter();
+                    @endphp
+                    @foreach($displayCategories as $cat)
+                        <span
+                            class="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase tracking-widest border border-amber-500/20">
+                            {{ $cat->name }}
+                        </span>
+                    @endforeach
                     @if ($stemLanguages->isNotEmpty())
                         <span
                             class="px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400 text-[9px] font-bold uppercase border border-zinc-700">
