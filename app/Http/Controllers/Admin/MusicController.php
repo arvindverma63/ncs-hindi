@@ -22,7 +22,8 @@ class MusicController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Music::with(['categories', 'category']);
+            $withRelations = Music::hasCategoryMusicTable() ? ['categories', 'category'] : ['category'];
+            $query = Music::with($withRelations);
 
             if ($request->filled('search')) {
                 $search = $request->search;
@@ -35,11 +36,14 @@ class MusicController extends Controller
 
             if ($request->filled('category')) {
                 $catVal = $request->category;
-                $query->where(function ($q) use ($catVal) {
-                    $q->where('category_id', $catVal)
-                        ->orWhereHas('categories', function ($cq) use ($catVal) {
+                $hasPivot = Music::hasCategoryMusicTable();
+                $query->where(function ($q) use ($catVal, $hasPivot) {
+                    $q->where('category_id', $catVal);
+                    if ($hasPivot) {
+                        $q->orWhereHas('categories', function ($cq) use ($catVal) {
                             $cq->where('categories.id', $catVal);
                         });
+                    }
                 });
             }
 
@@ -117,7 +121,8 @@ class MusicController extends Controller
     public function edit($id)
     {
         try {
-            $music = Music::with('categories')->findOrFail($id);
+            $withRelations = Music::hasCategoryMusicTable() ? ['categories', 'category'] : ['category'];
+            $music = Music::with($withRelations)->findOrFail($id);
             $categories = Category::where('is_active', 1)->get();
             $languages = Language::where('is_active', 1)->orderBy('name')->pluck('name')->toArray();
             return view('admin.music.edit', compact('music', 'categories', 'languages'));

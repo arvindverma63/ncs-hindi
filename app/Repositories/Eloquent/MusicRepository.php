@@ -25,7 +25,8 @@ class MusicRepository implements MusicRepositoryInterface
 
     private function buildTrendingQuery(array $filters = []): Builder
     {
-        $query = Music::with(['categories', 'category'])->where('is_public', true);
+        $withRelations = Music::hasCategoryMusicTable() ? ['categories', 'category'] : ['category'];
+        $query = Music::with($withRelations)->where('is_public', true);
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
@@ -39,18 +40,24 @@ class MusicRepository implements MusicRepositoryInterface
 
         if (!empty($filters['category_id'])) {
             $catVal = $filters['category_id'];
-            $query->where(function ($q) use ($catVal) {
+            $hasPivot = Music::hasCategoryMusicTable();
+            $query->where(function ($q) use ($catVal, $hasPivot) {
                 if (\Illuminate\Support\Str::isUuid($catVal)) {
-                    $q->where('category_id', $catVal)
-                        ->orWhereHas('categories', function ($cq) use ($catVal) {
+                    $q->where('category_id', $catVal);
+                    if ($hasPivot) {
+                        $q->orWhereHas('categories', function ($cq) use ($catVal) {
                             $cq->where('categories.id', $catVal);
                         });
+                    }
                 } else {
                     $q->whereHas('category', function ($cq) use ($catVal) {
                         $cq->where('slug', $catVal);
-                    })->orWhereHas('categories', function ($cq) use ($catVal) {
-                        $cq->where('slug', $catVal);
                     });
+                    if ($hasPivot) {
+                        $q->orWhereHas('categories', function ($cq) use ($catVal) {
+                            $cq->where('slug', $catVal);
+                        });
+                    }
                 }
             });
         }
@@ -168,7 +175,7 @@ class MusicRepository implements MusicRepositoryInterface
                 'slug'             => Music::uniqueSlug($data['title']),
             ]);
 
-            if (!empty($categoryIds)) {
+            if (!empty($categoryIds) && Music::hasCategoryMusicTable()) {
                 $music->categories()->sync($categoryIds);
             }
 
@@ -242,7 +249,9 @@ class MusicRepository implements MusicRepositoryInterface
 
             if (!empty($categoryIds)) {
                 $updateData['category_id'] = $categoryIds[0];
-                $music->categories()->sync($categoryIds);
+                if (Music::hasCategoryMusicTable()) {
+                    $music->categories()->sync($categoryIds);
+                }
             }
 
             $music->update($updateData);
@@ -265,7 +274,8 @@ class MusicRepository implements MusicRepositoryInterface
     }
     public function getLibraryMusic($filters = [])
     {
-        $query = Music::with(['categories', 'category'])->where('is_public', true);
+        $withRelations = Music::hasCategoryMusicTable() ? ['categories', 'category'] : ['category'];
+        $query = Music::with($withRelations)->where('is_public', true);
 
         if (!empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
@@ -276,18 +286,24 @@ class MusicRepository implements MusicRepositoryInterface
 
         if (!empty($filters['category_id'])) {
             $catVal = $filters['category_id'];
-            $query->where(function ($q) use ($catVal) {
+            $hasPivot = Music::hasCategoryMusicTable();
+            $query->where(function ($q) use ($catVal, $hasPivot) {
                 if (\Illuminate\Support\Str::isUuid($catVal)) {
-                    $q->where('category_id', $catVal)
-                        ->orWhereHas('categories', function ($cq) use ($catVal) {
+                    $q->where('category_id', $catVal);
+                    if ($hasPivot) {
+                        $q->orWhereHas('categories', function ($cq) use ($catVal) {
                             $cq->where('categories.id', $catVal);
                         });
+                    }
                 } else {
                     $q->whereHas('category', function ($cq) use ($catVal) {
                         $cq->where('slug', $catVal);
-                    })->orWhereHas('categories', function ($cq) use ($catVal) {
-                        $cq->where('slug', $catVal);
                     });
+                    if ($hasPivot) {
+                        $q->orWhereHas('categories', function ($cq) use ($catVal) {
+                            $cq->where('slug', $catVal);
+                        });
+                    }
                 }
             });
         }

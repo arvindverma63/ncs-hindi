@@ -148,9 +148,39 @@ class Music extends Model
 
     // --- Relationships ---
 
+    public static function hasCategoryMusicTable(): bool
+    {
+        static $hasTable = null;
+        if ($hasTable === null) {
+            try {
+                $hasTable = \Illuminate\Support\Facades\Schema::hasTable('category_music');
+            } catch (\Throwable $e) {
+                $hasTable = false;
+            }
+        }
+        return (bool) $hasTable;
+    }
+
     public function categories()
     {
+        if (!static::hasCategoryMusicTable()) {
+            return $this->belongsTo(Category::class, 'category_id');
+        }
         return $this->belongsToMany(Category::class, 'category_music', 'music_id', 'category_id');
+    }
+
+    public function getCategoriesAttribute()
+    {
+        if (!static::hasCategoryMusicTable()) {
+            $cat = $this->category;
+            return $cat ? collect([$cat]) : collect();
+        }
+
+        if ($this->relationLoaded('categories')) {
+            return $this->getRelationValue('categories');
+        }
+
+        return $this->categories()->getResults();
     }
 
     public function category()

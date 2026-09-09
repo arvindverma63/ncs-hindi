@@ -36,6 +36,9 @@ class Category extends Model
 
     public function music()
     {
+        if (!Music::hasCategoryMusicTable()) {
+            return $this->hasMany(Music::class, 'category_id');
+        }
         return $this->belongsToMany(Music::class, 'category_music', 'category_id', 'music_id');
     }
 }
