@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('music_stems', 'youtube_link')) {
+            return;
+        }
+
         Schema::table('music_stems', function (Blueprint $table) {
             $table->string('youtube_link')->nullable()->after('mega_link');
         });

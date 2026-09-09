@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('music_stems', function (Blueprint $table) {
-            $table->string('audio_file')->nullable()->after('file_path');
-            $table->boolean('can_play_on_website')->default(true)->after('is_public');
+            if (!Schema::hasColumn('music_stems', 'audio_file')) {
+                $table->string('audio_file')->nullable()->after('file_path');
+            }
+            if (!Schema::hasColumn('music_stems', 'can_play_on_website')) {
+                $table->boolean('can_play_on_website')->default(true)->after('is_public');
+            }
         });
     }
 

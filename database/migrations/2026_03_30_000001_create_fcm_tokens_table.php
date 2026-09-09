@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('fcm_tokens')) {
+            return;
+        }
+
         Schema::create('fcm_tokens', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('user_id', 36)->nullable()->index();

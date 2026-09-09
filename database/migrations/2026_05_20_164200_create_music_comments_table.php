@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('music_comments')) {
+            return;
+        }
+
         Schema::create('music_comments', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('music_id', 36)->index();

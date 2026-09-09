@@ -11,10 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('stem_interactions', function (Blueprint $table) {
-            $table->char('user_id', 36)->nullable()->change();
-            $table->enum('type', ['like', 'download', 'view'])->change();
-        });
+        try {
+            Schema::table('stem_interactions', function (Blueprint $table) {
+                $table->char('user_id', 36)->nullable()->change();
+                $table->enum('type', ['like', 'download', 'view'])->change();
+            });
+        } catch (\Throwable $e) {
+            // Ignore if already changed or doctrine DBAL restriction
+        }
     }
 
     /**

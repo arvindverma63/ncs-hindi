@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('stem_interactions', 'ip_address')) {
+            return;
+        }
+
         Schema::table('stem_interactions', function (Blueprint $table) {
             $table->string('ip_address', 45)->nullable()->after('type');
         });

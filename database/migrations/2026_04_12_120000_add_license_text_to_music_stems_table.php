@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('music_stems', 'license_text')) {
+            return;
+        }
+
         Schema::table('music_stems', function (Blueprint $table) {
             $table->text('license_text')->nullable()->after('description');
         });

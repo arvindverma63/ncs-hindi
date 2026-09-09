@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('users', 'ncs_credits')) {
+            return;
+        }
+
         Schema::table('users', function (Blueprint $table) {
             $table->integer('ncs_credits')->default(0)->after('profile_image');
         });

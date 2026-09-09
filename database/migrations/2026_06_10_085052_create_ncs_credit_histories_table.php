@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('ncs_credit_histories')) {
+            return;
+        }
+
         Schema::create('ncs_credit_histories', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->char('user_id', 36)->index();

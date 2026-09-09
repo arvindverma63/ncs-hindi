@@ -12,6 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('category_music')) {
+            return;
+        }
+
         Schema::create('category_music', function (Blueprint $table) {
             $table->uuid('music_id');
             $table->uuid('category_id');
