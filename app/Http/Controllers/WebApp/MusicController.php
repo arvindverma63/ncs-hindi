@@ -105,17 +105,51 @@ class MusicController extends Controller
             return redirect()->away($music->mega_link);
         }
 
-        if ($music->file_path && filter_var($music->file_path, FILTER_VALIDATE_URL)) {
-            return redirect()->away($music->file_path);
+        $targetPath = $music->audio_file ?: $music->file_path;
+
+        if ($targetPath && filter_var($targetPath, FILTER_VALIDATE_URL)) {
+            return redirect()->away($targetPath);
         }
 
-        if (!$music->file_path) {
-            abort(404);
+        if ($targetPath) {
+            $cleanPath = ltrim(preg_replace('/^storage\//i', '', $targetPath), '/');
+
+            // Generate clean download name (with audio extension)
+            $ext = pathinfo($cleanPath, PATHINFO_EXTENSION) ?: 'mp3';
+            $baseTitle = \Illuminate\Support\Str::slug($music->title) ?: 'ncs-track';
+            $downloadName = ($music->file_name && !in_array(strtolower($music->file_name), ['uploaded audio', 'external link', 'direct audio upload']))
+                ? $music->file_name
+                : ($baseTitle . '.' . $ext);
+
+            if (!str_ends_with(strtolower($downloadName), '.' . strtolower($ext))) {
+                $downloadName .= '.' . $ext;
+            }
+
+            // Check possible physical disk locations on the server
+            $possiblePaths = [
+                storage_path('app/public/' . $cleanPath),
+                public_path('storage/' . $cleanPath),
+                public_path($cleanPath),
+                storage_path('app/' . $cleanPath),
+            ];
+
+            foreach ($possiblePaths as $filePath) {
+                if (file_exists($filePath) && is_file($filePath)) {
+                    return response()->download($filePath, $downloadName);
+                }
+            }
+
+            if (Storage::disk('public')->exists($cleanPath)) {
+                return Storage::disk('public')->download($cleanPath, $downloadName);
+            }
         }
 
-        $downloadName = $music->file_name ?: basename($music->file_path);
+        // If audio_url is an external web link, redirect to it
+        if ($music->audio_url && filter_var($music->audio_url, FILTER_VALIDATE_URL)) {
+            return redirect()->away($music->audio_url);
+        }
 
-        return Storage::disk('public')->download($music->file_path, $downloadName);
+        abort(404, 'Audio file not found on server.');
     }
 
     public function incrementDownload($id)
