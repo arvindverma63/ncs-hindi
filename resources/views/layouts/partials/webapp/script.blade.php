@@ -366,29 +366,10 @@
     }
 
     function triggerFullScreenAd(downloadUrl, isMega = false) {
-        const isSongDetail = window.location.pathname.includes('/music/');
-
-        if (isSongDetail) {
-            // Onclick popunder ad on download click in song detail screen
-            const adUrl = 'https://3nbf4.com/afu.php?zoneid=11132365';
-            
-            if (isMega) {
-                // Open Mega in a new tab first, then attempt to open ad in a new tab
-                window.open(downloadUrl, '_blank');
-                window.open(adUrl, '_blank');
-            } else {
-                // Open ad in a new tab, and start download in the current window
-                window.open(adUrl, '_blank');
-                window.location.href = downloadUrl;
-            }
+        if (isMega) {
+            window.open(downloadUrl, '_blank');
         } else {
-            // On other pages, download starts cleanly without ads in a new tab
-            const downloadWindow = window.open('about:blank', '_blank');
-            if (downloadWindow) {
-                downloadWindow.location.href = downloadUrl;
-            } else {
-                window.location.href = downloadUrl;
-            }
+            window.location.href = downloadUrl;
         }
     }
 
