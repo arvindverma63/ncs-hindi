@@ -115,7 +115,7 @@ class Music extends Model
             if (filter_var($this->audio_file, FILTER_VALIDATE_URL)) {
                 return $this->audio_file;
             }
-            $cleanPath = ltrim(preg_replace('/^storage\//i', '', $this->audio_file), '/');
+            $cleanPath = ltrim(preg_replace('/^\/?storage\//i', '', $this->audio_file), '/');
             return asset('storage/' . $cleanPath);
         }
 
@@ -126,7 +126,7 @@ class Music extends Model
                     return $this->file_path;
                 }
             } else {
-                $cleanPath = ltrim(preg_replace('/^storage\//i', '', $this->file_path), '/');
+                $cleanPath = ltrim(preg_replace('/^\/?storage\//i', '', $this->file_path), '/');
                 if (preg_match('/\.(mp3|wav|ogg|m4a|aac|flac)$/i', $cleanPath)) {
                     return asset('storage/' . $cleanPath);
                 }

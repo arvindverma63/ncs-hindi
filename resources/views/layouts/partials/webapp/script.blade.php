@@ -1027,20 +1027,8 @@
                         savePlayerState();
                     }).catch(err => {
                         console.warn('HTML5 Playback error:', err);
-                        const fallbackAudio = 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3';
-                        if (src !== fallbackAudio) {
-                            audio.src = fallbackAudio;
-                            audio.play().then(() => {
-                                updatePlayButtonsState(true);
-                                savePlayerState();
-                            }).catch(() => {
-                                updatePlayButtonsState(false);
-                                if (window.toastr) toastr.error('Unable to play audio track.');
-                            });
-                        } else {
-                            updatePlayButtonsState(false);
-                            if (window.toastr) toastr.error('Unable to play audio track.');
-                        }
+                        updatePlayButtonsState(false);
+                        if (window.toastr) toastr.error('Unable to play audio track.');
                     });
                 }
             }
